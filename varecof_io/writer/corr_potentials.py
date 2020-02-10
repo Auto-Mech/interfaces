@@ -14,7 +14,7 @@ TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
 
 def species(rvalues, potentials, bnd_frm_idxs,
-            dist_comp_idxs=(), pot_labels=(), species_name='mol'):
+            dist_restrict_idxs=(), pot_labels=(), species_name='mol'):
     """ Writes string for correction potential for some species Fortran file
         :return : String for the mol_corr.f file
         :rtype: string
@@ -65,17 +65,17 @@ def species(rvalues, potentials, bnd_frm_idxs,
     bond_distance_string = util.format_corrpot_dist_string(
         aidx, bidx, asym, bsym)
 
-    # Build distance comparison strings
-    comp_distance_strings = ''
-    for i, idxs in enumerate(dist_comp_idxs):
+    # Build distance restriction strings
+    restrict_distance_strings = ''
+    for i, idxs in enumerate(dist_restrict_idxs):
         [idx1, idx2] = idxs
         sym1, sym2 = chr(67+2*i), chr(68+2*i)
-        comp_distance_strings += util.format_corrpot_dist_string(
+        restrict_distance_strings += util.format_corrpot_dist_string(
             idx1, idx2, sym1, sym2)
-        comp_distance_strings += '\n'
-        comp_distance_strings += util.format_comp_dist_string(
+        restrict_distance_strings += '\n'
+        restrict_distance_strings += util.format_restrict_dist_string(
             sym1, sym2, species_name)
-        comp_distance_strings += '\n'
+        restrict_distance_strings += '\n'
 
     # Build the delmlt string
     delmlt_string = util.format_delmlt_string(asym, bsym)
@@ -97,7 +97,7 @@ def species(rvalues, potentials, bnd_frm_idxs,
         'aidx': aidx,
         'bidx': bidx,
         'bond_distance_string': bond_distance_string,
-        'comp_distance_strings': comp_distance_strings,
+        'restrict_distance_strings': restrict_distance_strings,
         'delmlt_string': delmlt_string,
         'spline_strings': spline_strings
     }

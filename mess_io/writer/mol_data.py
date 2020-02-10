@@ -161,7 +161,7 @@ def rotor_hindered(group, axis, symmetry, potential,
 
 
 def rotor_internal(group, axis, symmetry,
-                   rotor_id='', geom=None,
+                   rotor_id='', remdummy=None, geom=None,
                    mass_exp_size=5, pot_exp_size=5,
                    hmin=13, hmax=101,
                    grid_size=100):
@@ -169,8 +169,8 @@ def rotor_internal(group, axis, symmetry,
     """
 
     # Format the sections
-    rotor_group = util.format_rotor_key_defs(group)
-    rotor_axis = util.format_rotor_key_defs(axis)
+    rotor_group = util.format_rotor_key_defs(group, remdummy)
+    rotor_axis = util.format_rotor_key_defs(axis, remdummy)
 
     # Format the geom
     natom = 1

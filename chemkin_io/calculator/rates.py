@@ -26,18 +26,25 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
         rct_names = rxn_parser.reactant_names(dstr)
         prd_names = rxn_parser.product_names(dstr)
         rxn = (rct_names, prd_names)
-        rxn_rev = (prd_names, rct_names)
-        if rxn not in mech_dct and rxn_rev not in mech_dct:
+        # rxn_rev = (prd_names, rct_names)
+        if rxn not in mech_dct:
             mech_dct[rxn] = reaction(dstr, rxn_units,
                                      t_ref, temps, pressures=pressures)
-        elif rxn in mech_dct and rxn_rev not in mech_dct:
+        else:
             new_ktp_dct = reaction(dstr, rxn_units,
                                    t_ref, temps, pressures=pressures)
             mech_dct[rxn] = _add_rates(mech_dct[rxn], new_ktp_dct)
-        elif rxn not in mech_dct and rxn_rev in mech_dct:
-            new_ktp_dct = reaction(dstr, rxn_units,
-                                   t_ref, temps, pressures=pressures)
-            mech_dct[rxn_rev] = _add_rates(mech_dct[rxn_rev], new_ktp_dct)
+        # if rxn not in mech_dct and rxn_rev not in mech_dct:
+        #     mech_dct[rxn] = reaction(dstr, rxn_units,
+        #                              t_ref, temps, pressures=pressures)
+        # elif rxn in mech_dct and rxn_rev not in mech_dct:
+        #     new_ktp_dct = reaction(dstr, rxn_units,
+        #                            t_ref, temps, pressures=pressures)
+        #     mech_dct[rxn] = _add_rates(mech_dct[rxn], new_ktp_dct)
+        # elif rxn not in mech_dct and rxn_rev in mech_dct:
+        #     new_ktp_dct = reaction(dstr, rxn_units,
+        #                            t_ref, temps, pressures=pressures)
+        #     mech_dct[rxn_rev] = _add_rates(mech_dct[rxn_rev], new_ktp_dct)
 
     # ktp_dct = {}
     # for name, rxn_dstr in rxn_dct.items():

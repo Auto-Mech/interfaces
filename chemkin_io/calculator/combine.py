@@ -66,7 +66,7 @@ def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
                 mech2_ktp = _reverse_reaction_rates(
                     mech2_ktp_dct, mech2_thermo_dct, mech2_name_match, temps)
         else:
-            mech2_dct = None
+            mech2_ktp = {}
 
         # Add data_entry to overal thermo dictionary
         total_ktp_dct[mech1_name] = {
@@ -115,21 +115,28 @@ def build_thermo_inchi_dcts(mech1_str, mech2_str,
     mech1_thermo_dct, mech2_thermo_dct = build_thermo_name_dcts(
         mech1_str, mech2_str, temps)
 
+    # Build the inchi dicts where:
     # Get dicts: dict[name] = inchi
-    mech1_name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
-        mech1_csv_str, 'inchi')
-    mech2_name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
-        mech2_csv_str, 'inchi')
-
     # Convert name dict to get: dict[inchi] = name
-    mech1_thermo_ich_dct = {}
-    for name, data in mech1_thermo_dct.items():
-        ich = mech1_name_inchi_dct[name]
-        mech1_thermo_ich_dct[ich] = data
-    mech2_thermo_ich_dct = {}
-    for name, data in mech2_thermo_dct.items():
-        ich = mech2_name_inchi_dct[name]
-        mech2_thermo_ich_dct[ich] = data
+    if mech1_thermo_dct is not None:
+        mech1_name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
+            mech1_csv_str, 'inchi')
+        mech1_thermo_ich_dct = {}
+        for name, data in mech1_thermo_dct.items():
+            ich = mech1_name_inchi_dct[name]
+            mech1_thermo_ich_dct[ich] = data
+    else:
+        mech1_thermo_ich_dct = None
+
+    if mech2_thermo_dct is not None:
+        mech2_name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
+            mech2_csv_str, 'inchi')
+        mech2_thermo_ich_dct = {}
+        for name, data in mech2_thermo_dct.items():
+            ich = mech2_name_inchi_dct[name]
+            mech2_thermo_ich_dct[ich] = data
+    else:
+        mech2_thermo_ich_dct = None
 
     return mech1_thermo_ich_dct, mech2_thermo_ich_dct
 
@@ -266,8 +273,9 @@ def build_reaction_inchi_dcts(mech1_str, mech2_str,
     for names, data in mech1_reaction_dct.items():
         [rct_names, prd_names] = names
         rct_ichs, prd_ichs = (), ()
-        for rcts, prds in zip(rct_names, prd_names):
+        for rcts in rct_names:
             rct_ichs += ((mech1_name_inchi_dct[rcts]),)
+        for prds in prd_names:
             prd_ichs += ((mech1_name_inchi_dct[prds]),)
         mech1_reaction_ich_dct[(rct_ichs, prd_ichs)] = data
 
@@ -275,18 +283,41 @@ def build_reaction_inchi_dcts(mech1_str, mech2_str,
     for names, data in mech2_reaction_dct.items():
         [rct_names, prd_names] = names
         rct_ichs, prd_ichs = (), ()
-        for rcts, prds in zip(rct_names, prd_names):
+        for rcts in rct_names:
             rct_ichs += ((mech2_name_inchi_dct[rcts]),)
+        for prds in prd_names:
             prd_ichs += ((mech2_name_inchi_dct[prds]),)
         mech2_reaction_ich_dct[(rct_ichs, prd_ichs)] = data
 
     return mech1_reaction_ich_dct, mech2_reaction_ich_dct
+
+
+def conv_ich_to_name_ktp_dct(ktp_ich_dct, csv_str):
+    """ convert ktp dct from using ichs to using names
+    """
+    # Get dicts: dict[name] = inchi
+    mech1_inchi_name_dct = chemkin_io.parser.mechanism.spc_inchi_dct(
+        csv_str)
+
+    # Convert name dict to get: dict[inchi] = rxn_data
+    ktp_name_dct = {}
+    for ichs, params in ktp_ich_dct.items():
+        [rct_ichs, prd_ichs] = ichs
+        rct_names, prd_names = (), ()
+        for rcts in rct_ichs:
+            rct_names += ((mech1_inchi_name_dct[rcts]),)
+        for prds in prd_ichs:
+            prd_names += ((mech1_inchi_name_dct[prds]),)
+        ktp_name_dct[(rct_names, prd_names)] = params
+
+    return ktp_name_dct
+
 # def spc_name_from_inchi(mech1_csv_str, mech2_csv_str, ich_pair):
 #     """ uses dict[inchi]=name dicts to get
 #         the mechanism name for a given InChI string
 #     """
-#     mech1_inchi_dct = chemkin_io.parser.mechanism.spc_inchi_dct(mech1_csv_str)
-#     mech2_inchi_dct = chemkin_io.parser.mechanism.spc_inchi_dct(mech2_csv_str)
+#    mech1_inchi_dct = chemkin_io.parser.mechanism.spc_inchi_dct(mech1_csv_str)
+#    mech2_inchi_dct = chemkin_io.parser.mechanism.spc_inchi_dct(mech2_csv_str)
 #
 #     if ich in mech1_inchi_dct:
 #        mech_name = mech1_inchi_dct[ich]

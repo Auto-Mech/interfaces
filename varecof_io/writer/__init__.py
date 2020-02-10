@@ -14,6 +14,7 @@ from varecof_io.writer.corr_potentials import dummy
 from varecof_io.writer.corr_potentials import auxiliary
 from varecof_io.writer.corr_potentials import makefile
 from varecof_io.writer.corr_potentials import compile_corr_pot
+from varecof_io.writer.util import divsur_frame_geom_script
 
 
 __all__ = [
@@ -28,5 +29,6 @@ __all__ = [
     'dummy',
     'auxiliary',
     'makefile',
-    'compile_corr_pot'
+    'compile_corr_pot',
+    'divsur_frame_geom_script'
 ]

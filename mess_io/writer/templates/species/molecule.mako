@@ -2,8 +2,10 @@ RRHO
 ## Core Section
 ${core}
 ## Frequencies Section
+% if nfreqs > 0:
   Frequencies[1/cm]         ${nfreqs}
 ${freqs}
+% endif
 ## Electronic Levels Section
   ElectronicLevels[1/cm]    ${nlevels}
 ${levels}
