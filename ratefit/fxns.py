@@ -127,6 +127,11 @@ def plog_rate_constants(plog_dct, t_ref, pressure, temps):
             pressure_defined = True
             plog_params = plog_dct[plog_pressure]
 
+    # print('plog test')
+    # print(plog_dct)
+    # print(pressure)
+    # print(plog_pressures)
+
     # If pressure equals value use, arrhenius expression
     if pressure_defined:
         ktps = arrhenius(plog_params, t_ref, temps)

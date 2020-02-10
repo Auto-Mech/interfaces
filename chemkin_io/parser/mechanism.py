@@ -197,6 +197,7 @@ def spc_inchi_dct(csv_str):
 
     return spc_dct
 
+
 def reac_class_dct(csv_str, entry):
     """ build a dictionary of name idx and inchi entry
     """

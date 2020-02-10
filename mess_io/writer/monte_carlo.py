@@ -14,27 +14,40 @@ SECTION_PATH = os.path.join(TEMPLATE_PATH, 'sections')
 MONTE_CARLO_PATH = os.path.join(SECTION_PATH, 'monte_carlo')
 
 
-def monte_carlo(geom, formula,
+def monte_carlo(geom, elec_levels,
                 flux_mode_str, data_file_name,
-                ground_energy, reference_energy):
+                ground_energy, reference_energy,
+                freqs=(),
+                no_qc_corr=False, use_cm_shift=False):
     """ Writes a monte carlo species section
     """
 
     # Format the molecule specification section
-    natoms, atom_list = util.molec_spec_format(geom)
+    atom_list = util.molec_spec_format(geom)
+    
+    # Build a formatted frequencies and elec levels string
+    nlevels, levels = util.elec_levels_format(elec_levels)
+    if freqs:
+        nfreqs, freqs = util.freqs_format(freqs)
+    else:
+        nfreqs = 0
 
     # Indent various strings string if needed
     flux_mode_str = util.indent(flux_mode_str, 4)
 
     # Create dictionary to fill template
     monte_carlo_keys = {
-        'formula': formula,
-        'natoms': natoms,
         'atom_list': atom_list,
         'flux_mode_str': flux_mode_str,
         'data_file_name': data_file_name,
         'ground_energy': ground_energy,
-        'reference_energy': reference_energy
+        'nlevels': nlevels,
+        'levels': levels,
+        'nfreqs': nfreqs,
+        'freqs': freqs,
+        'reference_energy': reference_energy,
+        'no_qc_corr': no_qc_corr,
+        'use_cm_shift': use_cm_shift
     }
 
     # Set template name and path for a monte carlo species section

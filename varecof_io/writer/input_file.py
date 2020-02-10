@@ -63,7 +63,7 @@ def tst(nsamp_max, nsamp_min, flux_err, pes_size,
     return tst_str
 
 
-def divsur(r1dists,
+def divsur(rdists,
            npivot1,
            npivot2,
            xyz_pivot1,
@@ -147,8 +147,8 @@ def divsur(r1dists,
         dist_coords_string = 'r11 = r1'
 
     # Build string for conditions
-    conditions_str = ''
-    nconditions = len(conditions.keys)
+    conditions_string = ''
+    nconditions = len(conditions)
     if 'delta_r' in conditions:
         alpha = str(conditions['delta_r'])
         conditions_string += '(r2-r1) < 0.01 + {0}\n'.format(alpha)

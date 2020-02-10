@@ -168,13 +168,10 @@ def molec_spec_format(geom):
     """ Helps format the molecular section from the geometry
     """
 
-    # Get the number of atoms
-    natoms = len(geom)
-
     # Build geom string; converting the coordinates to angstrom
     atom_list_string = ''
     for (asymb, _) in geom:
-        atom_list_string += '{:s}\n'.format(asymb)
+        atom_list_string += '{:s} '.format(asymb)
 
     # Remove final newline character
     atom_list_string = atom_list_string.rstrip()
@@ -182,7 +179,7 @@ def molec_spec_format(geom):
     # Indent the lines
     atom_list_string = indent(atom_list_string, 6)
 
-    return natoms, atom_list_string
+    return atom_list_string
 
 
 def format_flux_mode_indices(atom_indices):

@@ -2,12 +2,17 @@
  Utility functions for formatting
 """
 
+import os
+import subprocess
 from qcelemental import constants as qcc
 from qcelemental import periodictable as ptab
 from automol import geom
 
 # Conversion factors
 BOHR2ANG = qcc.conversion_factor('bohr', 'angstrom')
+
+# Obtain the path to a convert struct executable
+SRC_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 # Utility functions for the structure.inp writer
@@ -75,7 +80,7 @@ def format_grids_string(grid, name, units):
 def format_faces_string(faces):
     """ format faces keywords
     """
-    faces_str = ' '.join(faces)
+    faces_str = ' '.join((str(val) for val in faces))
 
     return faces_str
 
@@ -103,8 +108,10 @@ def format_pivot_xyz_string(idx, npivot, xyzp, phi_dependence=False):
     atom_idx = idx
     if idx == 1:
         d_idx = 1
+        t_idx = 1
     else:
         d_idx = 2
+        t_idx = 2
 
     if npivot == 1:
         x_val = 'x{0} = {1:.3f}'.format(atom_idx, xyzp[0])
@@ -112,36 +119,37 @@ def format_pivot_xyz_string(idx, npivot, xyzp, phi_dependence=False):
         z_val = '  z{0} = {1:.3f}'.format(atom_idx, xyzp[2])
         pivot_xyz_string = (x_val + y_val + z_val)
     elif npivot > 1 and not phi_dependence:
-        x_val1 = 'x{0} = {1:.3f} + d{2}*cos(t{0})'.format(
-            atom_idx, xyzp[0], d_idx)
-        y_val1 = '  y{0} = {1:.3f} + d{2}*sin(t{0})'.format(
-            atom_idx, xyzp[1], d_idx)
+        x_val1 = 'x{0} = {1:.3f} + d{2}*cos(t{3})'.format(
+            atom_idx, xyzp[0], d_idx, t_idx)
+        y_val1 = '  y{0} = {1:.3f} + d{2}*sin(t{3})'.format(
+            atom_idx, xyzp[1], d_idx, t_idx)
         z_val1 = '  z{0} = 0.000'.format(
             atom_idx)
-        x_val2 = 'x{0} = {1:.3f} - d{2}*cos(t{0})'.format(
-            atom_idx+1, xyzp[0], d_idx)
-        y_val2 = '  y{0} = {1:.3f} - d{2}*sin(t{0})'.format(
-            atom_idx+1, xyzp[1], d_idx)
+        x_val2 = 'x{0} = {1:.3f} - d{2}*cos(t{3})'.format(
+            atom_idx+1, xyzp[0], d_idx, t_idx)
+        y_val2 = '  y{0} = {1:.3f} - d{2}*sin(t{3})'.format(
+            atom_idx+1, xyzp[1], d_idx, t_idx)
         z_val2 = '  z{0} = 0.000'.format(
             atom_idx+1)
         pivot_xyz_string = (x_val1 + y_val1 + z_val1 + '\n' +
                             x_val2 + y_val2 + z_val2)
     else:
-        # Not sure if this implementation is any good
-        x_val1 = 'x{0} = {1:.0f} + d{2}*sin(p{0})*cos(t{0})'.format(
-            atom_idx, xyzp[0], d_idx)
-        y_val1 = '  y{0} = {1:.0f} + d{2}*sin(p{0})*sin(t{0})'.format(
-            atom_idx, xyzp[1], d_idx)
-        z_val1 = '  z{0} = {1:.0f} + d{2}*cos(p{0})'.format(
-            atom_idx, xyzp[2], d_idx)
-        x_val2 = 'x{0} = {1:.0f} - d{2}*sin(p{0})*cos(t{0})'.format(
-            atom_idx+1, xyzp[0], d_idx)
-        y_val2 = '  y{0} = {1:.0f} - d{2}*sin(p{0})*sin(t{0})'.format(
-            atom_idx+1, xyzp[1], d_idx)
-        z_val2 = '  z{0} = {1:.0f} + d{2}*cos(p{0})'.format(
-            atom_idx+1, xyzp[2], d_idx)
-        pivot_xyz_string = (x_val1 + y_val1 + z_val1 + '\n' +
-                            x_val2 + y_val2 + z_val2)
+        raise NotImplementedError
+        # # Not sure if this implementation is any good
+        # x_val1 = 'x{0} = {1:.0f} + d{2}*sin(p{0})*cos(t{0})'.format(
+        #     atom_idx, xyzp[0], d_idx)
+        # y_val1 = '  y{0} = {1:.0f} + d{2}*sin(p{0})*sin(t{0})'.format(
+        #     atom_idx, xyzp[1], d_idx)
+        # z_val1 = '  z{0} = {1:.0f} + d{2}*cos(p{0})'.format(
+        #     atom_idx, xyzp[2], d_idx)
+        # x_val2 = 'x{0} = {1:.0f} - d{2}*sin(p{0})*cos(t{0})'.format(
+        #     atom_idx+1, xyzp[0], d_idx)
+        # y_val2 = '  y{0} = {1:.0f} - d{2}*sin(p{0})*sin(t{0})'.format(
+        #     atom_idx+1, xyzp[1], d_idx)
+        # z_val2 = '  z{0} = {1:.0f} + d{2}*cos(p{0})'.format(
+        #     atom_idx+1, xyzp[2], d_idx)
+        # pivot_xyz_string = (x_val1 + y_val1 + z_val1 + '\n' +
+        #                     x_val2 + y_val2 + z_val2)
 
     return pivot_xyz_string
 
@@ -179,18 +187,18 @@ def format_delmlt_string(asym, bsym):
 
     return delmlt_string
 
-def format_comp_dist_string(sym1, sym2, name):
+def format_restrict_dist_string(sym1, sym2, name):
     """ build string that has the distance comparison
     """
 
-    comp_string = (
+    restrict_string = (
         "      if (r{0}{1}.lt.rAB) then\n" +
         "        {2}_corr = 100.0\n" +
         "        return\n" +
         "      endif"
     ).format(sym1, sym2, name)
 
-    return comp_string
+    return restrict_string
 
 
 def format_spline_strings(npot, sym1, sym2, species_name):
@@ -211,3 +219,17 @@ def format_spline_strings(npot, sym1, sym2, species_name):
     spline_str += '      endif'
 
     return spline_str
+
+
+def divsur_frame_geom_script():
+    """ Run the VaReCoF utility script to calculate the fragment
+        geometries contained in the divsur.out file
+        (only requires the divsur.inp file)
+    """
+    conv_cmd = [
+        os.path.join(SRC_PATH, 'convert_struct'),        
+        'divsur.inp'
+    ]
+    devnull = open(os.devnull, 'w')
+    subprocess.check_call(
+        conv_cmd, stdout=devnull, stderr=devnull)

@@ -20,7 +20,7 @@ def species(species_label, species_data, zero_energy):
 
     # Indent the string containing all of data for the well
     species_data = util.indent(species_data, 2)
-    
+
     # Format the precision of the zero energy
     zero_energy = '{0:<8.2f}'.format(zero_energy)
 

@@ -22,7 +22,7 @@ SPECIES_NAME = 'mol'
 POT_LABELS = ['basis+relaxed', 'basis', 'relaxed']
 FORTRAN_COMPILER = 'gfortran'
 SPECIES_CORR_POTENTIALS = ['mol']
-DIST_COMP_IDXS = [[1, 5]]
+DIST_RESTRICT_IDXS = [[1, 5]]
 
 # For test__compile_correction_potential
 MAKE_PATH = '.'
@@ -48,7 +48,7 @@ def test__species_writer():
     # Write the species_corr.f string with no distance constraints
     species_corr_str = varecof_io.writer.corr_potentials.species(
         RVALS, POTENTIALS, BND_IDXS,
-        dist_comp_idxs=DIST_COMP_IDXS)
+        dist_restrict_idxs=DIST_RESTRICT_IDXS)
     with open('mol_corr_constraint.f', 'w') as mol_corr_file:
         mol_corr_file.write(species_corr_str)
 
