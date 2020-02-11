@@ -45,6 +45,9 @@ def core_multirotor(geom1, sym_factor, pot_surf, int_rot,
 
     # Format the geometry section
     natom1, geom1 = util.geom_format(geom1)
+    
+    # Indent the internal rotor string
+    int_rot = util.indent(int_rot, 2)
 
     # Create dictionary to fill template
     core_keys = {
