@@ -45,14 +45,11 @@ def geom_format(geom):
     # Build geom string; converting the coordinates to angstrom
     geom_string = ''
     for (asymb, xyz) in geom:
-        geom_string += '{:s}   {:>10.5f}  {:>10.5f}  {:>10.5f}\n'.format(
+        geom_string += '{:<4s}{:>14.5f}{:>14.5f}{:>14.5f}\n'.format(
                         asymb, *tuple([val*0.529177 for val in xyz]))
 
-    # Remove final newline character
-    geom_string = geom_string.rstrip()
-
-    # Indent the lines
-    geom_string = indent(geom_string, 4)
+    # Remove final newline character and indent the lines
+    geom_string = indent(geom_string.rstrip(), 4)
 
     return natoms, geom_string
 
