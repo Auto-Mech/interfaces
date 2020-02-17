@@ -9,6 +9,7 @@ ${levels}
 % if nfreqs > 0:
   Frequencies[1/cm]         ${nfreqs}
 ${freqs}
+% endif
 % if no_qc_corr:
     NoQuantumCorrection
 % endif
