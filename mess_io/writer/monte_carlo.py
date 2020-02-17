@@ -24,7 +24,7 @@ def monte_carlo(geom, elec_levels,
 
     # Format the molecule specification section
     atom_list = util.molec_spec_format(geom)
-    
+
     # Build a formatted frequencies and elec levels string
     nlevels, levels = util.elec_levels_format(elec_levels)
     if freqs:
