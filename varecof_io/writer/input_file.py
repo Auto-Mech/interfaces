@@ -186,16 +186,30 @@ def divsur(rdists,
     return divsur_str
 
 
-def elec_struct(exe_path, base_name):
+def elec_struct(exe_path, lib_path, base_name, npot,
+                dummy_name='dummy_corr_', lib_name='libcorrpot.so',
+                geom_ptt='GEOMETRY_HERE', ene_ptt='molpro_energy'):
     """ Writes the electronic structure code input file for VaReCoF
         Currently code only runs with Molpro
         :rtype: string
     """
 
+    # Write the correction potential strings
+    pot_path = os.path.join(lib_path, lib_name)
+    pot_params_str = ''
+    for i in range(npot):
+        pot_params_str += '{0:<42s}{1:<8d}\n'.format(base_name+'_corr_', 1)    
+        pot_params_str += '{0:<42s}{1:<8d}\n'.format('ParameterInteger', i+1)
+    pot_params_str += '{0:<42s}{1:<8d}\n'.format(dummy_name, 1)    
+
     # Create dictionary to fill template
     els_keys = {
         'exe_path': exe_path,
-        'base_name': base_name
+        'geom_ptt': geom_ptt,
+        'ene_ptt': ene_ptt,
+        'base_name': base_name,
+        'pot_path': pot_path,
+        'pot_params_str': pot_params_str
     }
 
     # Set template name and path for the global keywords section

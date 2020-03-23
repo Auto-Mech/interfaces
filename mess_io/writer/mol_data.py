@@ -231,7 +231,7 @@ def tunnel_eckart(imag_freq, well_depth1, well_depth2):
     return tunnel_str
 
 
-def tunnel_sct(imag_freq, cutoff_energy, tunnel_file):
+def tunnel_sct(imag_freq, tunnel_file, cutoff_energy=2500):
     """ Writes the tunneling section accounting for small curvature tunneling
     """
 

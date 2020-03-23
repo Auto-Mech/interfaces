@@ -27,9 +27,9 @@ c     Set the distance of the two atoms forming the bond in the reaction
 ${bond_distance_string}
 
 ## Set strings that modify the potential for certain distances
-% if comp_distance_strings != '':
+% if restrict_distance_strings != '':
 c     Set the distances to other atoms we must check to alter the potential
-${comp_distance_strings}
+${restrict_distance_strings}
 % endif
 c     Set mult factor for potential to exponential form when sampling dist outside bounds
 ${delmlt_string}

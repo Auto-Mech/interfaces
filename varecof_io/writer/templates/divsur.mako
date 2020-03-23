@@ -35,6 +35,7 @@ Cycles ${ncycles}
 ${r1_string}
 % if r2_string != '':
 ${r2_string}
+% endif
 % if d1_string != '':
 ${d1_string}
 % endif

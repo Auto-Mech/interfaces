@@ -94,8 +94,8 @@ def species(rvalues, potentials, bnd_frm_idxs,
         'dv_vals': dv_vals,
         'rmin': rmin,
         'rmax': rmax,
-        'aidx': aidx,
-        'bidx': bidx,
+        # 'aidx': aidx,
+        # 'bidx': bidx,
         'bond_distance_string': bond_distance_string,
         'restrict_distance_strings': restrict_distance_strings,
         'delmlt_string': delmlt_string,
@@ -144,19 +144,17 @@ def auxiliary():
     return pot_aux_str
 
 
-def makefile(fortran_compiler, pot_file_names=None):
+def makefile(fortran_compiler, pot_file_names=()):
     """ Writes string for a makefile to compile correction potentials
         :return : String for the makefile
         :rtype: string
     """
 
     # Set species name
-    if pot_file_names is not None:
-        corr_potential_names = ''
+    corr_potential_names = ''
+    if pot_file_names:
         for potential in pot_file_names:
             corr_potential_names += '{0}_corr.f '.format(potential)
-    else:
-        corr_potential_names = 'species_corr.f'
 
     make_keys = {
         'fc': fortran_compiler,
