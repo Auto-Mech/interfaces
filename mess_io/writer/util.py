@@ -146,17 +146,22 @@ def format_xmat(xmat):
     """ Format the xmat anharm section
     """
 
+    print('MESS XMAT TEST')
+    print(xmat)
+
     xmat = numpy.array(xmat)
     # Loop over the rows of the anharm numpy array
     anharm_string = ''
     for i in range(xmat.shape[0]):
-        anharm_string += '  '.join([str(val) for val in list(xmat[i, :])
-                                    if val != 0.0])
+        anharm_string += ' '.join(
+            ['{0:>12.5f}'.format(val) for val in list(xmat[i, :i+1])
+             if val != 0.0]
+        )
         if (i+1) != xmat.shape[0]:
             anharm_string += '\n'
 
     # Indent the lines
-    anharm_string = indent(anharm_string, 4)
+    anharm_string = indent(anharm_string, 2)
 
     return anharm_string
 

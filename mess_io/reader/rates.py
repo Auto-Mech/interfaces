@@ -59,7 +59,7 @@ def pdep_ks(output_string, reactant, product, pressure, pressure_unit):
 
     # Find where the block of text where the high-pressure rates exist
     block_str = ('Temperature-Species Rate Tables:')
-    pressure_str = 'Pressure = ' + str(pressure) + ' ' + pressure_unit
+    # pressure_str = 'Pressure = ' + str(pressure) + ' ' + pressure_unit
 
     for i, line in enumerate(mess_lines):
         if block_str in line:
@@ -131,11 +131,18 @@ def get_temperatures(output_string):
     for i in range(block_start, len(mess_lines)):
         if 'Temperature =' in mess_lines[i]:
             tmp = mess_lines[i].strip().split()
+            temperature_unit = tmp[3]
             if tmp[2] not in temperatures:
-                temperatures.append(tmp[2])
+                temperatures.append(float(tmp[2]))
             else:
                 temperature_unit = tmp[3]
                 break
+
+    # Read unit
+    for i in range(block_start, len(mess_lines)):
+        if 'Temperature =' in mess_lines[i]:
+            temperature_unit = mess_lines[i].strip().split()[3]
+            break
 
     return temperatures, temperature_unit
 
@@ -183,9 +190,8 @@ def get_pressures(output_string):
             for j in range(pressure_start, len(mess_lines)):
                 if 'O-O' in mess_lines[j]:
                     break
-                else:
-                    tmp = mess_lines[j].strip().split()
-                    pressures.append(float(tmp[0]))
+                tmp = mess_lines[j].strip().split()
+                pressures.append(float(tmp[0]))
             break
 
     # append high pressure

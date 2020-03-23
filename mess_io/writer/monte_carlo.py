@@ -29,6 +29,7 @@ def monte_carlo(geom, elec_levels,
     nlevels, levels = util.elec_levels_format(elec_levels)
     if freqs:
         nfreqs, freqs = util.freqs_format(freqs)
+        no_qc_corr = True
     else:
         nfreqs = 0
 

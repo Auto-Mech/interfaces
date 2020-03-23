@@ -48,7 +48,7 @@ def atom(mass, elec_levels):
 
 def molecule(core, freqs, elec_levels,
              hind_rot='',
-             xmat=None, rovib_coups='', rot_dists=''):
+             xmat=(), rovib_coups='', rot_dists=''):
     """ Writes the molecule section of a MESS input file
         :param str core: string for the "Core" section written
                          by another mess_io function
@@ -68,7 +68,7 @@ def molecule(core, freqs, elec_levels,
         rovib_coups = util.format_rovib_coups(rovib_coups)
     if rot_dists != '':
         rot_dists = util.format_rot_dist_consts(rot_dists)
-    if xmat is not None:
+    if xmat:
         anharm = util.format_xmat(xmat)
     else:
         anharm = ''

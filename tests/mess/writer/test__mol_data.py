@@ -170,7 +170,7 @@ def test__tunnel_sct_writer():
 
     # Use the writer to create a string for each of the tunnel sections
     tunnel_sct_str = mess_io.writer.mol_data.tunnel_sct(
-        imag_freq, cutoff_energy, tunnel_file)
+        imag_freq, tunnel_file, cutoff_energy=cutoff_energy)
 
     # Print the SCT tunnel string
     print(tunnel_sct_str)

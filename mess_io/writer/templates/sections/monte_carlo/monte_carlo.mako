@@ -1,14 +1,15 @@
   MonteCarlo
-    MoleculeSpecification       ${atom_list}
+    MoleculeSpecification          ${atom_list}
 ${flux_mode_str}\
-    DataFile                    ${data_file_name}
-    ElectronicLevels[1/cm]      ${nlevels}
+    DataFile                       ${data_file_name}
+    ElectronicLevels[1/cm]         ${nlevels}
 ${levels}
-    GroundEnergy[kcal/mol]      ${ground_energy}
-    ReferenceEnergy[kcal/mol]   ${reference_energy}
+    GroundEnergy[kcal/mol]         ${ground_energy}
+    ReferenceEnergy[kcal/mol]      ${reference_energy}
 % if nfreqs > 0:
-  Frequencies[1/cm]         ${nfreqs}
+  NonFluxionalFrequencies[1/cm]    ${nfreqs}
 ${freqs}
+  NoHessian
 % endif
 % if no_qc_corr:
     NoQuantumCorrection

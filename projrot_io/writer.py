@@ -63,24 +63,31 @@ def rpht_input(geoms, grads, hessians,
     return rpht_string
 
 
-def rpht_path_coord_en(coords, energy, bnd1=None, bnd2=None):
+def rpht_path_coord_en(coords, energy, bnd1=(), bnd2=()):
     """ Write the ProjRot file containing path data
     """
     nsteps = len(coords)
 
-    # Build bnd1 and bnd2 lists with fake values if they have not been set
-    bnd1 = bnd1 if bnd1 is not None else [1.00 for val in coords]
-    bnd2 = bnd2 if bnd2 is not None else [1.00 for val in coords]
+    # Check bnd1 and bnd2 lists and build the corresponding string lists
+    assert len(bnd1) == len(bnd2)
+    assert (bool(bnd1 and bnd2) or bool(not bnd1 and not bnd2))
+    bnd_strs = []
+    if bnd1 and bnd2:
+        for bd1, bd2 in zip(bnd1, bnd2):
+            bnd_strs.append('{0:<10.5f}{1:<10.5f}'.format(bd1, bd2))
+    else:
+        bnd_strs = ['' for i in range(len(coords))]
 
     # Check that all the lists are not empty and have the same length
-    assert all(lst for lst in (coords, energy, bnd1, bnd2))
-    assert all(len(lst) == nsteps for lst in (energy, bnd1, bnd2))
+    assert all(lst for lst in (coords, energy, bnd_strs))
+    assert all(len(lst) == nsteps for lst in (coords, energy, bnd_strs))
 
-    path_str = 'Point Coordinate Energy Bond1 Bond2\n'
-    for i, (crd, ene, bd1, bd2) in enumerate(zip(coords, energy, bnd1, bnd2)):
-        path_str += '{0:>3d}{1:>9.5f}{2:>9.5f}{3:>8.5f}{4:>8.5f}'.format(
-            i, crd, ene, bd1, bd2)
-        if i != nsteps-1:
+    path_str = '{0:<7s}{1:<12s}{2:<10s}{3:<10s}{4:<10s}\n'.format(
+        'Point', 'Coordinate', 'Energy', 'Bond1', 'Bond2')
+    for i, (crd, ene, bnd_str) in enumerate(zip(coords, energy, bnd_strs)):
+        path_str += '{0:<7d}{1:<12.5f}{2:<10.5f}{3:<20s}'.format(
+            i+1, crd, ene, bnd_str)
+        if i+1 != nsteps:
             path_str += '\n'
 
     return path_str
