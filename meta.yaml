@@ -1,15 +1,23 @@
-# cmd: conda build . --python 3 -c pacchem
+# cmd: conda build . -c auto-mech -c conda-forge
 package: 
     name: interfaces
-    version: "0.1.1"
+    version: "0.2.0"
  
 source:
     path: .
 
 requirements:
     build:
-        - python=3.6
+        - python
     run:
+        - python
         - numpy
-        - pacchem::autofile
-        - pacchem:: dsarrfit
+        - mako
+        - pytest
+        - pytest-cov
+        - future
+        - flake8
+        - pylint
+        - conda-forge::qcelemental
+        - auto-mech::automol
+        - auto-mech::autoparse
