@@ -31,10 +31,11 @@ def test__molecule_writer():
     mol_symfactor = 1.000
     mol_freqs = (100.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0)
     mol_elec_levels = ((1, 0.0), (3, 50.0))
+    interp_emax = ''
 
     # Get the string for the core using the geometry
     mol_core = mess_io.writer.mol_data.core_rigidrotor(
-        mol_geom, mol_symfactor, interp_emax='')
+        mol_geom, mol_symfactor, interp_emax=interp_emax)
 
     # Use the writer to create a string for the molecule section
     molecule_section_str1 = mess_io.writer.species.molecule(
