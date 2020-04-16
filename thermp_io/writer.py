@@ -10,7 +10,7 @@ SRC_PATH = os.path.dirname(os.path.realpath(__file__))
 TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
 
-def thermp_input(formula, delta_h,
+def thermp_input(ntemps, formula, delta_h,
                  enthalpy_temp=0.0, break_temp=1000.0,
                  thermp_file_name='thermp.dat'):
     """ Writes the input file for thermp
@@ -25,6 +25,7 @@ def thermp_input(formula, delta_h,
 
     # Create a fill value dictionary
     thermp_keys = {
+        'ntemps': ntemps,
         'formula': formula,
         'deltaH': delta_h,
         'enthalpyT': enthalpy_temp,

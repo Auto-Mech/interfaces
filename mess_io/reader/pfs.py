@@ -22,9 +22,9 @@ def partition_fxn(output_string):
     for i, line in enumerate(output_string.splitlines()):
         if i not in (0, 1):
             tmp = line.strip().split()
-            temps.append(tmp[0])
-            logq.append(tmp[1])
-            dq_dt.append(tmp[2])
-            dq2_dt2.append(tmp[3])
+            temps.append(float(tmp[0]))
+            logq.append(float(tmp[1]))
+            dq_dt.append(float(tmp[2]))
+            dq2_dt2.append(float(tmp[3]))
 
     return temps, logq, dq_dt, dq2_dt2
