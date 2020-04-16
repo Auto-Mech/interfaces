@@ -1,6 +1,6 @@
 1, 0
 Nwell, Nprod
-30
+${ntemps}
 nt
 ${deltaH}   ${enthalpyT}
 ${formula}
