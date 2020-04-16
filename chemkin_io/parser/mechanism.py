@@ -117,6 +117,9 @@ def _read_name_inchi(data):
         spc_dct = dict(zip(data.name, data.inchi))
     elif hasattr(data, 'smiles'):
         print('No inchi column in csv file, getting inchi from SMILES')
+        # debugging test
+        for smiles in data.smiles:
+            print('smiles test', smiles, _inchi(smiles))
         ichs = [_inchi(smiles) for smiles in data.smiles]
         spc_dct = dict(zip(data.name, ichs))
     else:

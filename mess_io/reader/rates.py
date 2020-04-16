@@ -61,17 +61,24 @@ def pdep_ks(output_string, reactant, product, pressure, pressure_unit):
     block_str = ('Temperature-Species Rate Tables:')
     # pressure_str = 'Pressure = ' + str(pressure) + ' ' + pressure_unit
 
+    #rate_constants = []
+    # print('block_str reaction test:', block_str, reaction)
     for i, line in enumerate(mess_lines):
+        # print('i test:', i, line)
         if block_str in line:
             for j in range(i, len(mess_lines)):
+                # print('j test:', j, line)
                 if 'Temperature-Pressure Rate Tables' in mess_lines[j]:
                     break
+                # print('mess_lines test:', mess_lines[j])
                 if reaction in mess_lines[j]:
                     mess_press = mess_lines[j-2].strip().split()[2]
+                    # print('mess_press test:', mess_press)
                     if float(mess_press) == pressure:
                         rate_const_block_start = j
                         rate_constants = grab_rate_constants(
                             mess_lines, rate_const_block_start, reaction)
+                        # print('rate_constants test:', rate_constants, rate_const_block_start)
 
     return rate_constants
 
