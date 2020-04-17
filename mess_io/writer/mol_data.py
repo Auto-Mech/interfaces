@@ -134,9 +134,6 @@ def rotor_hindered(group, axis, symmetry, potential,
     rotor_group = util.format_rotor_key_defs(group, remdummy)
     rotor_axis = util.format_rotor_key_defs(axis, remdummy)
     rotor_npotential, rotor_potential = util.format_rotor_potential(potential)
-    print('pot mess', potential)
-    print('pot mess', rotor_potential)
-    print('pot mess', rotor_npotential)
 
     # Format the geom
     natom = 1
