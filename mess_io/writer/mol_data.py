@@ -13,18 +13,18 @@ SPECIES_PATH = os.path.join(TEMPLATE_PATH, 'species')
 SPEC_INFO_PATH = os.path.join(SPECIES_PATH, 'info')
 
 
-def core_rigidrotor(geom1, sym_factor, interp_emax=''):
+def core_rigidrotor(geom, sym_factor, interp_emax=None):
     """ Writes a rigid-rotor core section.
     """
 
     # Format the geometry section
-    natom1, geom1 = util.geom_format(geom1)
+    natom, geom = util.geom_format(geom)
 
     # Create dictionary to fill template
     core_keys = {
         'sym_factor': sym_factor,
-        'natom1': natom1,
-        'geom1': geom1,
+        'natom': natom,
+        'geom': geom,
         'interp_emax': interp_emax
     }
 
@@ -38,13 +38,13 @@ def core_rigidrotor(geom1, sym_factor, interp_emax=''):
     return core_rigrot_str
 
 
-def core_multirotor(geom1, sym_factor, pot_surf, int_rot,
+def core_multirotor(geom, sym_factor, pot_surf, int_rot,
                     interp_emax=100, quant_lvl_emax=9):
     """ Writes a multi-rotor core section.
     """
 
     # Format the geometry section
-    natom1, geom1 = util.geom_format(geom1)
+    natom1, geom = util.geom_format(geom)
 
     # Indent the internal rotor string
     int_rot = util.indent(int_rot, 2)
@@ -52,8 +52,8 @@ def core_multirotor(geom1, sym_factor, pot_surf, int_rot,
     # Create dictionary to fill template
     core_keys = {
         'sym_factor': sym_factor,
-        'natom1': natom1,
-        'geom1': geom1,
+        'natom': natom,
+        'geom': geom,
         'pot_surf': pot_surf,
         'int_rot': int_rot,
         'interp_emax': interp_emax,
@@ -105,14 +105,14 @@ def core_phasespace(geom1, geom2, sym_factor, stoich,
     return core_pst_str
 
 
-def core_rotd(sym_factor, ne_file, stoich):
+def core_rotd(sym_factor, flux_file, stoich):
     """ Writes a core section which calls flux files from Rotd/VaReCoF
     """
 
     # Set values and template based on core type
     core_keys = {
         'sym_factor': sym_factor,
-        'ne_file': ne_file,
+        'flux_file': flux_file,
         'stoich': stoich
     }
 
@@ -134,6 +134,9 @@ def rotor_hindered(group, axis, symmetry, potential,
     rotor_group = util.format_rotor_key_defs(group, remdummy)
     rotor_axis = util.format_rotor_key_defs(axis, remdummy)
     rotor_npotential, rotor_potential = util.format_rotor_potential(potential)
+    print('pot mess', potential)
+    print('pot mess', rotor_potential)
+    print('pot mess', rotor_npotential)
 
     # Format the geom
     natom = 1

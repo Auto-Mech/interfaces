@@ -141,12 +141,12 @@ def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
     return sadpt_str
 
 
-def ts_variational(ts_label, reac_label, prod_label, irc_pt_strs, tunnel=''):
+def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
     """ Writes a TS section containing variational information
     """
 
     # Concatenate all of the variational point strings and indent them
-    ts_data = '\n'.join(irc_pt_strs)
+    ts_data = '\n'.join(rpath_pt_strs)
     ts_data = util.indent(ts_data, 4)
     if tunnel != '':
         tunnel = util.indent(tunnel, 4)
