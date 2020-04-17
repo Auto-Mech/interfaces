@@ -1,5 +1,5 @@
   Stoichiometry  ${stoich}
   Core Rotd 
-    File                    ${ne_file}
+    File                    ${flux_file}
     SymmetryFactor          ${sym_factor}
   End
