@@ -115,7 +115,8 @@ def test__rotor_hindered_writer():
 
     # Use the writer to create a string for the molecule section
     rot_hind_str = mess_io.writer.mol_data.rotor_hindered(
-        group, axis, symmetry, potential)
+        group, axis, symmetry, potential,
+        remdummy=None, geom=None, use_quantum_weight=False)
 
     # Print the hindered rotor section string
     print(rot_hind_str)
