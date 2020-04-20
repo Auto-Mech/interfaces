@@ -14,11 +14,10 @@ SECTION_PATH = os.path.join(TEMPLATE_PATH, 'sections')
 MONTE_CARLO_PATH = os.path.join(SECTION_PATH, 'monte_carlo')
 
 
-def monte_carlo(geom, elec_levels,
-                flux_mode_str, data_file_name,
-                ground_energy, reference_energy,
-                freqs=(),
-                no_qc_corr=False, use_cm_shift=False):
+def mc_species(geom, elec_levels,
+               flux_mode_str, data_file_name,
+               ground_energy, reference_energy,
+               freqs=(), no_qc_corr=False, use_cm_shift=False):
     """ Writes a monte carlo species section
     """
 
@@ -59,6 +58,32 @@ def monte_carlo(geom, elec_levels,
     mc_str = Template(filename=template_file_path).render(**monte_carlo_keys)
 
     return mc_str
+
+
+def mc_data(geos, enes, grads=(), hessians=()):
+    """ Writes a monte carlo species section
+    """
+    if not grads and not hessians:
+        assert len(geos) == len(enes)
+    elif grads or hessians:
+        assert grads and hessians
+        assert len(geos) == len(enes) == len(grads) == len(hessians)
+
+    for idx in range(len(geos)):
+        idx_str = str(idx+1)
+        dat_str += 'Sampling point'+idx_str+'\n'
+        dat_str += 'Energy'+'\n'
+        dat_str += enes[idx]+'\n'
+        dat_str += 'Geometry'+'\n'
+        dat_str += geos[idx]+'\n'
+        if gradient:
+            dat_str += 'Gradient'+'\n'
+            dat_str += grads[idx]
+        if hessian:
+            dat_str += 'Hessian'+'\n'
+            dat_str += hessians[idx]+'\n'
+
+    return dat_str
 
 
 def fluxional_mode(atom_indices, span=360.0):
