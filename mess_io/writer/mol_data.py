@@ -105,14 +105,14 @@ def core_phasespace(geom1, geom2, sym_factor, stoich,
     return core_pst_str
 
 
-def core_rotd(sym_factor, flux_file, stoich):
+def core_rotd(sym_factor, flux_file_name, stoich):
     """ Writes a core section which calls flux files from Rotd/VaReCoF
     """
 
     # Set values and template based on core type
     core_keys = {
         'sym_factor': sym_factor,
-        'flux_file': flux_file,
+        'flux_file_name': flux_file_name,
         'stoich': stoich
     }
 

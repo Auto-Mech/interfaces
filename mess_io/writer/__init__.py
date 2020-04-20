@@ -22,7 +22,8 @@ from mess_io.writer.mol_data import rotor_hindered
 from mess_io.writer.mol_data import rotor_internal
 from mess_io.writer.mol_data import tunnel_eckart
 from mess_io.writer.mol_data import tunnel_sct
-from mess_io.writer.monte_carlo import monte_carlo
+from mess_io.writer.monte_carlo import mc_species
+from mess_io.writer.monte_carlo import mc_data
 from mess_io.writer.monte_carlo import fluxional_mode
 
 
@@ -45,6 +46,7 @@ __all__ = [
     'rotor_internal',
     'tunnel_eckart',
     'tunnel_sct',
-    'monte_carlo',
+    'mc_species',
+    'mc_data',
     'fluxional_mode',
 ]
