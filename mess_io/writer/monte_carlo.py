@@ -69,17 +69,18 @@ def mc_data(geos, enes, grads=(), hessians=()):
         assert grads and hessians
         assert len(geos) == len(enes) == len(grads) == len(hessians)
 
-    for idx in range(len(geos)):
+    dat_str = ''
+    for idx, _ in enumerate(geos):
         idx_str = str(idx+1)
         dat_str += 'Sampling point'+idx_str+'\n'
         dat_str += 'Energy'+'\n'
         dat_str += enes[idx]+'\n'
         dat_str += 'Geometry'+'\n'
         dat_str += geos[idx]+'\n'
-        if gradient:
+        if grads:
             dat_str += 'Gradient'+'\n'
             dat_str += grads[idx]
-        if hessian:
+        if hessians:
             dat_str += 'Hessian'+'\n'
             dat_str += hessians[idx]+'\n'
 

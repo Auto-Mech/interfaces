@@ -3,6 +3,7 @@ Writes MESS input for a molecule
 """
 
 import os
+import numpy
 from mako.template import Template
 from mess_io.writer import util
 
@@ -44,7 +45,7 @@ def core_multirotor(geom, sym_factor, pot_surf, int_rot,
     """
 
     # Format the geometry section
-    natom1, geom = util.geom_format(geom)
+    natom, geom = util.geom_format(geom)
 
     # Indent the internal rotor string
     int_rot = util.indent(int_rot, 2)
@@ -161,6 +162,85 @@ def rotor_hindered(group, axis, symmetry, potential,
     rotor_hind_str = Template(filename=template_file_path).render(**rotor_keys)
 
     return rotor_hind_str
+
+
+def mdhr_data(potentials, freqs=()):
+    """ Write a file containing the hindered rotor potentials
+        Only writes the file for up to 4-dimensinal rotor
+    """
+
+    # Determine the dimensions of the rotor potential list
+    dims = numpy.array(potentials).shape
+    ndims = len(dims)
+
+    # Write top line string with number of points in potential
+    if ndims == 1:
+        dat_str = '{0:>6d}'.format(*dims)
+        nfreqs = len(freqs[0]) if freqs else None
+    elif ndims == 2:
+        dat_str = '{0:>6d}{1:>6d}'.format(*dims)
+        nfreqs = len(freqs[0][0]) if freqs else None
+    elif ndims == 3:
+        dat_str = '{0:>6d}{1:>6d}{2:>6d}'.format(*dims)
+        nfreqs = len(freqs[0][0][0]) if freqs else None
+    elif ndims == 4:
+        dat_str = '{0:>6d}{1:>6d}{2:>6d}{3:>6d}'.format(*dims)
+        nfreqs = len(freqs[0][0][0][0]) if freqs else None
+
+    # Add the nofreq line
+    if freqs:
+        dat_str += '\n '
+        dat_str += ' '.join('{0:d}'.format(idx+1) for idx in range(nfreqs))
+        dat_str += '\n\n'
+    else:
+        dat_str += '\n nofreq\n\n'
+
+    # Write the strings with the potential values
+    if ndims == 1:
+        for i in range(dims[0]):
+            dat_str += (
+                '{0:>6d}{1:>15.8f}'.format(
+                    i+1, potentials[i])
+                )
+            if freqs:
+                ' {}'.join((freq for freq in freqs[i]))
+            dat_str += '\n'
+    elif ndims == 2:
+        for i in range(dims[0]):
+            for j in range(dims[1]):
+                dat_str += (
+                    '{0:>6d}{1:>6d}{2:>15.8f}'.format(
+                        i+1, j+1, potentials[i][j])
+                )
+                if freqs:
+                    strs = ('{0:d}'.format(int(val)) for val in freqs[i][j])
+                    dat_str += '  ' + ' '.join(strs)
+                dat_str += '\n'
+    elif ndims == 3:
+        for i in range(dims[0]):
+            for j in range(dims[1]):
+                for k in range(dims[2]):
+                    dat_str += (
+                        '{0:>6d}{1:>6d}{2:>6d}{3:>15.8f}'.format(
+                            i+1, j+1, k+1, potentials[i][j][k])
+                    )
+                    if freqs:
+                        ' {}'.join((freq for freq in freqs[i][j][k]))
+                    dat_str += '\n'
+    elif ndims == 4:
+        for i in range(dims[0]):
+            for j in range(dims[1]):
+                for k in range(dims[2]):
+                    for lm in range(dims[3]):
+                        dat_str += (
+                            '{0:>6d}{1:>6d}{2:>6d}{3:>6d}{4:>15.8f}'.format(
+                                i+1, j+1, k+1, lm+1, potentials[i][j][k][lm])
+                        )
+                        if freqs:
+                            ' {}'.join((freq for freq in freqs[i][j][k][lm]))
+                        dat_str += '\n'
+
+    return dat_str
 
 
 def rotor_internal(group, axis, symmetry,
