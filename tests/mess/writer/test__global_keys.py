@@ -14,7 +14,8 @@ def test__global_reaction():
 
     # Use the writer to create a string for the global keyword section for rxns
     global_reaction_str = mess_io.writer.global_reaction(
-        temps, pressures)
+        temperatures=temps,
+        pressures=pressures)
 
     # Print the global section string
     print(global_reaction_str)

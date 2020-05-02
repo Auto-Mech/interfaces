@@ -82,7 +82,7 @@ def bimolecular(bimol_label,
     # Determine if species is an atom
     isatom1 = util.is_atom_in_str(species1_data)
     isatom2 = util.is_atom_in_str(species2_data)
-    
+
     # Format the precision of the ground energy
     ground_energy = '{0:<8.2f}'.format(ground_energy)
 
@@ -117,7 +117,7 @@ def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
     ts_data = util.indent(ts_data, 2)
     if tunnel != '':
         tunnel = util.indent(tunnel, 4)
-    
+
     # Format the precision of the zero energy
     zero_energy = '{0:<8.2f}'.format(zero_energy)
 

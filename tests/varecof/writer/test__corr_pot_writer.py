@@ -3,6 +3,11 @@
 """
 
 import varecof_io.writer
+# import tempfile
+#
+# PREFIX = tempfile.mkdtemp()
+# print(PREFIX)
+
 
 # For test__corr_potentials writer
 NPOT = 5

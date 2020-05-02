@@ -117,9 +117,6 @@ def _read_name_inchi(data):
         spc_dct = dict(zip(data.name, data.inchi))
     elif hasattr(data, 'smiles'):
         print('No inchi column in csv file, getting inchi from SMILES')
-        # debugging test
-        for smiles in data.smiles:
-            print('smiles test', smiles, _inchi(smiles))
         ichs = [_inchi(smiles) for smiles in data.smiles]
         spc_dct = dict(zip(data.name, ichs))
     else:
@@ -201,30 +198,6 @@ def spc_inchi_dct(csv_str):
 
     return spc_dct
 
-
-def reac_class_dct(csv_str, entry):
-    """ build a dictionary of name idx and inchi entry
-    """
-    data = _read_csv(csv_str)
-    print('csv in reac_class_dct', csv_str)
-    if entry == 'class':
-        cla_dct = _read_reac_class(data)
-    else:
-        raise NotImplementedError
-
-    return cla_dct
-
-def _read_reac_class(data):
-    """ get dct[name]=smiles """
-
-    cla_dct = {}
-    if hasattr(data, 'rclass'):
-        cla_dct = dict(zip(data.reaction, data.rclass))
-    else:
-        cla_dct = {}
-        print('No "RCLASS" column in csv file')
-
-    return cla_dct
 
 def _read_csv(csv_str):
     """ read the csv file; removes whitespace and makes everything lower

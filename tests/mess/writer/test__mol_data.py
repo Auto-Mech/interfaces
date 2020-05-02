@@ -16,14 +16,15 @@ def test__core_rigidrotor_writer():
 
     # Use the writer to create a string for each of the core sections
     core_rigrot_str1 = mess_io.writer.mol_data.core_rigidrotor(
-        geom, sym_factor, interp_emax='')
-
-    # Set additional value for energy interpolation used in messpf
-    interp_emax = 1500
+        geom=geom,
+        sym_factor=sym_factor,
+        interp_emax=None)
 
     # Use the writer to create a string for core sections with add'l keys set
     core_rigrot_str2 = mess_io.writer.mol_data.core_rigidrotor(
-        geom, sym_factor, interp_emax=interp_emax)
+        geom=geom,
+        sym_factor=sym_factor,
+        interp_emax=1500)
 
     # Print the core string
     print(core_rigrot_str1)
@@ -47,16 +48,22 @@ def test__core_multirotor_writer():
     axis = [3, 2, 1]
     symmetry = 1
     rotor_int_str = mess_io.writer.mol_data.rotor_internal(
-        group, axis, symmetry,
-        rotor_id='NNO',
+        group=group,
+        axis=axis,
+        symmetry=symmetry,
+        rotor_id='CH3',
         mass_exp_size=5, pot_exp_size=5,
         hmin=13, hmax=101,
         grid_size=100)
 
     # Use the writer to create a string for each of the core sections
     core_multirotor_str = mess_io.writer.mol_data.core_multirotor(
-        geom, sym_factor, pot_surf, rotor_int_str,
-        interp_emax=100, quant_lvl_emax=9)
+        geom=geom,
+        sym_factor=sym_factor,
+        pot_surf=pot_surf,
+        int_rot_str=rotor_int_str,
+        interp_emax=100,
+        quant_lvl_emax=9)
 
     # Print the core string
     print(core_multirotor_str)
@@ -78,7 +85,10 @@ def test__core_phasespace_writer():
 
     # Use the writer to create a string for each of the core sections
     core_phasespace_str = mess_io.writer.mol_data.core_phasespace(
-        geom1, geom2, sym_factor, stoich,
+        geom1=geom1,
+        geom2=geom2,
+        sym_factor=sym_factor,
+        stoich=stoich,
         pot_prefactor=10, pot_power_exp=6)
 
     # Print the core string
@@ -96,7 +106,9 @@ def test__core_rotd_writer():
 
     # Use the writer to create a string for each of the core sections
     core_rotd_str = mess_io.writer.mol_data.core_rotd(
-        sym_factor, ne_file, stoich)
+        sym_factor=sym_factor,
+        flux_file_name=ne_file,
+        stoich=stoich)
 
     # Print the core string
     print(core_rotd_str)
@@ -115,8 +127,15 @@ def test__rotor_hindered_writer():
 
     # Use the writer to create a string for the molecule section
     rot_hind_str = mess_io.writer.mol_data.rotor_hindered(
-        group, axis, symmetry, potential,
-        remdummy=None, geom=None, use_quantum_weight=False)
+        group=group,
+        axis=axis,
+        symmetry=symmetry,
+        potential=potential,
+        remdummy=None,
+        geom=None,
+        use_quantum_weight=False)
+
+    # Need tests for other keywords being on
 
     # Print the hindered rotor section string
     print(rot_hind_str)
@@ -133,8 +152,10 @@ def test__rotor_internal_writer():
 
     # Use the writer to create a string for the molecule section
     rotor_int_str = mess_io.writer.mol_data.rotor_internal(
-        group, axis, symmetry,
-        rotor_id='NNO',
+        group=group,
+        axis=axis,
+        symmetry=symmetry,
+        rotor_id='CH3',
         mass_exp_size=5, pot_exp_size=5,
         hmin=13, hmax=101,
         grid_size=100)
@@ -178,11 +199,11 @@ def test__tunnel_sct_writer():
 
 
 if __name__ == '__main__':
-    # test__core_rigidrotor_writer()
-    # test__core_multirotor_writer()
-    # test__core_phasespace_writer()
-    # test__core_rotd_writer()
+    test__core_rigidrotor_writer()
+    test__core_multirotor_writer()
+    test__core_phasespace_writer()
+    test__core_rotd_writer()
     test__rotor_hindered_writer()
     test__rotor_internal_writer()
-    # test__tunnel_eckart_writer()
-    # test__tunnel_sct_writer()
+    test__tunnel_eckart_writer()
+    test__tunnel_sct_writer()

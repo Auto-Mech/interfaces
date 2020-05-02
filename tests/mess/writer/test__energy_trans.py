@@ -12,6 +12,7 @@ def test__energy_trans_writer():
     exp_factor = 150.0
     exp_power = 50.0
     exp_cutoff = 80.0
+
     # Set the LJ parameters for the target and bath
     eps1 = 100.0
     eps2 = 200.0
@@ -22,10 +23,10 @@ def test__energy_trans_writer():
 
     # Use the writer to create a string for the energy transfer section
     energy_trans_section_str = mess_io.writer.energy_transfer(
-            exp_factor, exp_power, exp_cutoff,
-            eps1, eps2,
-            sig1, sig2,
-            mass1, mass2)
+         exp_factor, exp_power, exp_cutoff,
+         eps1, eps2,
+         sig1, sig2,
+         mass1, mass2)
 
     # Print the energy transfer section string
     print(energy_trans_section_str)

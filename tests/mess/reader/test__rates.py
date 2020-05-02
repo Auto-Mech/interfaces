@@ -37,12 +37,12 @@ def test__rates():
 
     # Read pressure-dependent rate constants at two pressures
     p1_rates = mess_io.reader.pdep_ks(
-        output_string, reactant, product, pressures[3], punit)
+        output_string, reactant, product, pressures[3])
     print('\n{0} {1} Rate-Constants:'.format(pressures[3], punit))
     print(p1_rates)
 
     p2_rates = mess_io.reader.pdep_ks(
-        output_string, reactant, product, pressures[4], punit)
+        output_string, reactant, product, pressures[4])
     print('\n{0} {1} Rate-Constants:'.format(pressures[4], punit))
     print(p2_rates)
 

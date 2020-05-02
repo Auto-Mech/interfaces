@@ -24,7 +24,7 @@ def rpht_output(file_name):
                 real_freqs.append(freq)
             else:
                 imag_freqs.append(-1.0*freq)
-    
+
     # Sort imaginary freqeuncies in descending order
     imag_freqs.sort(reverse=True)
 

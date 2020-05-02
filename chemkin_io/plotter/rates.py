@@ -20,8 +20,8 @@ AXES_DCTS = [
     {'title': 'Ratio of rate constants'}
 ]
 
-font = {'size': 14}
-matplotlib.rc('font', **font)
+FONT = {'size': 14}
+matplotlib.rc('font', **FONT)
 
 
 def build(ktp_dct, temps, plot_dir='rate_plots', names=None):
@@ -31,18 +31,15 @@ def build(ktp_dct, temps, plot_dir='rate_plots', names=None):
     # build new dct where we only have reactions with both mechs
     filt_ktp_dct = {}
     for reaction, ktps in ktp_dct.items():
-        # break
         if list(ktps['mech1'].keys()) == list(ktps['mech2'].keys()):
             filt_ktp_dct[reaction] = ktps
-    # import sys
-    # sys.exit()
 
     # Initialize file string to species and file names
     file_name_str = '{0:40s}{1}\n'.format('Name', 'Filename')
 
     # Set names to dict values if ther aren't anything
     if names is None:
-        names = [key for key in ktp_dct]
+        names = list(ktp_dct.keys())
 
     # Make the directory that holds the plots if it doesn't exist
     if not os.path.exists(plot_dir):

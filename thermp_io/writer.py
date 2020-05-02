@@ -10,10 +10,15 @@ SRC_PATH = os.path.dirname(os.path.realpath(__file__))
 TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
 
-def thermp_input(ntemps, formula, delta_h,
-                 enthalpy_temp=0.0, break_temp=1000.0,
-                 thermp_file_name='thermp.dat'):
+def input_file(ntemps, formula, delta_h, enthalpy_temp=0.0, break_temp=1000.0):
     """ Writes the input file for thermp
+        :param list float ntemps: Number of temperatures
+        :param string formula: Chemical formula for species
+        :param float delta_h: Enthalpy of formation
+        :param float enthalpy_temp: Temperature corresponding to enthalpy
+        :param float break_temp: Temperature delineating low-and-high for fits
+        :return thermp_str: String for the ThermP input file
+        :rtype: string
     """
 
     # Get the stoichiometry of all elements to build composition string
