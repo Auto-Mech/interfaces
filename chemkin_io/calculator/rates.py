@@ -96,7 +96,7 @@ def reaction(rxn_str, rxn_units, t_ref, temps, pressures=None):
             pdep_dct = _troe(troe_params, highp_ks, lowp_ks,
                              pressures, temps)
         else:
-            pdep_dct = ratefit.fxns.lindemann(
+            pdep_dct = ratefit.calc.lindemann(
                 highp_ks, lowp_ks, pressures, temps)
 
     # Build the rate constants dictionary with the pdep dict
@@ -117,10 +117,8 @@ def _add_rates(ktp_dct1, ktp_dct2):
 def _arrhenius(arr_params, temps, t_ref, rxn_units):
     """ calc arrhenius
     """
-    # rate_ks = np.zeros(len(temps))
-    # for params in arr_params:
     arr_params = _update_params_units(arr_params, rxn_units)
-    rate_ks = ratefit.fxns.arrhenius(arr_params, t_ref, temps)
+    rate_ks = ratefit.calc.arrhenius(arr_params, t_ref, temps)
     return rate_ks
 
 
@@ -129,7 +127,7 @@ def _plog(plog_params, pressures, temps, t_ref, rxn_units):
     """
     for pressure, params in plog_params.items():
         plog_params[pressure] = _update_params_units(params, rxn_units)
-    pdep_dct = ratefit.fxns.plog(plog_params, t_ref, pressures, temps)
+    pdep_dct = ratefit.calc.plog(plog_params, t_ref, pressures, temps)
     return pdep_dct
 
 
@@ -141,7 +139,7 @@ def _chebyshev(chebyshev_params, pressures, temps):
     [arows, acols] = chebyshev_params['alpha_dim']
     alpha = np.array(chebyshev_params['alpha_elm'])
     assert alpha.shape == (arows, acols)
-    pdep_dct = ratefit.fxns.chebyshev(
+    pdep_dct = ratefit.calc.chebyshev(
         alpha, tmin, tmax, pmin, pmax, pressures, temps)
     return pdep_dct
 
@@ -153,7 +151,7 @@ def _troe(troe_params, highp_ks, lowp_ks, pressures, temps):
         ts2 = None
     elif len(troe_params) == 4:
         ts2 = troe_params[3]
-    pdep_dct = ratefit.fxns.troe(
+    pdep_dct = ratefit.calc.troe(
         highp_ks, lowp_ks, pressures, temps,
         troe_params[0], troe_params[1], troe_params[2], ts2=ts2)
     return pdep_dct

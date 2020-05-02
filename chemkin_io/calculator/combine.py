@@ -166,19 +166,18 @@ def _assess_reaction_match(mech1_names, mech2_dct):
     mech1_rct_comb = list(itertools.combinations(mech1_rcts, len(mech1_rcts)))
     mech1_prd_comb = list(itertools.combinations(mech1_prds, len(mech1_prds)))
 
+    mech2_key = ()
+    flip_rxn = None
     for rxn in mech2_dct:
         [mech2_rcts, mech2_prds] = rxn
         if mech2_rcts in mech1_rct_comb and mech2_prds in mech1_prd_comb:
             flip_rxn = False
             mech2_key = rxn
             break
-        elif mech2_rcts in mech1_prd_comb and mech2_prds in mech1_rct_comb:
+        if mech2_rcts in mech1_prd_comb and mech2_prds in mech1_rct_comb:
             mech2_key = rxn
             flip_rxn = True
             break
-        else:
-            mech2_key = ()
-            flip_rxn = None
 
     ret = mech2_key, flip_rxn
 

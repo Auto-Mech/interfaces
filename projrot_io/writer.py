@@ -180,7 +180,8 @@ def _format_hessian_str(hess):
 
     # Format the Hessian
     hess = np.array(hess)
-    nrows, ncols = hess.shape
+    nrows = np.shape(hess)[0]
+    ncols = np.shape(hess)[1]
 
     if nrows % 5 == 0:
         nchunks = nrows // 5

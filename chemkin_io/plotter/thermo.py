@@ -32,7 +32,7 @@ def build(thermo_dct, temps, plot_dir='therm_plots', names=None):
 
     # Set names to dict values if ther aren't anything
     if names is None:
-        names = [key for key in thermo_dct]
+        names = list(thermo_dct.keys())
 
     # Make the directory that holds the plots if it doesn't exist
     if not os.path.exists(plot_dir):

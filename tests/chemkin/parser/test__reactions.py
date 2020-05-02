@@ -59,7 +59,7 @@ DUP_PLOG_REACTION = (
     "PLOG/3.160E+01  2.33E+43    -9.38   14810.0/\n"
     "PLOG/1.000E+02  3.41E+39    -8.04   14360.0/\n"
     "DUP\n"
-    "C2H3+O2<=>C2H3OO  4.07E+27    -4.67   5222\n"
+    "C2H3+O2<=>C2H3OO  8.07E+27    -2.67   23222\n"
     "PLOG/1.000E-02  1.78E-09    4.15    -4707.0/\n"
     "PLOG/1.000E-01  2.36E+22    -4.52   2839.0/\n"
     "PLOG/3.160E-01  2.00E+26    -5.43   2725.0/\n"
@@ -189,11 +189,12 @@ def test__duplicate_plog_parameters():
 if __name__ == '__main__':
     # test__reactant_names()
     # test__product_names()
-    test__high_p_parameters()
-    test__low_p_parameters()
+    # test__high_p_parameters()
+    test__duplicate_high_p_parameters()
+    # test__low_p_parameters()
     # test__troe_parameters()
-    test__chebyshev_parameters()
-    test__plog_parameters()
+    # test__chebyshev_parameters()
+    # test__plog_parameters()
     # test__buffer_enhance_factors()
     # test__data_strings()
     # test__duplicate_high_p_parameters()

@@ -40,13 +40,12 @@ def highp_ks(output_string, reactant, product):
     return rate_constants
 
 
-def pdep_ks(output_string, reactant, product, pressure, pressure_unit):
+def pdep_ks(output_string, reactant, product, pressure):
     """ Reads rate constants for a reaction at some pressure
         :param str output_string: string of lines for MESS output file
         :param str reactant: label for the reactant used in the MESS output
         :param str product: label for the product used in the MESS output
         :param str pressure: pressure for which rate constants are desired
-        :param str pressure_unit: unit for the pressure in the MESS output
         :return rate_constants: all rate constants for the reaction
         :rtype: list: str
     """
@@ -59,26 +58,19 @@ def pdep_ks(output_string, reactant, product, pressure, pressure_unit):
 
     # Find where the block of text where the high-pressure rates exist
     block_str = ('Temperature-Species Rate Tables:')
-    # pressure_str = 'Pressure = ' + str(pressure) + ' ' + pressure_unit
 
-    #rate_constants = []
-    # print('block_str reaction test:', block_str, reaction)
+    rate_constants = []
     for i, line in enumerate(mess_lines):
-        # print('i test:', i, line)
         if block_str in line:
             for j in range(i, len(mess_lines)):
-                # print('j test:', j, line)
                 if 'Temperature-Pressure Rate Tables' in mess_lines[j]:
                     break
-                # print('mess_lines test:', mess_lines[j])
                 if reaction in mess_lines[j]:
                     mess_press = mess_lines[j-2].strip().split()[2]
-                    # print('mess_press test:', mess_press)
                     if float(mess_press) == pressure:
                         rate_const_block_start = j
                         rate_constants = grab_rate_constants(
                             mess_lines, rate_const_block_start, reaction)
-                        # print('rate_constants test:', rate_constants, rate_const_block_start)
 
     return rate_constants
 
@@ -106,9 +98,7 @@ def grab_rate_constants(mess_lines, block_start, reaction):
     for i in range(block_start+1, len(mess_lines)):
         if mess_lines[i].strip() == '':
             break
-        else:
-            rate_constants.append(
-                mess_lines[i].strip().split()[reaction_col])
+        rate_constants.append(mess_lines[i].strip().split()[reaction_col])
 
     return rate_constants
 

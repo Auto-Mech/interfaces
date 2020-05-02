@@ -122,32 +122,38 @@ def test__ts_sadpt_writer():
     print('\n'+ts_sadpt_str)
 
 
-def test__ts_irc_writer():
-    """ ts irc writer
+def test__ts_variational_writer():
+    """ ts mess_io.writer.rxnchan.ts_variational
     """
 
-    # Set the number of points along the irc
-    nirc = 21
+    # Set the number of points along the var
+    nvar = 21
 
-    # Loop over all the points of the irc and build MESS strings
-    irc_pt_strings = []
-    for i in range(nirc):
-        irc_pt_string = mess_io.writer.stringslib.INTERMEDIATE_SEP_STR
-        irc_pt_string += '! IRC Point {0}\n'.format(str(i+1))
-        irc_pt_string += MOLECULE_MESS_STRING
-        irc_pt_strings.append(irc_pt_string)
+    # Loop over all the points of the var and build MESS strings
+    var_pt_strings = []
+    for i in range(nvar):
+        var_pt_string = '+++++++++++++++++++++++++++++++++++'
+        var_pt_string += '! IRC Point {0}\n'.format(str(i+1))
+        var_pt_string += MOLECULE_MESS_STRING
+        var_pt_strings.append(var_pt_string)
 
     # Set labels for TS
     ts_label = 'B1'
     reac_label = 'R1'
     prod_label = 'P1'
 
-    # Use the writer to create a string for the ts irc section
-    ts_irc_str = mess_io.writer.rxnchan.ts_irc(
-        ts_label, reac_label, prod_label, irc_pt_strings, ZERO_ENERGY)
+    tunnel_string = """Tunneling  Eckart
+  ImaginaryFrequency[1/cm]  2000
+  WellDepth[kcal/mol]       10
+  WellDepth[kcal/mol]       20"""
+
+    # Use the writer to create a string for the ts variational section
+    ts_var_str = mess_io.writer.rxnchan.ts_variational(
+        ts_label, reac_label, prod_label,
+        var_pt_strings, tunnel=tunnel_string)
 
     # Print the ts sadpoint section
-    print('\n'+ts_irc_str)
+    print('\n'+ts_var_str)
 
 
 if __name__ == '__main__':
@@ -155,4 +161,4 @@ if __name__ == '__main__':
     test__well_writer()
     test__bimolecular_writer()
     test__ts_sadpt_writer()
-    # test__ts_irc_writer()
+    test__ts_variational_writer()

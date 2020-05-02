@@ -60,7 +60,8 @@ def test_sct_rpht_input():
     # Write the string for the ProjRot input
     inp_str = projrot_io.writer.rpht_input(
         GEOMS, GRADS, HESSES,
-        saddle_idx=11, rotors_str='', coord_proj=CART_PROJ)
+        saddle_idx=11, rotors_str='',
+        coord_proj=CART_PROJ)
 
     # Print the string
     print(inp_str)
@@ -72,7 +73,7 @@ def test_sct_coord_en():
     # Write the string withoutp bnd1 and bnd2 vals
     en_str = projrot_io.writer.rpht_path_coord_en(
         RXN_PATH_COORDS, RXN_PATH_ENERGIES,
-        bnd1=None, bnd2=None)
+        bnd1=(), bnd2=())
 
     # Print the string
     print(en_str)
