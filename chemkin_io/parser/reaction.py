@@ -72,7 +72,7 @@ def data_dct(block_str, data_entry='strings'):
             rct_names = reactant_names(string)
             prd_names = product_names(string)
             key = (rct_names, prd_names)
-            if key not in rxn_dct.keys():
+            if key not in rxn_dct:
                 rxn_dct[key] = string
             else:
                 rxn_dct[key] += '\n'+string
@@ -176,7 +176,7 @@ def low_p_parameters(rxn_dstr):
 def troe_parameters(rxn_dstr):
     """ troe parameters
     """
-    pattern = (
+    pattern1 = (
         'TROE' +
         app.zero_or_more(app.SPACE) + app.escape('/') +
         app.SPACES + app.capturing(app.NUMBER) +
@@ -185,9 +185,22 @@ def troe_parameters(rxn_dstr):
         app.SPACES + app.maybe(app.capturing(app.NUMBER)) +
         app.zero_or_more(app.SPACE) + app.escape('/')
     )
-    params = apf.first_capture(pattern, rxn_dstr)
-    if params is not None:
-        params = [float(val) for val in params]
+    pattern2 = (
+        'TROE' +
+        app.zero_or_more(app.SPACE) + app.escape('/') +
+        app.SPACES + app.capturing(app.NUMBER) +
+        app.SPACES + app.capturing(app.NUMBER) +
+        app.SPACES + app.capturing(app.NUMBER) +
+        app.zero_or_more(app.SPACE) + app.escape('/')
+    )
+    cap1 = apf.first_capture(pattern1, rxn_dstr)
+    cap2 = apf.first_capture(pattern2, rxn_dstr)
+    if cap1 is not None:
+        params = [float(val) for val in cap1]
+    else:
+        if cap2 is not None:
+            params = [float(val) for val in cap2]
+            params.append(None)
     return params
 
 
