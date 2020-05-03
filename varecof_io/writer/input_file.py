@@ -162,7 +162,7 @@ def divsur(rdists,
         'pivot_xyz_string2': pivot_xyz_string2,
         'frame1': frame1,
         'frame2': frame2,
-        'dist_coords_string': dist_coords_string, 
+        'dist_coords_string': dist_coords_string,
         'nconditions': nconditions,
         'conditions_string': conditions_string,
         'ncycles': ncycles,
@@ -198,9 +198,9 @@ def elec_struct(exe_path, lib_path, base_name, npot,
     pot_path = os.path.join(lib_path, lib_name)
     pot_params_str = ''
     for i in range(npot):
-        pot_params_str += '{0:<42s}{1:<8d}\n'.format(base_name+'_corr_', 1)    
+        pot_params_str += '{0:<42s}{1:<8d}\n'.format(base_name+'_corr_', 1)
         pot_params_str += '{0:<42s}{1:<8d}\n'.format('ParameterInteger', i+1)
-    pot_params_str += '{0:<42s}{1:<8d}\n'.format(dummy_name, 1)    
+    pot_params_str += '{0:<42s}{1:<8d}\n'.format(dummy_name, 1)
 
     # Create dictionary to fill template
     els_keys = {

@@ -17,44 +17,43 @@ jobs:
                     source activate interfaces-env
                     python setup.py install
             - run:
-                name: Run Tests
-                command: |
-                    source activate interfaces-env
-                    cd interfaces
-                    pytest -v --disable-pytest-warnings --cov=interfaces --pyargs interfaces
-            - run:
-                name: Check chemkin_io
+                name: Test chemkin_io
                 command: |
                     source activate interfaces-env
                     cd chemkin_io
+                    pytest -v --disable-pytest-warnings --cov=chemkin_io --pyargs chemkin_io
                     flake8 --exit-zero chemkin_io
                     pylint --rcfile=../.pylintrc chemkin_io
             - run:
-                name: Check mess_io
+                name: Test mess_io
                 command: |
                     source activate interfaces-env
                     cd mess_io
+                    pytest -v --disable-pytest-warnings --cov=mess_io --pyargs mess_io
                     flake8 --exit-zero mess_io
                     pylint --rcfile=../.pylintrc mess_io
             - run:
-                name: Check projrot_io
+                name: Test projrot_io
                 command: |
                     source activate interfaces-env
                     cd projrot_io
+                    pytest -v --disable-pytest-warnings --cov=projrot_io --pyargs projrot_io
                     flake8 --exit-zero projrot_io
                     pylint --rcfile=../.pylintrc projrot_io
             - run:
-                name: Check thermp_io
+                name: Test thermp_io
                 command: |
                     source activate interfaces-env
                     cd thermp_io
+                    pytest -v --disable-pytest-warnings --cov=thermp_io --pyargs thermp_io
                     flake8 --exit-zero thermp_io
                     pylint --rcfile=../.pylintrc thermp_io
             - run:
-                name: Check varecof_io
+                name: Test varecof_io
                 command: |
                     source activate interfaces-env
                     cd varecof_io
+                    pytest -v --disable-pytest-warnings --cov=varecof_io --pyargs varecof_io
                     flake8 --exit-zero varecof_io
                     pylint --rcfile=../.pylintrc varecof_io
 workflows:

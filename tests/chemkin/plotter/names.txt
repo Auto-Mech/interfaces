@@ -1,5 +1,0 @@
-Name                                    Filename
-reaction                                r1
-reaction                                r3
-reaction                                r5
-reaction                                r7
