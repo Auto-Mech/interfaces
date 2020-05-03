@@ -5,14 +5,8 @@
 import varecof_io
 
 
-def test__input_writer():
+def test__tst_writer():
     """ tests varecof_io.writer.input_file.tst
-              varecof_io.writer.input_file.divsur
-              varecof_io.writer.input_file.elec_struct
-              varecof_io.writer.input_file.structure
-              varecof_io.writer.input_file.tml
-              varecof_io.writer.input_file.mc_flux
-              varecof_io.writer.input_file.convert
     """
 
     # Write the tst input string
@@ -31,6 +25,11 @@ def test__input_writer():
     print(tst_inp_str)
     print('\n\ntst.inp (user-defined grid):')
     print(tst_inp_str2)
+
+
+def test__divsur_writer():
+    """ tests varecof_io.writer.input_file.divsur
+    """
 
     # Write the long range divsur input file
     rdists = [10.5, 9.0, 8.0, 7.5, 7.0, 6.5, 6.0,
@@ -83,17 +82,27 @@ def test__input_writer():
     print('\n\ndivsur.inp (short-range; natoms(frag1) >= 2?):')
     print(sr_divsur_inp_str2)
 
+
+def test__els_writer():
+    """ tests varecof_io.writer.input_file.elec_struct
+    """
+
     # Write the els input string
     exe_path = '/path/to/exe'
     lib_path = '/path/to/lib'
     base_name = 'mol'
     npot = 3
-    els_inp_str = varecof_io.write.input_file.elec_struct(
+    els_inp_str = varecof_io.writer.input_file.elec_struct(
         exe_path, lib_path, base_name, npot,
         dummy_name='dummy_corr_', lib_name='libcorrpot.so',
         geom_ptt='GEOMETRY_HERE', ene_ptt='molpro_energy')
     print('\n\nels.inp:')
     print(els_inp_str)
+
+
+def test__structure_writer():
+    """ tests varecof_io.writer.input_file.structure
+    """
 
     # Write the structure input string
     geom1 = (('H', (0.0, 0.0, 0.0)),)
@@ -105,6 +114,11 @@ def test__input_writer():
         geom1, geom2)
     print('\n\nstructure.inp:')
     print(struct_inp_str)
+
+
+def test__tml_writer():
+    """ tests varecof_io.writer.input_file.tml
+    """
 
     # Write the *.tml input string
     memory = 4.0
@@ -119,10 +133,19 @@ def test__input_writer():
     print('\n\nmol.tml:')
     print(tml_inp_str)
 
-    # Write the mc_flux.inp input string
+
+def test__mcflux_writer():
+    """ tests varecof_io.writer.input_file.mc_flux
+    """
+
     mc_flux_inp_str = varecof_io.writer.input_file.mc_flux()
     print('\n\nmc_flux.inp:')
     print(mc_flux_inp_str)
+
+
+def test__convert_writer():
+    """ tests varecof_io.writer.input_file.convert
+    """
 
     # Write the convert.inp input string
     conv_inp_str = varecof_io.writer.input_file.convert()
@@ -131,4 +154,10 @@ def test__input_writer():
 
 
 if __name__ == '__main__':
-    test__input_writer()
+    test__tst_writer()
+    test__divsur_writer()
+    test__els_writer()
+    test__structure_writer()
+    test__tml_writer()
+    test__mcflux_writer()
+    test__convert_writer()

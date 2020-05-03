@@ -2,14 +2,23 @@
   Tests the varecof_io.writer functions
 """
 
+import os
+import tempfile
 import varecof_io
-# import tempfile
-#
-# PREFIX = tempfile.mkdtemp()
-# print(PREFIX)
 
 
-# For test__corr_potentials writer
+# Set paths for building files
+PATH = tempfile.mkdtemp()
+print(PATH)
+DATA_PATH = os.path.join(PATH, 'data')
+MOL_COR_PATH = os.path.join(PATH, 'mol_corr.f')
+MOL_COR_WNAMES_PATH = os.path.join(PATH, 'mol_corr_wnames.f')
+MOL_COR_CONST_PATH = os.path.join(PATH, 'mol_corr_constraint.f')
+DUMMY_PATH = os.path.join(PATH, 'dummy_corr.f')
+POT_AUX_PATH = os.path.join(PATH, 'pot_aux.f')
+MAKEFILE_PATH = os.path.join(PATH, 'makefile')
+
+# Set variables
 NPOT = 5
 BND_IDXS = [1, 3]
 RVALS = [1.5958, 1.6958, 1.7958, 1.8958, 1.9958,
@@ -29,9 +38,6 @@ FORTRAN_COMPILER = 'gfortran'
 SPECIES_CORR_POTENTIALS = ['mol']
 DIST_RESTRICT_IDXS = [[1, 5]]
 
-# For test__compile_correction_potential
-MAKE_PATH = '.'
-
 
 def test__species_writer():
     """ tests varecof_io.writer.corr_potentials.species
@@ -40,21 +46,21 @@ def test__species_writer():
     # Write the species_corr.f string with no distance constraints
     species_corr_str = varecof_io.writer.corr_potentials.species(
         RVALS, POTENTIALS, BND_IDXS)
-    with open('mol_corr.f', 'w') as mol_corr_file:
+    with open(MOL_COR_PATH, 'w') as mol_corr_file:
         mol_corr_file.write(species_corr_str)
 
     # Write the species_corr.f string with no distance constraints
     species_corr_str = varecof_io.writer.corr_potentials.species(
         RVALS, POTENTIALS, BND_IDXS,
         species_name=SPECIES_NAME, pot_labels=POT_LABELS)
-    with open('mol_corr_wnames.f', 'w') as mol_corr_file:
+    with open(MOL_COR_WNAMES_PATH, 'w') as mol_corr_file:
         mol_corr_file.write(species_corr_str)
 
     # Write the species_corr.f string with no distance constraints
     species_corr_str = varecof_io.writer.corr_potentials.species(
         RVALS, POTENTIALS, BND_IDXS,
         dist_restrict_idxs=DIST_RESTRICT_IDXS)
-    with open('mol_corr_constraint.f', 'w') as mol_corr_file:
+    with open(MOL_COR_CONST_PATH, 'w') as mol_corr_file:
         mol_corr_file.write(species_corr_str)
 
 
@@ -62,7 +68,7 @@ def test__dummy_writer():
     """ tests varecof_io.writer.corr_potentials.dummy
     """
     dummy_corr_str = varecof_io.writer.corr_potentials.dummy()
-    with open('dummy_corr.f', 'w') as dummy_corr_file:
+    with open(DUMMY_PATH, 'w') as dummy_corr_file:
         dummy_corr_file.write(dummy_corr_str)
 
 
@@ -70,7 +76,7 @@ def test__auxiliary_writer():
     """ tests varecof_io.writer.corr_potentials.auxiliary
     """
     pot_aux_str = varecof_io.writer.corr_potentials.auxiliary()
-    with open('pot_aux.f', 'w') as pot_aux_file:
+    with open(POT_AUX_PATH, 'w') as pot_aux_file:
         pot_aux_file.write(pot_aux_str)
 
 
@@ -79,15 +85,14 @@ def test__makefile_writer():
     """
     makefile_str = varecof_io.writer.corr_potentials.makefile(
         FORTRAN_COMPILER, pot_file_names=SPECIES_CORR_POTENTIALS)
-    with open('makefile', 'w') as makefile_file:
+    with open(MAKEFILE_PATH, 'w') as makefile_file:
         makefile_file.write(makefile_str)
 
 
 def test__compile_correction_potential():
     """ test varecof_io.writer.corr_potentials.compile_correction_pot
     """
-    varecof_io.writer.corr_potentials.compile_corr_pot(
-        MAKE_PATH)
+    varecof_io.writer.corr_potentials.compile_corr_pot(PATH)
 
 
 if __name__ == '__main__':
