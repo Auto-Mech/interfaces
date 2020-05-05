@@ -66,11 +66,10 @@ def reaction(rxn_str, rxn_units, t_ref, temps, pressures=None):
     troe_params = rxn_parser.troe_parameters(rxn_str)
     chebyshev_params = rxn_parser.chebyshev_parameters(rxn_str)
     plog_params = rxn_parser.plog_parameters(rxn_str)
-    # print(highp_params)
-    # print(lowp_params)
-    # print(troe_params)
-    # print(chebyshev_params)
-    # print(plog_params)
+
+    print('\nplog', plog_params)
+    print('cheb', chebyshev_params)
+    print('lowp', lowp_params)
 
     # Calculate high_pressure rates
     highp_ks = _arrhenius(highp_params, temps, t_ref, rxn_units)
@@ -117,6 +116,7 @@ def _add_rates(ktp_dct1, ktp_dct2):
 def _arrhenius(arr_params, temps, t_ref, rxn_units):
     """ calc arrhenius
     """
+    print(arr_params)
     arr_params = _update_params_units(arr_params, rxn_units)
     rate_ks = ratefit.calc.arrhenius(arr_params, t_ref, temps)
     return rate_ks
@@ -182,7 +182,10 @@ def _update_params_units(params, rxn_units):
 
     # update units of params
     if params is not None:
-        params[0] *= a_conv_factor
-        params[2] *= ea_conv_factor
+        params[0][0] *= a_conv_factor
+        params[0][2] *= ea_conv_factor
+        if len(params) > 1:
+            params[1][0] *= a_conv_factor
+            params[1][2] *= ea_conv_factor
 
     return params

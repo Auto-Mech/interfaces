@@ -71,6 +71,7 @@ def test__high_p_rate_constants():
     for key, val in ktp_dct.items():
         print(key)
         print(val)
+    print(DUP_HIGHP_REACTION)
     ktp_dct = chemkin_io.calculator.rates.reaction(
         DUP_HIGHP_REACTION, UNITS, T_REF, TEMPS, pressures=None)
     print('\nhigh-pressure rate_constants')
@@ -134,7 +135,7 @@ def test__plog_rate_constants():
 
 
 if __name__ == '__main__':
-    test__mechanism()
+    # test__mechanism()
     test__high_p_rate_constants()
     test__lindemann_rate_constants()
     test__troe_rate_constants()
