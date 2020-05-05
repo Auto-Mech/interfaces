@@ -3,16 +3,16 @@
 """
 
 
-def rpht_output(file_name):
+def rpht_output(output_string):
     """ Read the projected frequencies
     """
 
     # Read the file and read in the non-zero frequencies
     freqs = []
-    with open(file_name, 'r') as freq_file:
-        for line in freq_file:
-            if line.strip() != '':
-                freqs.append(float(line.strip()))
+    for line in output_string.splitlines():
+        line = line.strip()
+        if line != '':
+            freqs.append(float(line))
 
     # Build lists for the real and imaginary frequencies
     real_freqs = []
@@ -24,7 +24,7 @@ def rpht_output(file_name):
                 real_freqs.append(freq)
             else:
                 imag_freqs.append(-1.0*freq)
-    
+
     # Sort imaginary freqeuncies in descending order
     imag_freqs.sort(reverse=True)
 

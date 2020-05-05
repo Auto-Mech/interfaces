@@ -72,7 +72,7 @@ def data_dct(block_str, data_entry='strings'):
             rct_names = reactant_names(string)
             prd_names = product_names(string)
             key = (rct_names, prd_names)
-            if key not in rxn_dct.keys():
+            if key not in rxn_dct:
                 rxn_dct[key] = string
             else:
                 rxn_dct[key] += '\n'+string
@@ -136,17 +136,20 @@ def high_p_parameters(rxn_dstr):
         prd_ptt=SPECIES_NAMES_PATTERN,
         coeff_ptt=app.capturing(COEFF_PATTERN)
     )
-    params_string = apf.first_capture(pattern, rxn_dstr)
-    if params_string is not None:
-        params = list(ap_cast(params_string.split()))
+    # params_string = apf.first_capture(pattern, rxn_dstr)
+    # if params_string is not None:
+    #     params = list(ap_cast(params_string.split()))
+    # else:
+    #     params = None
+
+    string_lst = apf.all_captures(pattern, rxn_dstr)
+    if string_lst:
+        params = []
+        for string in string_lst:
+            params.append(list(ap_cast(string.split())))
     else:
         params = None
 
-    # string_lst = apf.all_captures(pattern, rxn_dstr)
-    # if string_lst is not None:
-    #     params = []
-    #     for string in string_lst:
-    #         params.append(ap_cast(string.split()))
     return params
 
 
@@ -161,14 +164,19 @@ def low_p_parameters(rxn_dstr):
         app.SPACES + app.capturing(app.NUMBER) +
         app.zero_or_more(app.SPACE) + app.escape('/')
     )
-    params = apf.first_capture(pattern, rxn_dstr)
-    if params:
-        params = [float(val) for val in params]
+    # params = apf.first_capture(pattern, rxn_dstr)
+    # if params:
+    #     params = [float(val) for val in params]
+    # else:
+    #     params = None
+    string_lst = apf.all_captures(pattern, rxn_dstr)
+    if string_lst:
+        params = []
+        for string in string_lst:
+            params.append(list(ap_cast(string.split())))
     else:
+        print('here2')
         params = None
-    # capture_lst = apf.all_captures(pattern, rxn_dstr)
-    # params = [[float(val) for val in vals]
-    #           for vals in capture_lst]
 
     return params
 
@@ -176,7 +184,7 @@ def low_p_parameters(rxn_dstr):
 def troe_parameters(rxn_dstr):
     """ troe parameters
     """
-    pattern = (
+    pattern1 = (
         'TROE' +
         app.zero_or_more(app.SPACE) + app.escape('/') +
         app.SPACES + app.capturing(app.NUMBER) +
@@ -185,9 +193,24 @@ def troe_parameters(rxn_dstr):
         app.SPACES + app.maybe(app.capturing(app.NUMBER)) +
         app.zero_or_more(app.SPACE) + app.escape('/')
     )
-    params = apf.first_capture(pattern, rxn_dstr)
-    if params is not None:
-        params = [float(val) for val in params]
+    pattern2 = (
+        'TROE' +
+        app.zero_or_more(app.SPACE) + app.escape('/') +
+        app.SPACES + app.capturing(app.NUMBER) +
+        app.SPACES + app.capturing(app.NUMBER) +
+        app.SPACES + app.capturing(app.NUMBER) +
+        app.zero_or_more(app.SPACE) + app.escape('/')
+    )
+    cap1 = apf.first_capture(pattern1, rxn_dstr)
+    cap2 = apf.first_capture(pattern2, rxn_dstr)
+    if cap1 is not None:
+        params = [float(val) for val in cap1]
+    else:
+        if cap2 is not None:
+            params = [float(val) for val in cap2]
+            params.append(None)
+        else:
+            params = None
     return params
 
 
@@ -261,11 +284,11 @@ def plog_parameters(rxn_dstr):
         for params in params_lst:
             pressure = float(params[0])
             vals = list(map(float, params[1:]))
-            params_dct[pressure] = vals
-            # if pressure not in params_dct:
-            #     params_dct[pressure] = [vals]
-            # else:
-            #     params_dct[pressure].append(vals)
+            # params_dct[pressure] = vals
+            if pressure not in params_dct:
+                params_dct[pressure] = [vals]
+            else:
+                params_dct[pressure].append(vals)
     else:
         params_dct = None
 

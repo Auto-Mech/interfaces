@@ -39,7 +39,7 @@ def core_rigidrotor(geom, sym_factor, interp_emax=None):
     return core_rigrot_str
 
 
-def core_multirotor(geom, sym_factor, pot_surf, int_rot,
+def core_multirotor(geom, sym_factor, pot_surf, int_rot_str,
                     interp_emax=100, quant_lvl_emax=9):
     """ Writes a multi-rotor core section.
     """
@@ -48,7 +48,7 @@ def core_multirotor(geom, sym_factor, pot_surf, int_rot,
     natom, geom = util.geom_format(geom)
 
     # Indent the internal rotor string
-    int_rot = util.indent(int_rot, 2)
+    int_rot_str = util.indent(int_rot_str, 2)
 
     # Create dictionary to fill template
     core_keys = {
@@ -56,7 +56,7 @@ def core_multirotor(geom, sym_factor, pot_surf, int_rot,
         'natom': natom,
         'geom': geom,
         'pot_surf': pot_surf,
-        'int_rot': int_rot,
+        'int_rot': int_rot_str,
         'interp_emax': interp_emax,
         'quant_lvl_emax': quant_lvl_emax
     }
@@ -231,13 +231,14 @@ def mdhr_data(potentials, freqs=()):
         for i in range(dims[0]):
             for j in range(dims[1]):
                 for k in range(dims[2]):
-                    for lm in range(dims[3]):
+                    for lma in range(dims[3]):
                         dat_str += (
                             '{0:>6d}{1:>6d}{2:>6d}{3:>6d}{4:>15.8f}'.format(
-                                i+1, j+1, k+1, lm+1, potentials[i][j][k][lm])
+                                i+1, j+1, k+1, lma+1,
+                                potentials[i][j][k][lma])
                         )
                         if freqs:
-                            ' {}'.join((freq for freq in freqs[i][j][k][lm]))
+                            ' {}'.join((freq for freq in freqs[i][j][k][lma]))
                         dat_str += '\n'
 
     return dat_str
