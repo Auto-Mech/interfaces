@@ -116,7 +116,6 @@ def _add_rates(ktp_dct1, ktp_dct2):
 def _arrhenius(arr_params, temps, t_ref, rxn_units):
     """ calc arrhenius
     """
-    print(arr_params)
     arr_params = _update_params_units(arr_params, rxn_units)
     rate_ks = ratefit.calc.arrhenius(arr_params, t_ref, temps)
     return rate_ks
