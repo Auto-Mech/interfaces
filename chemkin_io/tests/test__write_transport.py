@@ -4,6 +4,7 @@
 
 import chemkin_io
 
+# String for testing??? fix later
 TRANS_STR = """! THEORETICAL TRANSPORT PROPERTIES
 !
 ! (1) Shape, index denotes atom (0), linear molec. (1), nonlinear molec. (2);

@@ -29,12 +29,18 @@ def test__reader():
     real2, imag2 = projrot_io.reader.rpht_output(OUT_STR2)
     real3, imag3 = projrot_io.reader.rpht_output(OUT_STR3)
 
-    assert numpy.allclose(real1, [5000.0, 4000.0, 3000.0, 2000.0, 1000.0])
+    ref_real1 = [5000.0, 4000.0, 3000.0, 2000.0, 1000.0]
+    ref_real2 = [5000.0, 4000.0, 3000.0, 2000.0]
+    ref_imag2 = [1111.11]
+    ref_real3 = [5000.0, 4000.0, 3000.0]
+    ref_imag3 = [2222.22, 1111.11]
+
+    assert numpy.allclose(real1, ref_real1)
     assert not imag1
-    assert numpy.allclose(real2, [5000.0, 4000.0, 3000.0, 2000.0])
-    assert numpy.allclose(imag2, [1111.11])
-    assert numpy.allclose(real3, [5000.0, 4000.0, 3000.0])
-    assert numpy.allclose(imag3, [2222.22, 1111.11])
+    assert numpy.allclose(real2, ref_real2)
+    assert numpy.allclose(imag2, ref_imag2)
+    assert numpy.allclose(real3, ref_real3)
+    assert numpy.allclose(imag3, ref_imag3)
 
 
 if __name__ == '__main__':

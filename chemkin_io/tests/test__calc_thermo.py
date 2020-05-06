@@ -13,6 +13,7 @@ def _read_file(file_name):
         file_str = file_obj.read()
     return file_str
 
+
 # Set paths
 PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_PATH = os.path.join(PATH, 'data')

@@ -57,7 +57,6 @@ def test__thermo_block():
 
     mech_str = SYNGAS_MECH_STR
     block_str = chemkin_io.parser.mechanism.thermo_block(mech_str)
-    print(len(block_str.splitlines()))
     assert len(block_str.splitlines()) == 78
 
 
@@ -77,21 +76,17 @@ def test__reaction_units():
 def test__species_name_dct():
     """ test chemkin_io.parser.species_name_dct
     """
-    name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
+    spc_name_dct = chemkin_io.parser.mechanism.spc_name_dct(
         HEPTANE_CSV_STR, 'inchi')
-    for key, val in name_inchi_dct.items():
-        print(key)
-        print(val)
+    assert len(spc_name_dct) == 1266
 
 
 def test__species_inchi_dct():
     """ test chemkin_io.parser.species_inchi_dct
     """
-    inchi_name_dct = chemkin_io.parser.mechanism.spc_inchi_dct(
+    spc_ich_dct = chemkin_io.parser.mechanism.spc_inchi_dct(
         HEPTANE_CSV_STR)
-    for key, val in inchi_name_dct.items():
-        print(key)
-        print(val)
+    assert len(spc_ich_dct) == 1261
 
 
 if __name__ == '__main__':
