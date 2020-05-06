@@ -4,6 +4,7 @@ Writes the global keyword section of a MESS input file
 
 import os
 from mako.template import Template
+from mess_io.writer import util
 
 
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
@@ -37,7 +38,7 @@ def global_reaction(temperatures, pressures):
     # Build global section string
     globrxn_str = Template(filename=template_file_path).render(**globrxn_keys)
 
-    return globrxn_str
+    return util.remove_trail_whitespace(globrxn_str)
 
 
 def global_pf(temperatures=(),
@@ -76,4 +77,4 @@ def global_pf(temperatures=(),
     # Build global section string
     globpf_str = Template(filename=template_file_path).render(**globpf_keys)
 
-    return globpf_str
+    return util.remove_trail_whitespace(globpf_str)

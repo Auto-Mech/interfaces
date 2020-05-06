@@ -57,7 +57,7 @@ def mc_species(geom, elec_levels,
     # Build monte carlo section string
     mc_str = Template(filename=template_file_path).render(**monte_carlo_keys)
 
-    return mc_str
+    return util.remove_trail_whitespace(mc_str)
 
 
 def mc_data(geos, enes, grads=(), hessians=()):
@@ -84,7 +84,7 @@ def mc_data(geos, enes, grads=(), hessians=()):
             dat_str += 'Hessian'+'\n'
             dat_str += hessians[idx]+'\n'
 
-    return dat_str
+    return util.remove_trail_whitespace(dat_str)
 
 
 def fluxional_mode(atom_indices, span=360.0):
@@ -107,4 +107,4 @@ def fluxional_mode(atom_indices, span=360.0):
     # Build monte carlo section string
     flux_str = Template(filename=template_file_path).render(**flux_mode_keys)
 
-    return flux_str
+    return util.remove_trail_whitespace(flux_str)

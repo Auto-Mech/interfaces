@@ -38,7 +38,7 @@ def species(species_label, species_data, zero_energy):
     # Build species section string
     species_str = Template(filename=template_file_path).render(**species_keys)
 
-    return species_str
+    return util.remove_trail_whitespace(species_str)
 
 
 def well(well_label, well_data, zero_energy):
@@ -65,7 +65,7 @@ def well(well_label, well_data, zero_energy):
     # Build well section string
     well_str = Template(filename=template_file_path).render(**well_keys)
 
-    return well_str
+    return util.remove_trail_whitespace(well_str)
 
 
 def bimolecular(bimol_label,
@@ -105,7 +105,7 @@ def bimolecular(bimol_label,
     # Build bimolecular section string
     bimol_str = Template(filename=template_file_path).render(**bimol_keys)
 
-    return bimol_str
+    return util.remove_trail_whitespace(bimol_str)
 
 
 def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
@@ -138,7 +138,7 @@ def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
     # Build saddle point string
     sadpt_str = Template(filename=template_file_path).render(**ts_sadpt_keys)
 
-    return sadpt_str
+    return util.remove_trail_whitespace(sadpt_str)
 
 
 def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
@@ -167,4 +167,4 @@ def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
     # Build transition state with variational string
     var_str = Template(filename=template_file_path).render(**var_keys)
 
-    return var_str
+    return util.remove_trail_whitespace(var_str)

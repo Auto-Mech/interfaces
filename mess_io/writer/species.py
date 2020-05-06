@@ -43,7 +43,7 @@ def atom(mass, elec_levels):
     # Build atom string
     atom_str = Template(filename=template_file_path).render(**atom_keys)
 
-    return atom_str
+    return util.remove_trail_whitespace(atom_str)
 
 
 def molecule(core, freqs, elec_levels,
@@ -101,4 +101,4 @@ def molecule(core, freqs, elec_levels,
     # Build molecule string
     molecule_str = Template(filename=template_file_path).render(**molec_keys)
 
-    return molecule_str
+    return util.remove_trail_whitespace(molecule_str)

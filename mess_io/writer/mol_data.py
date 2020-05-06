@@ -7,6 +7,7 @@ import numpy
 from mako.template import Template
 from mess_io.writer import util
 
+
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
 SRC_PATH = os.path.dirname(os.path.realpath(__file__))
 TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
@@ -36,7 +37,7 @@ def core_rigidrotor(geom, sym_factor, interp_emax=None):
     # Build core section string
     core_rigrot_str = Template(filename=template_file_path).render(**core_keys)
 
-    return core_rigrot_str
+    return util.remove_trail_whitespace(core_rigrot_str)
 
 
 def core_multirotor(geom, sym_factor, pot_surf, int_rot_str,
@@ -68,7 +69,7 @@ def core_multirotor(geom, sym_factor, pot_surf, int_rot_str,
     # Build core section string
     core_mulrot_str = Template(filename=template_file_path).render(**core_keys)
 
-    return core_mulrot_str
+    return util.remove_trail_whitespace(core_mulrot_str)
 
 
 def core_phasespace(geom1, geom2, sym_factor, stoich,
@@ -103,7 +104,7 @@ def core_phasespace(geom1, geom2, sym_factor, stoich,
     # Build core section string
     core_pst_str = Template(filename=template_file_path).render(**core_keys)
 
-    return core_pst_str
+    return util.remove_trail_whitespace(core_pst_str)
 
 
 def core_rotd(sym_factor, flux_file_name, stoich):
@@ -124,7 +125,7 @@ def core_rotd(sym_factor, flux_file_name, stoich):
     # Build core section string
     core_rotd_str = Template(filename=template_file_path).render(**core_keys)
 
-    return core_rotd_str
+    return util.remove_trail_whitespace(core_rotd_str)
 
 
 def rotor_hindered(group, axis, symmetry, potential,
@@ -161,7 +162,7 @@ def rotor_hindered(group, axis, symmetry, potential,
     # Build rotor section string
     rotor_hind_str = Template(filename=template_file_path).render(**rotor_keys)
 
-    return rotor_hind_str
+    return util.remove_trail_whitespace(rotor_hind_str)
 
 
 def mdhr_data(potentials, freqs=()):
@@ -241,7 +242,7 @@ def mdhr_data(potentials, freqs=()):
                             ' {}'.join((freq for freq in freqs[i][j][k][lma]))
                         dat_str += '\n'
 
-    return dat_str
+    return util.remove_trail_whitespace(dat_str)
 
 
 def rotor_internal(group, axis, symmetry,
@@ -284,7 +285,7 @@ def rotor_internal(group, axis, symmetry,
     # Build rotor section string
     rotor_int_str = Template(filename=template_file_path).render(**rotor_keys)
 
-    return rotor_int_str
+    return util.remove_trail_whitespace(rotor_int_str)
 
 
 def tunnel_eckart(imag_freq, well_depth1, well_depth2):
@@ -309,7 +310,7 @@ def tunnel_eckart(imag_freq, well_depth1, well_depth2):
     # Build tunnel section string
     tunnel_str = Template(filename=template_file_path).render(**tunnel_keys)
 
-    return tunnel_str
+    return util.remove_trail_whitespace(tunnel_str)
 
 
 def tunnel_sct(imag_freq, tunnel_file, cutoff_energy=2500):
@@ -333,4 +334,4 @@ def tunnel_sct(imag_freq, tunnel_file, cutoff_energy=2500):
     # Build tunnel section string
     tunnel_str = Template(filename=template_file_path).render(**tunnel_keys)
 
-    return tunnel_str
+    return util.remove_trail_whitespace(tunnel_str)
