@@ -261,6 +261,24 @@ def test__chebyshev_parameters():
         assert numpy.allclose(row, ref_row)
 
 
+def test__ratek_fit_info():
+    """ test chemkin_io.parser.reaction.ratek_fit_info
+    """
+
+    inf_str = """
+! Info Regarding Rate Constant Fits
+! Pressure: 1.000     Temps:    100-500 K,  MeanAbsErr:   1.1%,  MaxErr:  11.1%
+! Pressure: 10.000    Temps:    100-700 K,  MeanAbsErr:   2.2%,  MaxErr:  22.2%
+! Pressure: 100.000   Temps:   100-1000 K,  MeanAbsErr:   3.3%,  MaxErr:  33.3%
+! Pressure: High      Temps:   100-1500 K,  MeanAbsErr:   4.4%,  MaxErr:  44.4%
+"""
+
+    params = chemkin_io.parser.reaction.ratek_fit_info(
+        inf_str)
+
+    print(params)
+
+
 if __name__ == '__main__':
     test__data_objs()
     test__reactant_names()
@@ -271,3 +289,5 @@ if __name__ == '__main__':
     test__buffer_enhance_factors()
     test__plog_parameters()
     test__chebyshev_parameters()
+    test__ratek_fit_info()
+

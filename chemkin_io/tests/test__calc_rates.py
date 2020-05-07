@@ -50,17 +50,6 @@ PRESSURES2 = np.array([0.0100, 0.0700, 0.987])
 PRESSURES3 = np.array([0.1, 0.5, 2])
 
 
-def test__mechanism():
-    """ test chemkin_io.calculator.reaction.reactant_UNITS
-        test chemkin_io.calculator.reaction.mechanism
-    """
-    ktp_dct = chemkin_io.calculator.rates.mechanism(
-        FAKE1_REACTION_BLOCK, UNITS, T_REF, TEMPS, pressures=PRESSURES)
-    for spc, ktp in ktp_dct.items():
-        print(spc)
-        print(ktp)
-
-
 def test__high_p_rate_constants():
     """ test chemkin_io.calculator.rates.reaction
         for a reaction with only high-pressure params
@@ -133,10 +122,35 @@ def test__plog_rate_constants():
         print(val)
 
 
+def test__mechanism():
+    """ test chemkin_io.calculator.reaction.mechanism
+    """
+    ktp_dct = chemkin_io.calculator.rates.mechanism(
+        FAKE1_REACTION_BLOCK, UNITS, T_REF, TEMPS, pressures=PRESSURES)
+    for spc, ktp in ktp_dct.items():
+        print(spc)
+        print(ktp)
+
+
+def test__branching_ratios():
+    """ test chemkin_io.calculator.reaction.branching_ratios
+    """
+    tot_dct, branch_dct = chemkin_io.calculator.rates.branching_ratios(
+        FAKE1_REACTION_BLOCK, UNITS, T_REF, TEMPS, pressures=PRESSURES)
+    for spc, ktp in tot_dct.items():
+        print(spc)
+        print(ktp)
+    print('\n\n')
+    for spc, ktp in branch_dct.items():
+        print(spc)
+        print(ktp)
+
+
 if __name__ == '__main__':
-    test__mechanism()
     test__high_p_rate_constants()
     test__lindemann_rate_constants()
     test__troe_rate_constants()
     test__plog_rate_constants()
     test__chebyshev_rate_constants()
+    test__mechanism()
+    test__branching_ratios()

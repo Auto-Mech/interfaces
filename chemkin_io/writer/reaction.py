@@ -155,9 +155,9 @@ def _fit_info_str(pressures, temp_dct, err_dct):
     for pressure in pressures:
         if temp_dct:
             [min_temp, max_temp] = temp_dct[pressure]
-            temps_str = '{0:.0f}-{1:.0f}'.format(
+            temps_str = '{0:.0f}-{1:.0f} K'.format(
                 min_temp, max_temp)
-            temp_range_str = 'Temps: {0:<10s} K, '.format(
+            temp_range_str = 'Temps: {0:>12s}, '.format(
                 temps_str)
         else:
             temp_range_str = ''

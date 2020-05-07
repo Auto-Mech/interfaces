@@ -3,9 +3,12 @@
 
 
 import numpy as np
+import itertools
+import operator
 from qcelemental import constants as qcc
 import ratefit
 from chemkin_io.parser import reaction as rxn_parser
+
 
 # Constants and Conversion factors
 # NAVO = qcc.constants.avogadro_constant
@@ -54,6 +57,33 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
     return mech_dct
 
 
+def branching_ratios(rxn_block, rxn_units, t_ref, temps, pressures):
+    """ Calculate all of the branching ratios
+    """
+
+    # Build mechanism dct with rates for all reactions
+    mech_dct = mechanism(rxn_block, rxn_units, t_ref, temps, pressures)
+
+    # Obtain groups of rxns which share common reactants
+    rcts, rct_grps = [], []
+    rxns = sorted(mech_dct.keys())
+    for key, group in itertools.groupby(rxns, operator.itemgetter(0)):
+        rcts.append(key)
+        rct_grps.append(list(x for x in group))
+
+    # Build a dct where the rate constants have been combined
+    total_rate_dct = {}
+    for rct, rct_grp in zip(rcts, rct_grps):
+        total_rate_dct[rct] = sum((mech_dct[grp] for grp in rct_grp))
+
+    # Now get a dct of the branching ration
+    branch_dct = {}
+    for rxn, rates in mech_dct.items():
+        branch_dct[rxn] = mech_dct[rxn] / total_rate_dct[rxn[0]]
+
+    return branch_dct, total_rate_dct
+
+    
 def reaction(rxn_str, rxn_units, t_ref, temps, pressures=None):
     """ calculate the rate constant using the rxn_string
     """
@@ -66,10 +96,6 @@ def reaction(rxn_str, rxn_units, t_ref, temps, pressures=None):
     troe_params = rxn_parser.troe_parameters(rxn_str)
     chebyshev_params = rxn_parser.chebyshev_parameters(rxn_str)
     plog_params = rxn_parser.plog_parameters(rxn_str)
-
-    print('\nplog', plog_params)
-    print('cheb', chebyshev_params)
-    print('lowp', lowp_params)
 
     # Calculate high_pressure rates
     highp_ks = _arrhenius(highp_params, temps, t_ref, rxn_units)

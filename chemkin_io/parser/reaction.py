@@ -341,6 +341,10 @@ def ratek_fit_info(rxn_dstr):
     """
 
     # Read the temperatures and the Errors from the lines
+    pressure_ptt = (
+        'Pressure: ' +
+        app.capturing(app.FLOAT)
+    )
     trange_ptt = (
         'TempRange: ' +
         app.capturing(app.INTEGER) + '-' + app.capturing(app.INTEGER) +
@@ -356,14 +360,16 @@ def ratek_fit_info(rxn_dstr):
         app.capturing(app.FLOAT) + app.escape('%') +
         ','
     )
+    pressure_caps = apf.all_captures(pressure_ptt, rxn_dstr)
     trange_caps = apf.all_captures(trange_ptt, rxn_dstr)
     mean_caps = apf.all_captures(mean_ptt, rxn_dstr)
     max_caps = apf.all_captures(max_ptt, rxn_dstr)
 
+    pressures = [float(val) for val in pressure_caps]
     trange_vals = []
     for cap in trange_caps:
         temp1, temp2 = cap
-        trange_vals.apppend(int(temp1), int(temp2))
+        trange_vals.append([int(temp1), int(temp2)])
     if mean_caps is not None:
         mean_vals = [float(val) for val in mean_caps]
     else:
@@ -375,8 +381,13 @@ def ratek_fit_info(rxn_dstr):
 
     # Build the inf_dct
     inf_dct = {}
-    for idx, pressure in max_vals: # in enumerate(pressures):
-        inf_dct[pressure] = [trange_vals[idx], mean_vals[idx], max_vals[idx]]
+    for idx, pressure in enumerate(pressures):
+        inf_dct[pressure] = {'temps': trange_vals[idx]}
+        if mean_vals:
+            inf_dct[pressure].update({'mean_err': mean_vals[idx]})
+        if max_vals:
+            inf_dct[pressure].update({'max_err': max_vals[idx]})
+
     return inf_dct
 
 
