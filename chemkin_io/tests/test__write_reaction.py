@@ -63,6 +63,12 @@ def test__plog_writer():
         100: [333333.3333, 3.33, 333.333, 777777.7777, 7.77, 777.777],
         'high': [444444.4444, 4.44, 444.444, 888888.8888, 8.88, 888.888]
     }
+    temp_dct = {
+        1: [100, 500],
+        10: [100, 700],
+        100: [100, 1000],
+        'high': [100, 1500]
+    }
     err_dct = {
         1: [1.11, 11.111],
         10: [2.22, 22.222],
@@ -71,9 +77,9 @@ def test__plog_writer():
     }
 
     plog_str1 = chemkin_io.writer.reaction.plog(
-        reaction1, rate_params_dct1, err_dct)
+        reaction1, rate_params_dct1, {})
     plog_str2 = chemkin_io.writer.reaction.plog(
-        reaction2, rate_params_dct2, err_dct)
+        reaction2, rate_params_dct2, temp_dct, err_dct)
     print('\nplog_str1')
     print(plog_str1)
     print('\nplog_str2')

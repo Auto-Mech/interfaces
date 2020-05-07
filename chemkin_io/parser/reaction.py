@@ -335,6 +335,51 @@ def buffer_enhance_factors(rxn_dstr):
     return factors
 
 
+def ratek_fit_info(rxn_dstr):
+    """ Read the information describing features of the fits to the
+        rate constants
+    """
+
+    # Read the temperatures and the Errors from the lines
+    trange_ptt = (
+        'TempRange: ' +
+        app.capturing(app.INTEGER) + '-' + app.capturing(app.INTEGER) +
+        ' K'
+    )
+    mean_ptt = (
+        'MeanAbsErr:' + app.SPACES +
+        app.capturing(app.FLOAT) + app.escape('%') +
+        ','
+    )
+    max_ptt = (
+        'MaxErr:' + app.SPACES +
+        app.capturing(app.FLOAT) + app.escape('%') +
+        ','
+    )
+    trange_caps = apf.all_captures(trange_ptt, rxn_dstr)
+    mean_caps = apf.all_captures(mean_ptt, rxn_dstr)
+    max_caps = apf.all_captures(max_ptt, rxn_dstr)
+
+    trange_vals = []
+    for cap in trange_caps:
+        temp1, temp2 = cap
+        trange_vals.apppend(int(temp1), int(temp2))
+    if mean_caps is not None:
+        mean_vals = [float(val) for val in mean_caps]
+    else:
+        mean_vals = []
+    if max_caps is not None:
+        max_vals = [float(val) for val in max_caps]
+    else:
+        max_vals = []
+
+    # Build the inf_dct
+    inf_dct = {}
+    for idx, pressure in max_vals: # in enumerate(pressures):
+        inf_dct[pressure] = [trange_vals[idx], mean_vals[idx], max_vals[idx]]
+    return inf_dct
+
+
 # helper functions #
 def _first_line_pattern(rct_ptt, prd_ptt, coeff_ptt):
     return (rct_ptt + app.padded(CHEMKIN_ARROW) + prd_ptt +
