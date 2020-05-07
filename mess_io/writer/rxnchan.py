@@ -41,7 +41,7 @@ def species(species_label, species_data, zero_energy):
     return util.remove_trail_whitespace(species_str)
 
 
-def well(well_label, well_data, zero_energy):
+def well(well_label, well_data, zero_energy=None):
     """ Writes a well section.
     """
 
@@ -49,7 +49,8 @@ def well(well_label, well_data, zero_energy):
     well_data = util.indent(well_data, 4)
 
     # Format the precision of the zero energy
-    zero_energy = '{0:<8.2f}'.format(zero_energy)
+    if zero_energy is not None:
+        zero_energy = '{0:<8.2f}'.format(zero_energy)
 
     # Create dictionary to fill template
     well_keys = {
@@ -108,8 +109,8 @@ def bimolecular(bimol_label,
     return util.remove_trail_whitespace(bimol_str)
 
 
-def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
-             tunnel=''):
+def ts_sadpt(ts_label, reac_label, prod_label, ts_data,
+             zero_energy=None, tunnel=''):
     """ Writes a TS section containing only a saddle point
     """
 
@@ -119,7 +120,8 @@ def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
         tunnel = util.indent(tunnel, 4)
 
     # Format the precision of the zero energy
-    zero_energy = '{0:<8.2f}'.format(zero_energy)
+    if zero_energy is not None:
+        zero_energy = '{0:<8.2f}'.format(zero_energy)
 
     # Create dictionary to fill template
     ts_sadpt_keys = {
@@ -168,3 +170,34 @@ def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
     var_str = Template(filename=template_file_path).render(**var_keys)
 
     return util.remove_trail_whitespace(var_str)
+
+
+def configs_union(mol_data_strs):
+    """ Writes a section for a union of species.
+    """
+
+    # Add 'End' statment to each of the data strings
+    mol_data_strs = [string+'End' for string in mol_data_strs]
+    mol_data_strs[-1] += '\n'
+
+    # Concatenate all of the molecule strings
+    union_data = '\n'.join(mol_data_strs)
+    union_data = util.indent(union_data, 2)
+
+    # Add the tunneling string (seems tunneling goes for all TSs in union)
+    # if tunnel != '':
+    #     tunnel = util.indent(tunnel, 4)
+
+    # Create dictionary to fill template
+    union_keys = {
+        'union_data': union_data
+    }
+
+    # Set template name and path for a union-of-species
+    template_file_name = 'union.mako'
+    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
+
+    # Build transition state with variational string
+    union_str = Template(filename=template_file_path).render(**union_keys)
+
+    return util.remove_trail_whitespace(union_str)

@@ -156,9 +156,30 @@ def test__ts_variational_writer():
     print('\n'+ts_var_str)
 
 
+def test__configs_union_writer():
+    """ tests mess_io.writer.rxnchan.configs_union
+    """
+
+    # Set the number of points along the var
+    nmol = 3
+
+    # Loop over all the points of the var and build MESS strings
+    mol_strings = []
+    for _ in range(nmol):
+        mol_strings.append(MOLECULE_MESS_STRING)
+
+    # Use the writer to create a string for the union section
+    union_str = mess_io.writer.rxnchan.configs_union(
+        mol_strings)
+
+    # Print the ts sadpoint section
+    print('\n'+union_str)
+
+
 if __name__ == '__main__':
     test__species_writer()
     test__well_writer()
     test__bimolecular_writer()
     test__ts_sadpt_writer()
     test__ts_variational_writer()
+    test__configs_union_writer()

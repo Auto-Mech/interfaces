@@ -258,10 +258,11 @@ def rotor_internal(group, axis, symmetry,
     rotor_axis = util.format_rotor_key_defs(axis, remdummy)
 
     # Format the geom
-    natom = 1
     if geom is not None:
         natom, geom = util.geom_format(geom)
         geom = util.indent(geom, 4)
+    else:
+        natom = None
 
     # Create dictionary to fill template
     rotor_keys = {
@@ -286,6 +287,43 @@ def rotor_internal(group, axis, symmetry,
     rotor_int_str = Template(filename=template_file_path).render(**rotor_keys)
 
     return util.remove_trail_whitespace(rotor_int_str)
+
+
+def umbrella_mode(group, plane, ref_atom, potential,
+                  remdummy=None, geom=None):
+    """ Writes the section for a single hindered rotor.
+    """
+    # Format the sections
+    umbr_group = util.format_rotor_key_defs(group, remdummy)
+    umbr_plane = util.format_rotor_key_defs(plane, remdummy)
+    umbr_npotential, umbr_potential = util.format_rotor_potential(potential)
+
+    # Format the geom
+    if geom is not None:
+        natom, geom = util.geom_format(geom)
+        geom = util.indent(geom, 4)
+    else:
+        natom = None
+
+    # Create dictionary to fill template
+    umbr_keys = {
+        'group': umbr_group,
+        'axis': umbr_plane,
+        'ref_atom': ref_atom,
+        'npotential': umbr_npotential,
+        'potential': umbr_potential,
+        'natom': natom,
+        'geom': geom,
+    }
+
+    # Set template name and path for a hindered rotor section
+    template_file_name = 'umbrella.mako'
+    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
+
+    # Build rotor section string
+    umbr_str = Template(filename=template_file_path).render(**umbr_keys)
+
+    return util.remove_trail_whitespace(umbr_str)
 
 
 def tunnel_eckart(imag_freq, well_depth1, well_depth2):

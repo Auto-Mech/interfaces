@@ -164,6 +164,32 @@ def test__rotor_internal_writer():
     print(rotor_int_str)
 
 
+def test__umbrella_writer():
+    """ umbrella test
+    """
+
+    # Set the keywords hindered rotor section
+    group = [11, 10, 9, 8, 7, 6]
+    plane = [3, 2, 1]
+    ref_atom = 4
+    potential = [0.00, 2.91, 9.06, 12.63, 9.97, 3.51,
+                 0.03, 3.49, 9.96, 12.63, 9.08, 2.93]
+
+    # Use the writer to create a string for the molecule section
+    umbrella_str = mess_io.writer.mol_data.umbrella_mode(
+        group=group,
+        plane=plane,
+        ref_atom=ref_atom,
+        potential=potential,
+        remdummy=None,
+        geom=None)
+
+    # Need tests for other keywords being on
+
+    # Print the hindered rotor section string
+    print(umbrella_str)
+
+
 def test__tunnel_eckart_writer():
     """ tunnel test
     """
@@ -205,5 +231,6 @@ if __name__ == '__main__':
     test__core_rotd_writer()
     test__rotor_hindered_writer()
     test__rotor_internal_writer()
+    test__umbrella_writer()
     test__tunnel_eckart_writer()
     test__tunnel_sct_writer()
