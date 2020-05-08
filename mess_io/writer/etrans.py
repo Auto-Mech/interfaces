@@ -46,11 +46,7 @@ def energy_transfer(exp_factor, exp_power, exp_cutoff,
         'masses': mass_str
     }
 
-    # Set template name and path for the energy transfer section
-    template_file_name = 'energy_transfer.mako'
-    template_file_path = os.path.join(SECTION_PATH, template_file_name)
-
-    # Build energy transfer string
-    etrans_str = Template(filename=template_file_path).render(**etrans_keys)
-
-    return util.remove_trail_whitespace(etrans_str)
+    return util.build_mako_str(
+        template_file_name='energy_transfer.mako',
+        template_src_path=SECTION_PATH,
+        template_keys=etrans_keys)

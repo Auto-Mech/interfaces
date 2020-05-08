@@ -31,14 +31,10 @@ def species(species_label, species_data, zero_energy):
         'zero_energy': zero_energy
     }
 
-    # Set template name and path for a species
-    template_file_name = 'species.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build species section string
-    species_str = Template(filename=template_file_path).render(**species_keys)
-
-    return util.remove_trail_whitespace(species_str)
+    return util.build_mako_str(
+        template_file_name='species.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=species_keys)
 
 
 def well(well_label, well_data, zero_energy=None):
@@ -59,14 +55,10 @@ def well(well_label, well_data, zero_energy=None):
         'zero_energy': zero_energy
     }
 
-    # Set template name and path for a well
-    template_file_name = 'well.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build well section string
-    well_str = Template(filename=template_file_path).render(**well_keys)
-
-    return util.remove_trail_whitespace(well_str)
+    return util.build_mako_str(
+        template_file_name='well.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=well_keys)
 
 
 def bimolecular(bimol_label,
@@ -99,14 +91,10 @@ def bimolecular(bimol_label,
         'ground_energy': ground_energy
     }
 
-    # Set template name and path for a bimolecular set
-    template_file_name = 'bimolecular.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build bimolecular section string
-    bimol_str = Template(filename=template_file_path).render(**bimol_keys)
-
-    return util.remove_trail_whitespace(bimol_str)
+    return util.build_mako_str(
+        template_file_name='bimolecular.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=bimol_keys)
 
 
 def ts_sadpt(ts_label, reac_label, prod_label, ts_data,
@@ -133,14 +121,10 @@ def ts_sadpt(ts_label, reac_label, prod_label, ts_data,
         'tunnel': tunnel
     }
 
-    # Set template name and path for a TS with only a single saddle point
-    template_file_name = 'ts_sadpt.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build saddle point string
-    sadpt_str = Template(filename=template_file_path).render(**ts_sadpt_keys)
-
-    return util.remove_trail_whitespace(sadpt_str)
+    return util.build_mako_str(
+        template_file_name='ts_sadpt.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=ts_sadpt_keys)
 
 
 def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
@@ -162,14 +146,24 @@ def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
         'tunnel': tunnel
     }
 
-    # Set template name and path for a TS with an variational
-    template_file_name = 'ts_var.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
+    return util.build_mako_str(
+        template_file_name='ts_var.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=var_keys)
 
-    # Build transition state with variational string
-    var_str = Template(filename=template_file_path).render(**var_keys)
 
-    return util.remove_trail_whitespace(var_str)
+def configs_union(dummy_label):
+    """ Writes a section for a dummy species
+    """
+    # Create dictionary to fill template
+    dummy_keys = {
+        'dummy_label': dummy_label
+    }
+
+    return util.build_mako_str(
+        template_file_name='dummy.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=dummy_keys)
 
 
 def configs_union(mol_data_strs):
@@ -193,11 +187,7 @@ def configs_union(mol_data_strs):
         'union_data': union_data
     }
 
-    # Set template name and path for a union-of-species
-    template_file_name = 'union.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build transition state with variational string
-    union_str = Template(filename=template_file_path).render(**union_keys)
-
-    return util.remove_trail_whitespace(union_str)
+    return util.build_mako_str(
+        template_file_name='union.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=union_keys)

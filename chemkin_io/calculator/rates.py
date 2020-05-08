@@ -74,16 +74,31 @@ def branching_ratios(rxn_block, rxn_units, t_ref, temps, pressures):
     # Build a dct where the rate constants have been combined
     total_rate_dct = {}
     for rct, rct_grp in zip(rcts, rct_grps):
-        total_rate_dct[rct] = sum((mech_dct[grp] for grp in rct_grp))
+        if len(rct_grp) > 1:
+            # Initialize empty dct for all the pressures for below sum to work
+            total_rate_dct[rct] = dict(
+                zip(pressures, [None for _ in range(len(pressures))]))
+            # Sum over all the rates for each reaction, at each pressure
+            for pressure in pressures:
+                total_rate_dct[rct][pressure] = sum(
+                        (mech_dct[grp][pressure] for grp in rct_grp))
 
     # Now get a dct of the branching ration
     branch_dct = {}
-    for rxn, rates in mech_dct.items():
-        branch_dct[rxn] = mech_dct[rxn] / total_rate_dct[rxn[0]]
+    for rxn, rate_dct in mech_dct.items():
+        if rxn[0] in total_rate_dct:
+            # Initialize empty dct for all the pressures for below sum to work
+            branch_dct[rxn] = dict(
+                zip(pressures, [None for _ in range(len(pressures))]))
+            # Calc ratio: rate / total rate for each reaction, at each pressure
+            for pressure in pressures:
+                branch_dct[rxn][pressure] = (
+                    rate_dct[pressure] / total_rate_dct[rxn[0]][pressure]
+                )
 
     return branch_dct, total_rate_dct
 
-    
+
 def reaction(rxn_str, rxn_units, t_ref, temps, pressures=None):
     """ calculate the rate constant using the rxn_string
     """

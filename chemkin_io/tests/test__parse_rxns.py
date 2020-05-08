@@ -290,4 +290,3 @@ if __name__ == '__main__':
     test__plog_parameters()
     test__chebyshev_parameters()
     test__ratek_fit_info()
-

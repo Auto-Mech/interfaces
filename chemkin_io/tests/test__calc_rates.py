@@ -135,6 +135,7 @@ def test__mechanism():
 def test__branching_ratios():
     """ test chemkin_io.calculator.reaction.branching_ratios
     """
+    print('\n\n')
     tot_dct, branch_dct = chemkin_io.calculator.rates.branching_ratios(
         FAKE1_REACTION_BLOCK, UNITS, T_REF, TEMPS, pressures=PRESSURES)
     for spc, ktp in tot_dct.items():

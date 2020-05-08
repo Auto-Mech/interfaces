@@ -27,6 +27,8 @@ from mess_io.writer.mol_data import tunnel_sct
 from mess_io.writer.monte_carlo import mc_species
 from mess_io.writer.monte_carlo import mc_data
 from mess_io.writer.monte_carlo import fluxional_mode
+from mess_io.writer._sec import rxnchan_header_str
+from mess_io.writer._sec import species_separation_str
 
 
 __all__ = [
@@ -53,4 +55,6 @@ __all__ = [
     'mc_species',
     'mc_data',
     'fluxional_mode',
+    'rxnchan_header_str',
+    'species_separation_str'
 ]
