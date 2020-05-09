@@ -27,60 +27,60 @@ def test__tst_writer():
     print(tst_inp_str2)
 
 
-def test__divsur_writer():
-    """ tests varecof_io.writer.input_file.divsur
-    """
-
-    # Write the long range divsur input file
-    rdists = [10.5, 9.0, 8.0, 7.5, 7.0, 6.5, 6.0,
-              5.5, 5.25, 5.0, 4.5, 4.25, 4.0]
-    xyz_pivot1 = [0.0, 0.0, 0.0]
-    xyz_pivot2 = [0.0, 0.0, 0.0]
-    npivot1 = 1
-    npivot2 = 1
-    lr_divsur_inp_str = varecof_io.writer.input_file.divsur(
-        rdists, npivot1, npivot2, xyz_pivot1, xyz_pivot2)
-    print('\n\ndivsur.inp (long-range):')
-    print(lr_divsur_inp_str)
-
-    # Write the short range divsur input files
-    rdists = [4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75]
-    d1dists = [0.05, 0.15, 0.25]
-    p1angs = [85.0]
-    t1angs = [140.0]
-    xyz_pivot1 = [1.0, 2.0, 3.0]
-    xyz_pivot2 = [0.0, 0.0, 0.0]
-    npivot1 = 2
-    npivot2 = 1
-    sr_divsur_inp_str1 = varecof_io.writer.input_file.divsur(
-        rdists, npivot1, npivot2, xyz_pivot1, xyz_pivot2,
-        d1dists=d1dists,
-        p1angs=p1angs,
-        t1angs=t1angs)
-    print('\n\ndivsur.inp (short-range; natoms(frag1) = 1):')
-    print(sr_divsur_inp_str1)
-
-    rdists = [4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75]
-    d1dists = [0.05, 0.15, 0.25]
-    d2dists = [0.05, 0.15, 0.25]
-    p1angs = [85.0]
-    p2angs = [120.0]
-    t1angs = [140.0]
-    t2angs = [165.0]
-    xyz_pivot1 = [1.0, 2.0, 3.0]
-    xyz_pivot2 = [4.0, 5.0, 6.0]
-    npivot1 = 2
-    npivot2 = 2
-    sr_divsur_inp_str2 = varecof_io.writer.input_file.divsur(
-        rdists, npivot1, npivot2, xyz_pivot1, xyz_pivot2,
-        d1dists=d1dists,
-        d2dists=d2dists,
-        p1angs=p1angs,
-        p2angs=p2angs,
-        t1angs=t1angs,
-        t2angs=t2angs)
-    print('\n\ndivsur.inp (short-range; natoms(frag1) >= 2?):')
-    print(sr_divsur_inp_str2)
+# def test__divsur_writer():
+#     """ tests varecof_io.writer.input_file.divsur
+#     """
+#
+#     # Write the long range divsur input file
+#     rdists = [10.5, 9.0, 8.0, 7.5, 7.0, 6.5, 6.0,
+#               5.5, 5.25, 5.0, 4.5, 4.25, 4.0]
+#     xyz_pivot1 = [0.0, 0.0, 0.0]
+#     xyz_pivot2 = [0.0, 0.0, 0.0]
+#     npivot1 = 1
+#     npivot2 = 1
+#     lr_divsur_inp_str = varecof_io.writer.input_file.divsur(
+#         rdists, npivot1, npivot2, xyz_pivot1, xyz_pivot2)
+#     print('\n\ndivsur.inp (long-range):')
+#     print(lr_divsur_inp_str)
+#
+#     # Write the short range divsur input files
+#     rdists = [4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75]
+#     d1dists = [0.05, 0.15, 0.25]
+#     p1angs = [85.0]
+#     t1angs = [140.0]
+#     xyz_pivot1 = [1.0, 2.0, 3.0]
+#     xyz_pivot2 = [0.0, 0.0, 0.0]
+#     npivot1 = 2
+#     npivot2 = 1
+#     sr_divsur_inp_str1 = varecof_io.writer.input_file.divsur(
+#         rdists, npivot1, npivot2, xyz_pivot1, xyz_pivot2,
+#         d1dists=d1dists,
+#         p1angs=p1angs,
+#         t1angs=t1angs)
+#     print('\n\ndivsur.inp (short-range; natoms(frag1) = 1):')
+#     print(sr_divsur_inp_str1)
+#
+#     rdists = [4.25, 4.0, 3.75, 3.5, 3.25, 3.0, 2.75]
+#     d1dists = [0.05, 0.15, 0.25]
+#     d2dists = [0.05, 0.15, 0.25]
+#     p1angs = [85.0]
+#     p2angs = [120.0]
+#     t1angs = [140.0]
+#     t2angs = [165.0]
+#     xyz_pivot1 = [1.0, 2.0, 3.0]
+#     xyz_pivot2 = [4.0, 5.0, 6.0]
+#     npivot1 = 2
+#     npivot2 = 2
+#     sr_divsur_inp_str2 = varecof_io.writer.input_file.divsur(
+#         rdists, npivot1, npivot2, xyz_pivot1, xyz_pivot2,
+#         d1dists=d1dists,
+#         d2dists=d2dists,
+#         p1angs=p1angs,
+#         p2angs=p2angs,
+#         t1angs=t1angs,
+#         t2angs=t2angs)
+#     print('\n\ndivsur.inp (short-range; natoms(frag1) >= 2?):')
+#     print(sr_divsur_inp_str2)
 
 
 def test__els_writer():

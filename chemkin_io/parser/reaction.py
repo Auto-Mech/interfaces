@@ -136,11 +136,6 @@ def high_p_parameters(rxn_dstr):
         prd_ptt=SPECIES_NAMES_PATTERN,
         coeff_ptt=app.capturing(COEFF_PATTERN)
     )
-    # params_string = apf.first_capture(pattern, rxn_dstr)
-    # if params_string is not None:
-    #     params = list(ap_cast(params_string.split()))
-    # else:
-    #     params = None
 
     string_lst = apf.all_captures(pattern, rxn_dstr)
     if string_lst:
@@ -169,16 +164,6 @@ def low_p_parameters(rxn_dstr):
         params = [[float(val) for val in cap1]]
     else:
         params = None
-    # string_lst = apf.all_captures(pattern, rxn_dstr)
-    # print(string_lst)
-    # if string_lst:
-    #     params = []
-    #     for string in string_lst:
-    #         print(string)
-    #         params.append(list(ap_cast(string.split())))
-    # else:
-    #     print('here2')
-    #     params = None
 
     return params
 
@@ -286,7 +271,6 @@ def plog_parameters(rxn_dstr):
         for params in params_lst:
             pressure = float(params[0])
             vals = list(map(float, params[1:]))
-            # params_dct[pressure] = vals
             if pressure not in params_dct:
                 params_dct[pressure] = [vals]
             else:
@@ -342,13 +326,13 @@ def ratek_fit_info(rxn_dstr):
 
     # Read the temperatures and the Errors from the lines
     pressure_ptt = (
-        'Pressure: ' +
-        app.capturing(app.FLOAT)
+        'Pressure:' + app.SPACES +
+        app.capturing(app.one_of_these([app.FLOAT, 'High']))
     )
     trange_ptt = (
-        'TempRange: ' +
+        'Temps: ' + app.SPACES +
         app.capturing(app.INTEGER) + '-' + app.capturing(app.INTEGER) +
-        ' K'
+        app.SPACES + 'K'
     )
     mean_ptt = (
         'MeanAbsErr:' + app.SPACES +
@@ -357,15 +341,19 @@ def ratek_fit_info(rxn_dstr):
     )
     max_ptt = (
         'MaxErr:' + app.SPACES +
-        app.capturing(app.FLOAT) + app.escape('%') +
-        ','
+        app.capturing(app.FLOAT) + app.escape('%')
     )
     pressure_caps = apf.all_captures(pressure_ptt, rxn_dstr)
     trange_caps = apf.all_captures(trange_ptt, rxn_dstr)
     mean_caps = apf.all_captures(mean_ptt, rxn_dstr)
     max_caps = apf.all_captures(max_ptt, rxn_dstr)
 
-    pressures = [float(val) for val in pressure_caps]
+    pressures = []
+    for pressure in pressure_caps:
+        if pressure != 'High':
+            pressures.append(float(pressure))
+        elif pressure == 'High':
+            pressures.append(pressure)
     trange_vals = []
     for cap in trange_caps:
         temp1, temp2 = cap

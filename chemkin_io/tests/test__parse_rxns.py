@@ -17,7 +17,7 @@ def _read_file(file_name):
 # Set paths
 PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_PATH = os.path.join(PATH, 'data')
-FAKE1_MECH_NAME = 'fake_mech1.txt'
+FAKE1_MECH_NAME = 'fake1_mech.txt'
 
 # Read mechanism files
 FAKE1_MECH_STR = _read_file(
@@ -165,13 +165,13 @@ def test__buffer_enhance_factors():
     }
 
     ref_fct_dct2 = {
-        'H2O(7)': 6.63,
-        'H2(2)': 3.27,
+        'H2O': 6.63,
+        'H2': 3.27,
         'N2': 1.33,
-        'CO(1)': 2.8,
-        'H2O2(11)': 6.61,
-        'CO2(12)': 1.6,
-        'O2(3)': 1.2
+        'CO': 2.8,
+        'H2O2': 6.61,
+        'CO2': 1.6,
+        'O2': 1.2
     }
 
     fct_inf1 = zip(fct_dct1.items(), ref_fct_dct1.items())
@@ -273,10 +273,20 @@ def test__ratek_fit_info():
 ! Pressure: High      Temps:   100-1500 K,  MeanAbsErr:   4.4%,  MaxErr:  44.4%
 """
 
-    params = chemkin_io.parser.reaction.ratek_fit_info(
-        inf_str)
+    params = chemkin_io.parser.reaction.ratek_fit_info(inf_str)
 
-    print(params)
+    ref_params = {
+        1.0: {'temps': [100, 500], 'mean_err': 1.1, 'max_err': 11.1},
+        10.0: {'temps': [100, 700], 'mean_err': 2.2, 'max_err': 22.2},
+        100.0: {'temps': [100, 1000], 'mean_err': 3.3, 'max_err': 33.3},
+        'High': {'temps': [100, 1500], 'mean_err': 4.4, 'max_err': 44.4}
+    }
+
+    assert set(params.keys()) == set(ref_params.keys())
+    for key in params:
+        assert numpy.allclose(params[key]['temps'], params[key]['temps'])
+        assert numpy.isclose(params[key]['mean_err'], params[key]['mean_err'])
+        assert numpy.isclose(params[key]['max_err'], params[key]['max_err'])
 
 
 if __name__ == '__main__':

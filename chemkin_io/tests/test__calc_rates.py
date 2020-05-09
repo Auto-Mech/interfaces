@@ -17,7 +17,7 @@ def _read_file(file_name):
 # Set paths
 PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_PATH = os.path.join(PATH, 'data')
-FAKE1_MECH_NAME = 'fake_mech1.txt'
+FAKE1_MECH_NAME = 'fake1_mech.txt'
 
 # Read mechanism files
 FAKE1_MECH_STR = _read_file(

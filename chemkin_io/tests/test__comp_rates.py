@@ -3,7 +3,8 @@ compare thermo
 """
 
 import os
-import numpy as np
+import numpy
+from chemkin_io import parser
 from chemkin_io.calculator import combine
 
 
@@ -14,24 +15,35 @@ def _read_file(file_name):
     return file_str
 
 
+# Set paths
 PATH = os.path.dirname(os.path.realpath(__file__))
-MECH1_PATH = os.path.join(PATH, '../data/test')
-MECH1_STR = _read_file(os.path.join(MECH1_PATH, 'm1.txt'))
-MECH1_CSV_STR = _read_file(os.path.join(MECH1_PATH, 'm1.csv'))
-MECH2_PATH = os.path.join(PATH, '../data/test')
-MECH2_STR = _read_file(os.path.join(MECH2_PATH, 'm2.txt'))
-MECH2_CSV_STR = _read_file(os.path.join(MECH2_PATH, 'm2.csv'))
+DATA_PATH = os.path.join(PATH, 'data')
+FAKE1_MECH_NAME = 'fake1_mech.txt'
+FAKE2_MECH_NAME = 'fake2_mech.txt'
+FAKE_CSV_NAME = 'fake_species.csv'
 
-# Set index for the data dictionaries for the mechanisms
-INDEX = 'inchi'
+# Read mechanism and csv strings
+FAKE1_MECH_STR = _read_file(
+    os.path.join(DATA_PATH, FAKE1_MECH_NAME))
+FAKE2_MECH_STR = _read_file(
+    os.path.join(DATA_PATH, FAKE2_MECH_NAME))
+FAKE_CSV_STR = _read_file(
+    os.path.join(DATA_PATH, FAKE_CSV_NAME))
+
+# Read species blocks
+FAKE1_THERMO_BLOCK = parser.util.clean_up_whitespace(
+    parser.mechanism.thermo_block(FAKE1_MECH_STR))
+FAKE1_BLOCK_STRS = parser.thermo.data_strings(
+    FAKE1_THERMO_BLOCK)
+FAKE2_THERMO_BLOCK = parser.util.clean_up_whitespace(
+    parser.mechanism.thermo_block(FAKE2_MECH_STR))
+FAKE2_BLOCK_STRS = parser.thermo.data_strings(
+    FAKE2_THERMO_BLOCK)
 
 # Temperatures and Pressures to run
 T_REF = 1.0
-TEMPS = np.array([500.0, 1000.0, 1500.0])
-# TEMPS = [300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0,
-#          1300.0, 1400.0, 1500.0, 1600.0, 1700.0, 1800.0, 1900.0, 2000.0,
-#          2300.0, 2400.0, 2500.0, 2600.0, 2700.0, 2800.0, 2900.0, 3000.0]
-PRESSURES = np.array([1.0, 4.0, 5.0])
+TEMPS = numpy.array([500.0, 1000.0, 1500.0])
+PRESSURES = numpy.array([1.0, 4.0, 5.0])
 
 
 def test__compare_rates():
@@ -41,24 +53,25 @@ def test__compare_rates():
     # Build dictionaries containing:
     # thermo data strings for each species, k data strings for each reaction
     # Dictionaries indexed by the given mechanism names or InCHI string
-    if INDEX == 'name':
-        _, mech2_thermo_dct = combine.build_thermo_name_dcts(
-            MECH1_STR, MECH2_STR, TEMPS)
-        mech1_ktp_dct, mech2_ktp_dct = combine.build_reaction_name_dcts(
-            MECH1_STR, MECH2_STR,
-            T_REF, TEMPS, PRESSURES)
-    elif INDEX == 'inchi':
-        _, mech2_thermo_dct = combine.build_thermo_inchi_dcts(
-            MECH1_STR, MECH2_STR, MECH1_CSV_STR, MECH2_CSV_STR, TEMPS)
-        mech1_ktp_dct, mech2_ktp_dct = combine.build_reaction_inchi_dcts(
-            MECH1_STR, MECH2_STR, MECH1_CSV_STR, MECH2_CSV_STR,
-            T_REF, TEMPS, PRESSURES)
+    # Build name for test but use inchi
 
-    #print('\nMech1 reaction dct')
+    _, mech2_thermo_dct = combine.build_thermo_name_dcts(
+        FAKE1_MECH_STR, FAKE2_MECH_STR, TEMPS)
+    mech1_ktp_dct, mech2_ktp_dct = combine.build_reaction_name_dcts(
+        FAKE1_MECH_STR, FAKE2_MECH_STR,
+        T_REF, TEMPS, PRESSURES)
+
+    _, mech2_thermo_dct = combine.build_thermo_inchi_dcts(
+        FAKE1_MECH_STR, FAKE2_MECH_STR, FAKE_CSV_STR, FAKE_CSV_STR, TEMPS)
+    mech1_ktp_dct, mech2_ktp_dct = combine.build_reaction_inchi_dcts(
+        FAKE1_MECH_STR, FAKE2_MECH_STR, FAKE_CSV_STR, FAKE_CSV_STR,
+        T_REF, TEMPS, PRESSURES)
+
+    print('\nMech1 reaction dct')
     for key, val in mech1_ktp_dct.items():
         print(key)
         print(val)
-    #print('\n\nMech2 reaction dct')
+    print('\n\nMech2 reaction dct')
     for key, val in mech2_ktp_dct.items():
         print(key)
         print(val)
@@ -79,6 +92,9 @@ def test__compare_rates():
             print('Mech1 ks: ', ktp1)
             print('Mech2 ks: ', ktp2)
             print(' ')
+
+    print('\n\nktp dct')
+    print(ktp_dct)
 
 
 if __name__ == '__main__':

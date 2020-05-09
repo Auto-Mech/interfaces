@@ -16,8 +16,8 @@ PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_PATH = os.path.join(PATH, 'data')
 HEPTANE_MECH_NAME = 'heptane_mechanism.txt'
 SYNGAS_MECH_NAME = 'syngas_mechanism.txt'
-FAKE1_MECH_NAME = 'fake_mech1.txt'
-FAKE2_MECH_NAME = 'fake_mech2.txt'
+FAKE1_MECH_NAME = 'fake1_mech.txt'
+FAKE3_MECH_NAME = 'fake3_mech.txt'
 HEPTANE_CSV_NAME = 'heptane_species.csv'
 
 # Read mechanism and csv files
@@ -27,8 +27,8 @@ SYNGAS_MECH_STR = _read_file(
     os.path.join(DATA_PATH, SYNGAS_MECH_NAME))
 FAKE1_MECH_STR = _read_file(
     os.path.join(DATA_PATH, FAKE1_MECH_NAME))
-FAKE2_MECH_STR = _read_file(
-    os.path.join(DATA_PATH, FAKE2_MECH_NAME))
+FAKE3_MECH_STR = _read_file(
+    os.path.join(DATA_PATH, FAKE3_MECH_NAME))
 HEPTANE_CSV_STR = _read_file(
     os.path.join(DATA_PATH, HEPTANE_CSV_NAME))
 
@@ -66,7 +66,7 @@ def test__reaction_units():
     units1 = chemkin_io.parser.mechanism.reaction_units(HEPTANE_MECH_STR)
     units2 = chemkin_io.parser.mechanism.reaction_units(SYNGAS_MECH_STR)
     units3 = chemkin_io.parser.mechanism.reaction_units(FAKE1_MECH_STR)
-    units4 = chemkin_io.parser.mechanism.reaction_units(FAKE2_MECH_STR)
+    units4 = chemkin_io.parser.mechanism.reaction_units(FAKE3_MECH_STR)
     assert units1 == ('cal/mole', 'moles')
     assert units2 == ('kcal/mole', 'moles')
     assert units3 == ('cal/mole', 'molecules')

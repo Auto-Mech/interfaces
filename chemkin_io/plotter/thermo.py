@@ -23,7 +23,7 @@ AXES_DCTS = [
 ]
 
 
-def build(thermo_dct, temps, plot_dir='therm_plots', names=None):
+def build(thermo_dct, temps, dir_prefix='.', names=None):
     """ run over the dictionary for plotting
     """
 
@@ -35,11 +35,12 @@ def build(thermo_dct, temps, plot_dir='therm_plots', names=None):
         names = list(thermo_dct.keys())
 
     # Make the directory that holds the plots if it doesn't exist
+    plot_dir = '{0}/thermo_plots'.format(dir_prefix)
     if not os.path.exists(plot_dir):
         os.mkdir(plot_dir)
 
     # Plot the thermo data for each species
-    for i, (species, name) in enumerate(zip(thermo_dct, names)):
+    for i, (species, _) in enumerate(zip(thermo_dct, names)):
 
         # Set the name of the plot and update plot name file string
         file_name = 'spc{0}'.format(str(i+1))
@@ -48,15 +49,16 @@ def build(thermo_dct, temps, plot_dir='therm_plots', names=None):
         # build and save the figure to a PDF
         fig, axes = _build_figure(species)
         _build_axes(axes, thermo_dct[species], temps)
-        fig.savefig('{0}/{1}.pdf'.format(plot_dir, name), dpi=100)
+        fig_name = '{0}/{1}.pdf'.format(plot_dir, file_name)
+        fig.savefig(fig_name, dpi=100)
         plt.close(fig)
 
-    # Collate all of the pdfs together
-    _collate_pdfs(plot_dir)
+    # # Collate all of the pdfs together
+    # _collate_pdfs(plot_dir)
 
-    # Write file relating plot.pdf names to species names
-    with open('plot_names.txt', 'w') as plot_name_file:
-        plot_name_file.write(file_name_str)
+    # # Write file relating plot.pdf names to species names
+    # with open('plot_names.txt', 'w') as plot_name_file:
+    #     plot_name_file.write(file_name_str)
 
 
 def _build_figure(species):
