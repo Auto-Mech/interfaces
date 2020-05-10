@@ -24,8 +24,8 @@ FAKE1_MECH_STR = _read_file(
     os.path.join(DATA_PATH, FAKE1_MECH_NAME))
 
 # Build the reactions blocks and data strings
-FAKE1_REACTION_BLOCK = chemkin_io.parser.util.clean_up_whitespace(
-    chemkin_io.parser.mechanism.reaction_block(FAKE1_MECH_STR))
+FAKE1_REACTION_BLOCK = chemkin_io.parser.mechanism.reaction_block(
+    FAKE1_MECH_STR)
 FAKE1_REACTION_STRS = chemkin_io.parser.reaction.data_strings(
     FAKE1_REACTION_BLOCK)
 FAKE1_REACTION_DCT = chemkin_io.parser.reaction.data_dct(
@@ -265,15 +265,7 @@ def test__ratek_fit_info():
     """ test chemkin_io.parser.reaction.ratek_fit_info
     """
 
-    inf_str = """
-! Info Regarding Rate Constant Fits
-! Pressure: 1.000     Temps:    100-500 K,  MeanAbsErr:   1.1%,  MaxErr:  11.1%
-! Pressure: 10.000    Temps:    100-700 K,  MeanAbsErr:   2.2%,  MaxErr:  22.2%
-! Pressure: 100.000   Temps:   100-1000 K,  MeanAbsErr:   3.3%,  MaxErr:  33.3%
-! Pressure: High      Temps:   100-1500 K,  MeanAbsErr:   4.4%,  MaxErr:  44.4%
-"""
-
-    params = chemkin_io.parser.reaction.ratek_fit_info(inf_str)
+    params = chemkin_io.parser.reaction.ratek_fit_info(DUP_PLOG_REACTION)
 
     ref_params = {
         1.0: {'temps': [100, 500], 'mean_err': 1.1, 'max_err': 11.1},

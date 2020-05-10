@@ -24,8 +24,8 @@ FAKE1_MECH_STR = _read_file(
     os.path.join(DATA_PATH, FAKE1_MECH_NAME))
 
 # Build the reactions blocks and data strings
-FAKE1_REACTION_BLOCK = chemkin_io.parser.util.clean_up_whitespace(
-    chemkin_io.parser.mechanism.reaction_block(FAKE1_MECH_STR))
+FAKE1_REACTION_BLOCK = chemkin_io.parser.mechanism.reaction_block(
+    FAKE1_MECH_STR)
 FAKE1_REACTION_STRS = chemkin_io.parser.reaction.data_strings(
     FAKE1_REACTION_BLOCK)
 FAKE1_REACTION_DCT = chemkin_io.parser.reaction.data_dct(

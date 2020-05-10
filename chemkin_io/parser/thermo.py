@@ -101,8 +101,7 @@ def high_coefficients(thm_dstr):
 def temp_common_default(block_str):
     """ temperature defaults from the thermo block
     """
-    pattern = (app.STRING_START +
-               app.UNSIGNED_FLOAT + app.LINESPACES +
+    pattern = (app.UNSIGNED_FLOAT + app.LINESPACES +
                app.capturing(app.UNSIGNED_FLOAT) + app.LINESPACES +
                app.UNSIGNED_FLOAT)
     capture = apf.first_capture(pattern, block_str)

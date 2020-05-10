@@ -40,8 +40,8 @@ print(PLOT_PATH)
 def test__plot_thermo():
     """ test chemkin_io.mechparser.plot.thermo
     """
-    NAME_THM_DCT = dict(zip(NAMES, THM_DCT.values()))
-    chemkin_io.plotter.thermo.build(NAME_THM_DCT, TEMPS, dir_prefix=PLOT_PATH)
+    name_thm_dct = dict(zip(NAMES, THM_DCT.values()))
+    chemkin_io.plotter.thermo.build(name_thm_dct, TEMPS, dir_prefix=PLOT_PATH)
 
 
 if __name__ == '__main__':

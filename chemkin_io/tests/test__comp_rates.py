@@ -31,8 +31,8 @@ FAKE_CSV_STR = _read_file(
     os.path.join(DATA_PATH, FAKE_CSV_NAME))
 
 # Read species blocks
-FAKE1_THERMO_BLOCK = parser.util.clean_up_whitespace(
-    parser.mechanism.thermo_block(FAKE1_MECH_STR))
+FAKE1_THERMO_BLOCK = parser.mechanism.thermo_block(
+    FAKE1_MECH_STR)
 FAKE1_BLOCK_STRS = parser.thermo.data_strings(
     FAKE1_THERMO_BLOCK)
 FAKE2_THERMO_BLOCK = parser.util.clean_up_whitespace(
