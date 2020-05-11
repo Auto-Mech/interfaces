@@ -13,6 +13,7 @@ from mess_io.writer.rxnchan import bimolecular
 from mess_io.writer.rxnchan import ts_sadpt
 from mess_io.writer.rxnchan import ts_variational
 from mess_io.writer.rxnchan import configs_union
+from mess_io.writer.rxnchan import dummy
 from mess_io.writer.species import atom
 from mess_io.writer.species import molecule
 from mess_io.writer.mol_data import core_rigidrotor
@@ -41,6 +42,7 @@ __all__ = [
     'ts_sadpt',
     'ts_variational',
     'configs_union',
+    'dummy',
     'atom',
     'molecule',
     'core_rigidrotor',

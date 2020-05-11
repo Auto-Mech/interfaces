@@ -3,7 +3,6 @@ Writes MESS input for a monte carlo partition function calculation
 """
 
 import os
-from mako.template import Template
 from mess_io.writer import util
 
 

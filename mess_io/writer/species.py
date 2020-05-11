@@ -7,7 +7,6 @@ Takes in data from other MESS writer functions
 """
 
 import os
-from mako.template import Template
 from mess_io.writer import util
 
 

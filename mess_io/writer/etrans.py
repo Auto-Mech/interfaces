@@ -3,7 +3,6 @@ Writes the energy transfer section of a MESS input file
 """
 
 import os
-from mako.template import Template
 from mess_io.writer import util
 
 

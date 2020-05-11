@@ -17,7 +17,7 @@ TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
 
 def tst(nsamp_max, nsamp_min, flux_err, pes_size,
-        faces=[0], faces_symm=1,
+        faces=(0), faces_symm=1,
         ener_grid=(), amom_grid=()):
     """ Writes the tst.inp file for VaReCoF
         :param int nsamp_max: maximum number of samples
@@ -68,8 +68,8 @@ def divsur(rdists,
            npivot2,
            xyz_pivot1,
            xyz_pivot2,
-           frame1=[0, 0, 0, 0],
-           frame2=[0, 0, 0, 0],
+           frame1=(0, 0, 0, 0),
+           frame2=(0, 0, 0, 0),
            r2dists=(),
            d1dists=(), d2dists=(),
            t1angs=(), t2angs=(),

@@ -3,7 +3,6 @@ Writes MESS input for a molecule
 """
 
 import os
-from mako.template import Template
 from mess_io.writer import util
 
 
@@ -152,7 +151,7 @@ def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
         template_keys=var_keys)
 
 
-def configs_union(dummy_label):
+def dummy(dummy_label):
     """ Writes a section for a dummy species
     """
     # Create dictionary to fill template

@@ -2,9 +2,9 @@
 """
 
 
-import numpy as np
 import itertools
 import operator
+import numpy as np
 from qcelemental import constants as qcc
 import ratefit
 from chemkin_io.parser import reaction as rxn_parser
@@ -81,7 +81,7 @@ def branching_ratios(rxn_block, rxn_units, t_ref, temps, pressures):
             # Sum over all the rates for each reaction, at each pressure
             for pressure in pressures:
                 total_rate_dct[rct][pressure] = sum(
-                        (mech_dct[grp][pressure] for grp in rct_grp))
+                    (mech_dct[grp][pressure] for grp in rct_grp))
 
     # Now get a dct of the branching ration
     branch_dct = {}

@@ -4,7 +4,6 @@ Writes MESS input for a molecule
 
 import os
 import numpy
-from mako.template import Template
 from mess_io.writer import util
 
 
