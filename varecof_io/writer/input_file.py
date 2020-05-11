@@ -17,7 +17,7 @@ TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
 
 def tst(nsamp_max, nsamp_min, flux_err, pes_size,
-        faces=(0), faces_symm=1,
+        faces=(0,), faces_symm=1,
         ener_grid=(), amom_grid=()):
     """ Writes the tst.inp file for VaReCoF
         :param int nsamp_max: maximum number of samples
@@ -25,7 +25,7 @@ def tst(nsamp_max, nsamp_min, flux_err, pes_size,
         :return tst_inp_str: String for tst.inp file
         :rtype: string
     """
-
+    print(faces)
     # Set the energy and angular momentum grids
     if not ener_grid:
         ener_grid = [0, 10, 1.05, 179]
@@ -39,6 +39,7 @@ def tst(nsamp_max, nsamp_min, flux_err, pes_size,
     amom_grid = util.format_grids_string(amom_grid, 'amom', 'Kelvin')
 
     # Set the faces
+    print(faces)
     faces = util.format_faces_string(faces)
 
     # Create dictionary to fill template

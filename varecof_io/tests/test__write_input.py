@@ -155,7 +155,7 @@ def test__convert_writer():
 
 if __name__ == '__main__':
     test__tst_writer()
-    test__divsur_writer()
+    # test__divsur_writer()
     test__els_writer()
     test__structure_writer()
     test__tml_writer()

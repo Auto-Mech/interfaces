@@ -80,6 +80,7 @@ def format_grids_string(grid, name, units):
 def format_faces_string(faces):
     """ format faces keywords
     """
+    print(faces)
     faces_str = ' '.join((str(val) for val in faces))
 
     return faces_str
