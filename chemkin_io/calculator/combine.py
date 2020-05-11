@@ -149,10 +149,9 @@ def spc_name_from_inchi(mech1_csv_str, mech2_csv_str, ich):
     mech1_inchi_dct = chemkin_io.parser.mechanism.spc_inchi_dct(mech1_csv_str)
     mech2_inchi_dct = chemkin_io.parser.mechanism.spc_inchi_dct(mech2_csv_str)
 
-    if ich in mech1_inchi_dct:
-        mech_name = mech1_inchi_dct[ich]
-    else:
-        mech_name = mech2_inchi_dct[ich]
+    mech_name = mech1_inchi_dct.get(ich)
+    if mech_name is not None:
+        mech_name = mech2_inchi_dct.get(ich)
 
     return mech_name
 

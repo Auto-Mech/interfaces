@@ -21,7 +21,7 @@ jobs:
                 command: |
                     source activate interfaces-env
                     cd chemkin_io
-                    pytest -v
+                    pytest -v --disable-pytest-warnings
                     flake8 --exit-zero chemkin_io
                     pylint --rcfile=../.pylintrc chemkin_io
             - run:
@@ -29,7 +29,7 @@ jobs:
                 command: |
                     source activate interfaces-env
                     cd mess_io
-                    pytest -v
+                    pytest -v --disable-pytest-warnings
                     flake8 --exit-zero mess_io
                     pylint --rcfile=../.pylintrc mess_io
             - run:
@@ -37,7 +37,7 @@ jobs:
                 command: |
                     source activate interfaces-env
                     cd projrot_io
-                    pytest -v
+                    pytest -v --disable-pytest-warnings
                     flake8 --exit-zero projrot_io
                     pylint --rcfile=../.pylintrc projrot_io
             - run:
@@ -45,7 +45,7 @@ jobs:
                 command: |
                     source activate interfaces-env
                     cd thermp_io
-                    pytest -v
+                    pytest -v --disable-pytest-warnings
                     flake8 --exit-zero thermp_io
                     pylint --rcfile=../.pylintrc thermp_io
             - run:
@@ -53,7 +53,7 @@ jobs:
                 command: |
                     source activate interfaces-env
                     cd varecof_io
-                    pytest -v
+                    pytest -v --disable-pytest-warnings
                     flake8 --exit-zero varecof_io
                     pylint --rcfile=../.pylintrc varecof_io
 workflows:
