@@ -9,6 +9,7 @@ channels:
     - conda-forge
 
 dependencies:
+    - gfortran_linux-64  # [linux]
     - python=3.7
     - numpy
     - scipy

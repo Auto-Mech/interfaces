@@ -11,6 +11,7 @@ requirements:
         - python
     run:
         - python
+        - {{ compiler('fortran') }}
         - numpy
         - scipy
         - pyyaml
