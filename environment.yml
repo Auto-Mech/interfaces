@@ -14,6 +14,7 @@ dependencies:
     - scipy
     - pyyaml
     - mako
+    - matplotlib
     - pytest
     - pytest-cov
     - future
