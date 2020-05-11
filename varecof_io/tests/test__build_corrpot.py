@@ -34,7 +34,7 @@ POTENTIALS = [
 ]
 SPECIES_NAME = 'mol'
 POT_LABELS = ['basis+relaxed', 'basis', 'relaxed']
-FORTRAN_COMPILER = 'gfortran'
+FORTRAN_COMPILER = 'x86_64-conda_cos6-linux-gnu-gfortran'  # from conda-forge
 SPECIES_CORR_POTENTIALS = ['mol']
 DIST_RESTRICT_IDXS = [[1, 5]]
 
@@ -46,38 +46,33 @@ def test__species_writer():
     # Write the species_corr.f string with no distance constraints
     species_corr_str = varecof_io.writer.corr_potentials.species(
         RVALS, POTENTIALS, BND_IDXS)
-    with open(MOL_COR_PATH, 'w') as mol_corr_file:
-        mol_corr_file.write(species_corr_str)
+    print(species_corr_str)
 
     # Write the species_corr.f string with no distance constraints
     species_corr_str = varecof_io.writer.corr_potentials.species(
         RVALS, POTENTIALS, BND_IDXS,
         species_name=SPECIES_NAME, pot_labels=POT_LABELS)
-    with open(MOL_COR_WNAMES_PATH, 'w') as mol_corr_file:
-        mol_corr_file.write(species_corr_str)
+    print(species_corr_str)
 
     # Write the species_corr.f string with no distance constraints
     species_corr_str = varecof_io.writer.corr_potentials.species(
         RVALS, POTENTIALS, BND_IDXS,
         dist_restrict_idxs=DIST_RESTRICT_IDXS)
-    with open(MOL_COR_CONST_PATH, 'w') as mol_corr_file:
-        mol_corr_file.write(species_corr_str)
+    print(species_corr_str)
 
 
 def test__dummy_writer():
     """ tests varecof_io.writer.corr_potentials.dummy
     """
     dummy_corr_str = varecof_io.writer.corr_potentials.dummy()
-    with open(DUMMY_PATH, 'w') as dummy_corr_file:
-        dummy_corr_file.write(dummy_corr_str)
+    print(dummy_corr_str)
 
 
 def test__auxiliary_writer():
     """ tests varecof_io.writer.corr_potentials.auxiliary
     """
     pot_aux_str = varecof_io.writer.corr_potentials.auxiliary()
-    with open(POT_AUX_PATH, 'w') as pot_aux_file:
-        pot_aux_file.write(pot_aux_str)
+    print(pot_aux_str)
 
 
 def test__makefile_writer():
@@ -85,13 +80,29 @@ def test__makefile_writer():
     """
     makefile_str = varecof_io.writer.corr_potentials.makefile(
         FORTRAN_COMPILER, pot_file_names=SPECIES_CORR_POTENTIALS)
-    with open(MAKEFILE_PATH, 'w') as makefile_file:
-        makefile_file.write(makefile_str)
+    print(makefile_str)
 
 
 def test__compile_correction_potential():
     """ test varecof_io.writer.corr_potentials.compile_correction_pot
     """
+
+    species_corr_str = varecof_io.writer.corr_potentials.species(
+        RVALS, POTENTIALS, BND_IDXS)
+    dummy_corr_str = varecof_io.writer.corr_potentials.dummy()
+    pot_aux_str = varecof_io.writer.corr_potentials.auxiliary()
+    makefile_str = varecof_io.writer.corr_potentials.makefile(
+        FORTRAN_COMPILER, pot_file_names=SPECIES_CORR_POTENTIALS)
+
+    with open(MOL_COR_PATH, 'w') as mol_corr_file:
+        mol_corr_file.write(species_corr_str)
+    with open(DUMMY_PATH, 'w') as dummy_corr_file:
+        dummy_corr_file.write(dummy_corr_str)
+    with open(POT_AUX_PATH, 'w') as pot_aux_file:
+        pot_aux_file.write(pot_aux_str)
+    with open(MAKEFILE_PATH, 'w') as makefile_file:
+        makefile_file.write(makefile_str)
+
     varecof_io.writer.corr_potentials.compile_corr_pot(PATH)
 
 
