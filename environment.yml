@@ -22,6 +22,7 @@ dependencies:
     - conda-forge::qcelemental
     - kevinmooreiii::automol
     - kevinmooreiii::autoparse
+    - kevinmooreiii::ratefit
     - auto-mech::x2z
     - psi4::psi4
     - rdkit::rdkit

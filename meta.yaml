@@ -1,8 +1,8 @@
-# cmd: conda build . -c auto-mech -c conda-forge
-package: 
+# cmd: conda build . -c kevinmooreiii -c auto-mech -c psi4 -c rdkit -c openbabel -c conda-forge
+package:
     name: interfaces
     version: "0.2.0"
- 
+
 source:
     path: .
 
@@ -12,12 +12,19 @@ requirements:
     run:
         - python
         - numpy
+        - scipy
+        - pyyaml
         - mako
         - pytest
         - pytest-cov
         - future
         - flake8
         - pylint
+        - rdkit::rdkit
+        - openbabel::openbabel
         - conda-forge::qcelemental
-        - auto-mech::automol
-        - auto-mech::autoparse
+        - psi4::psi4
+        - kevinmooreiii::autoparse
+        - kevinmooreiii::automol
+        - kevinmooreiii:ratefit
+        - auto-mech::x2z
