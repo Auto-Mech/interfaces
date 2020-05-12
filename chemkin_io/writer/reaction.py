@@ -141,7 +141,7 @@ def _fit_info_str(pressures, temp_dct, err_dct):
     temp_dct = temp_dct if temp_dct else {}
     err_dct = err_dct if err_dct else {}
     if 'high' in temp_dct or 'high' in err_dct:
-        pressures = ['high'] + pressures
+        pressures += ['high']
 
     # Check the temp and err dcts have same presures as rate_dcts
     if temp_dct:
@@ -153,24 +153,28 @@ def _fit_info_str(pressures, temp_dct, err_dct):
     # Write string showing the temp fit range and fit errors
     inf_str = '! Info Regarding Rate Constant Fits\n'
     for pressure in pressures:
-        if err_dct:
-            [mean_err, max_err] = err_dct[pressure]
-            err_str = '{0:12s} {1:>5.1f}%,  {2:8s} {3:>5.1f}%'.format(
-                'MeanAbsErr =', mean_err, 'MaxErr =', max_err)
-        else:
-            err_str = ''
         if temp_dct:
             [min_temp, max_temp] = temp_dct[pressure]
-            temp_range_str = '{0:11s} {1:>.0f}-{2:<.0f} K, '.format(
-                'TempRange =', min_temp, max_temp)
+            temps_str = '{0:.0f}-{1:.0f} K'.format(
+                min_temp, max_temp)
+            temp_range_str = 'Temps: {0:>12s}, '.format(
+                temps_str)
         else:
             temp_range_str = ''
+        if err_dct:
+            [mean_err, max_err] = err_dct[pressure]
+            err_str = '{0:11s} {1:>5.1f}%,  {2:7s} {3:>5.1f}%'.format(
+                'MeanAbsErr:', mean_err, 'MaxErr:', max_err)
+        else:
+            err_str = ''
+
         # Put together the who info string
         if pressure != 'high':
-            pstr = '{0:<10.3f}'.format(pressure)
+            pstr = '{0:<9.3f}'.format(pressure)
         else:
-            pstr = '{0:<10s}'.format('High')
-        inf_str += '! {0}: {1} {2}\n'.format(pstr, temp_range_str, err_str)
+            pstr = '{0:<9s}'.format('High')
+        inf_str += '! Pressure: {0} {1} {2}\n'.format(
+            pstr, temp_range_str, err_str)
 
     return inf_str
 
