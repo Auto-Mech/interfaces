@@ -30,15 +30,15 @@ CART_PROJ = 'cartesian'
 
 
 def test_rt_projections():
-    """ test projrot_io.writer.rpht_inumpyut
+    """ test projrot_io.writer.rpht_input
     """
-    # Write the string for the ProjRot inumpyut
-    inumpy_str = projrot_io.writer.rpht_inumpyut(
+    # Write the string for the ProjRot input
+    inp_str = projrot_io.writer.rpht_input(
         [GEOM], [GRAD], [HESS],
         saddle_idx=1, rotors_str='', coord_proj=CART_PROJ)
 
     # Print the string
-    print(inumpy_str)
+    print(inp_str)
 
 
 def test_rt_hr_projections():
@@ -50,12 +50,12 @@ def test_rt_hr_projections():
     rotors_str = projrot_io.writer.rotors(AXIS, GROUP)
 
     # Write the string for the ProjRot inumpyut
-    inumpy_str = projrot_io.writer.rpht_inumpyut(
+    inp_str = projrot_io.writer.rpht_input(
         [GEOM], [GRAD], [HESS],
         saddle_idx=1, rotors_str=rotors_str, coord_proj=CART_PROJ)
 
     # Print the string
-    print(inumpy_str)
+    print(inp_str)
 
 
 if __name__ == '__main__':

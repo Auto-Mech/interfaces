@@ -26,10 +26,10 @@ SYNGAS_MECH_STR = _read_file(
     os.path.join(DATA_PATH, SYNGAS_MECH_NAME))
 
 # Read species blocks
-HEPTANE_SPECIES_BLOCK = chemkin_io.parser.util.clean_up_whitespace(
-    chemkin_io.parser.mechanism.species_block(HEPTANE_MECH_STR))
-SYNGAS_SPECIES_BLOCK = chemkin_io.parser.util.clean_up_whitespace(
-    chemkin_io.parser.mechanism.species_block(SYNGAS_MECH_STR))
+HEPTANE_SPECIES_BLOCK = chemkin_io.parser.mechanism.species_block(
+    HEPTANE_MECH_STR)
+SYNGAS_SPECIES_BLOCK = chemkin_io.parser.mechanism.species_block(
+    SYNGAS_MECH_STR)
 
 
 def test__names():

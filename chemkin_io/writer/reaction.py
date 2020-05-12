@@ -121,7 +121,7 @@ def chebyshev(reaction, high_params, alpha_matrix, tmin, tmax, pmin, pmax):
     # Write the dimensions of the alpha matrix
     nrows = len(alpha_matrix)
     ncols = len(alpha_matrix[0])
-    cheb_str += '{0:>10s}/  {1:d} {2:d}\n'.format('CHEB', nrows, ncols)
+    cheb_str += '{0:>10s}/    {1:d} {2:d}\n'.format('CHEB', nrows, ncols)
 
     # Write the parameters from the alpha matrix
     for idx, row in enumerate(alpha_matrix):

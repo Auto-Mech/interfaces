@@ -4,8 +4,8 @@ Writes MESS input for a molecule
 
 import os
 import numpy
-from mako.template import Template
 from mess_io.writer import util
+
 
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
 SRC_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -29,14 +29,10 @@ def core_rigidrotor(geom, sym_factor, interp_emax=None):
         'interp_emax': interp_emax
     }
 
-    # Set template name and path for a rigid-rotor core section
-    template_file_name = 'core_rigidrotor.mako'
-    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
-
-    # Build core section string
-    core_rigrot_str = Template(filename=template_file_path).render(**core_keys)
-
-    return core_rigrot_str
+    return util.build_mako_str(
+        template_file_name='core_rigidrotor.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=core_keys)
 
 
 def core_multirotor(geom, sym_factor, pot_surf, int_rot_str,
@@ -61,14 +57,10 @@ def core_multirotor(geom, sym_factor, pot_surf, int_rot_str,
         'quant_lvl_emax': quant_lvl_emax
     }
 
-    # Set template name and path for a multi-rotor core section
-    template_file_name = 'core_multirotor.mako'
-    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
-
-    # Build core section string
-    core_mulrot_str = Template(filename=template_file_path).render(**core_keys)
-
-    return core_mulrot_str
+    return util.build_mako_str(
+        template_file_name='core_multirotor.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=core_keys)
 
 
 def core_phasespace(geom1, geom2, sym_factor, stoich,
@@ -96,14 +88,10 @@ def core_phasespace(geom1, geom2, sym_factor, stoich,
         'pot_power_exp': pot_power_exp
     }
 
-    # Set template name and path for a phase space core section
-    template_file_name = 'core_phasespace.mako'
-    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
-
-    # Build core section string
-    core_pst_str = Template(filename=template_file_path).render(**core_keys)
-
-    return core_pst_str
+    return util.build_mako_str(
+        template_file_name='core_phasespace.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=core_keys)
 
 
 def core_rotd(sym_factor, flux_file_name, stoich):
@@ -117,14 +105,10 @@ def core_rotd(sym_factor, flux_file_name, stoich):
         'stoich': stoich
     }
 
-    # Set template name and path for a Rotd core section
-    template_file_name = 'core_rotd.mako'
-    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
-
-    # Build core section string
-    core_rotd_str = Template(filename=template_file_path).render(**core_keys)
-
-    return core_rotd_str
+    return util.build_mako_str(
+        template_file_name='core_rotd.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=core_keys)
 
 
 def rotor_hindered(group, axis, symmetry, potential,
@@ -154,14 +138,10 @@ def rotor_hindered(group, axis, symmetry, potential,
         'use_quantum_weight': use_quantum_weight
     }
 
-    # Set template name and path for a hindered rotor section
-    template_file_name = 'rotor_hindered.mako'
-    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
-
-    # Build rotor section string
-    rotor_hind_str = Template(filename=template_file_path).render(**rotor_keys)
-
-    return rotor_hind_str
+    return util.build_mako_str(
+        template_file_name='rotor_hindered.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=rotor_keys)
 
 
 def mdhr_data(potentials, freqs=()):
@@ -241,7 +221,7 @@ def mdhr_data(potentials, freqs=()):
                             ' {}'.join((freq for freq in freqs[i][j][k][lma]))
                         dat_str += '\n'
 
-    return dat_str
+    return util.remove_trail_whitespace(dat_str)
 
 
 def rotor_internal(group, axis, symmetry,
@@ -257,10 +237,11 @@ def rotor_internal(group, axis, symmetry,
     rotor_axis = util.format_rotor_key_defs(axis, remdummy)
 
     # Format the geom
-    natom = 1
     if geom is not None:
         natom, geom = util.geom_format(geom)
         geom = util.indent(geom, 4)
+    else:
+        natom = None
 
     # Create dictionary to fill template
     rotor_keys = {
@@ -277,14 +258,43 @@ def rotor_internal(group, axis, symmetry,
         'geom': geom
     }
 
-    # Set template name and path for a internal rotor section
-    template_file_name = 'rotor_internal.mako'
-    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
+    return util.build_mako_str(
+        template_file_name='rotor_internal.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=rotor_keys)
 
-    # Build rotor section string
-    rotor_int_str = Template(filename=template_file_path).render(**rotor_keys)
 
-    return rotor_int_str
+def umbrella_mode(group, plane, ref_atom, potential,
+                  remdummy=None, geom=None):
+    """ Writes the section for a single hindered rotor.
+    """
+    # Format the sections
+    umbr_group = util.format_rotor_key_defs(group, remdummy)
+    umbr_plane = util.format_rotor_key_defs(plane, remdummy)
+    umbr_npotential, umbr_potential = util.format_rotor_potential(potential)
+
+    # Format the geom
+    if geom is not None:
+        natom, geom = util.geom_format(geom)
+        geom = util.indent(geom, 4)
+    else:
+        natom = None
+
+    # Create dictionary to fill template
+    umbr_keys = {
+        'group': umbr_group,
+        'axis': umbr_plane,
+        'ref_atom': ref_atom,
+        'npotential': umbr_npotential,
+        'potential': umbr_potential,
+        'natom': natom,
+        'geom': geom,
+    }
+
+    return util.build_mako_str(
+        template_file_name='umbrella_mode.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=umbr_keys)
 
 
 def tunnel_eckart(imag_freq, well_depth1, well_depth2):
@@ -302,14 +312,10 @@ def tunnel_eckart(imag_freq, well_depth1, well_depth2):
         'well_depth2': well_depth2
     }
 
-    # Set template name and path for an Eckart tunneling section
-    template_file_name = 'tunnel_eckart.mako'
-    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
-
-    # Build tunnel section string
-    tunnel_str = Template(filename=template_file_path).render(**tunnel_keys)
-
-    return tunnel_str
+    return util.build_mako_str(
+        template_file_name='tunnel_eckart.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=tunnel_keys)
 
 
 def tunnel_sct(imag_freq, tunnel_file, cutoff_energy=2500):
@@ -326,11 +332,7 @@ def tunnel_sct(imag_freq, tunnel_file, cutoff_energy=2500):
         'tunnel_file': tunnel_file
     }
 
-    # Set template name and path for an SCT tunneling section
-    template_file_name = 'tunnel_sct.mako'
-    template_file_path = os.path.join(SPEC_INFO_PATH, template_file_name)
-
-    # Build tunnel section string
-    tunnel_str = Template(filename=template_file_path).render(**tunnel_keys)
-
-    return tunnel_str
+    return util.build_mako_str(
+        template_file_name='tunnel_sct.mako',
+        template_src_path=SPEC_INFO_PATH,
+        template_keys=tunnel_keys)

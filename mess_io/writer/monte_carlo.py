@@ -3,7 +3,6 @@ Writes MESS input for a monte carlo partition function calculation
 """
 
 import os
-from mako.template import Template
 from mess_io.writer import util
 
 
@@ -50,14 +49,10 @@ def mc_species(geom, elec_levels,
         'use_cm_shift': use_cm_shift
     }
 
-    # Set template name and path for a monte carlo species section
-    template_file_name = 'monte_carlo.mako'
-    template_file_path = os.path.join(MONTE_CARLO_PATH, template_file_name)
-
-    # Build monte carlo section string
-    mc_str = Template(filename=template_file_path).render(**monte_carlo_keys)
-
-    return mc_str
+    return util.build_mako_str(
+        template_file_name='monte_carlo.mako',
+        template_src_path=MONTE_CARLO_PATH,
+        template_keys=monte_carlo_keys)
 
 
 def mc_data(geos, enes, grads=(), hessians=()):
@@ -84,7 +79,7 @@ def mc_data(geos, enes, grads=(), hessians=()):
             dat_str += 'Hessian'+'\n'
             dat_str += hessians[idx]+'\n'
 
-    return dat_str
+    return util.remove_trail_whitespace(dat_str)
 
 
 def fluxional_mode(atom_indices, span=360.0):
@@ -100,11 +95,7 @@ def fluxional_mode(atom_indices, span=360.0):
         'span': span,
     }
 
-    # Set template name and path for a monte carlo species section
-    template_file_name = 'fluxional_mode.mako'
-    template_file_path = os.path.join(MONTE_CARLO_PATH, template_file_name)
-
-    # Build monte carlo section string
-    flux_str = Template(filename=template_file_path).render(**flux_mode_keys)
-
-    return flux_str
+    return util.build_mako_str(
+        template_file_name='fluxional_mode.mako',
+        template_src_path=MONTE_CARLO_PATH,
+        template_keys=flux_mode_keys)

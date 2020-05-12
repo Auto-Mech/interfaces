@@ -3,7 +3,7 @@ Writes the energy transfer section of a MESS input file
 """
 
 import os
-from mako.template import Template
+from mess_io.writer import util
 
 
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
@@ -26,7 +26,7 @@ def energy_transfer(exp_factor, exp_power, exp_cutoff,
         :param float sig2: Sigma of Species 2
         :param float mass1: Mass of Species 1
         :param float mass2: Mass of Species 2
-        :return energy_transfer_str: String for section
+        :return etrans_str: String for section
         :rtype: string
     """
 
@@ -36,7 +36,7 @@ def energy_transfer(exp_factor, exp_power, exp_cutoff,
     mass_str = '{0:<10.1f} {1:<10.1f}'.format(mass1, mass2)
 
     # Create dictionary to fill template
-    energy_trans_keys = {
+    etrans_keys = {
         'exp_factor': exp_factor,
         'exp_power': exp_power,
         'exp_cutoff': exp_cutoff,
@@ -45,11 +45,7 @@ def energy_transfer(exp_factor, exp_power, exp_cutoff,
         'masses': mass_str
     }
 
-    # Set template name and path for the energy transfer section
-    template_file_name = 'energy_transfer.mako'
-    template_file_path = os.path.join(SECTION_PATH, template_file_name)
-
-    # Build energy transfer string
-    energy_trans_str = Template(filename=template_file_path).render(**energy_trans_keys)
-
-    return energy_trans_str
+    return util.build_mako_str(
+        template_file_name='energy_transfer.mako',
+        template_src_path=SECTION_PATH,
+        template_keys=etrans_keys)

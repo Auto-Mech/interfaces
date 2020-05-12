@@ -210,8 +210,29 @@ def _read_csv(csv_str):
 
 
 def _clean_up(mech_str, remove_comments=True):
+    """ Remove comment lines and whitespace from mech string
+    """
+    mech_str = _convert_comment_lines(mech_str)
     if remove_comments:
         mech_str = util.remove_line_comments(
             mech_str, delim_pattern=app.escape('!'))
     mech_str = util.clean_up_whitespace(mech_str)
+    return mech_str
+
+
+def _convert_comment_lines(mech_str):
+    """ try and convert special comments before removal
+    """
+    # Set the lines in the file (in_lines) and their replacements (out_lines)
+    inlines = [
+        app.escape('!') + app.SPACES + app.escape('Pressure:')
+    ]
+    outlines = [
+        app.escape('Pressure:')
+    ]
+
+    # Loop over lines and make all the replacements in the mech string
+    for inline, outline in zip(inlines, outlines):
+        mech_str = apf.replace(inline, outline, mech_str, case=True)
+
     return mech_str

@@ -24,7 +24,7 @@ FONT = {'size': 14}
 matplotlib.rc('font', **FONT)
 
 
-def build(ktp_dct, temps, plot_dir='rate_plots', names=None):
+def build(ktp_dct, temps, dir_prefix='.', names=None):
     """ run over the dictionary for plotting
     """
 
@@ -42,6 +42,7 @@ def build(ktp_dct, temps, plot_dir='rate_plots', names=None):
         names = list(ktp_dct.keys())
 
     # Make the directory that holds the plots if it doesn't exist
+    plot_dir = '{0}/rate_plots'.format(dir_prefix)
     if not os.path.exists(plot_dir):
         os.mkdir(plot_dir)
 
@@ -80,15 +81,16 @@ def build(ktp_dct, temps, plot_dir='rate_plots', names=None):
         file_name_str += '{0:40s}{1}\n'.format('reaction', file_name)
 
         # build and save the figure to a PDF
-        fig.savefig('{0}/{1}.pdf'.format(plot_dir, file_name), dpi=100)
+        fig_name = '{0}/{1}.pdf'.format(plot_dir, file_name)
+        fig.savefig(fig_name, dpi=100)
         plt.close(fig)
 
-    # Collate all of the pdfs together
-    _collate_pdfs(plot_dir)
+    # # Collate all of the pdfs together
+    # _collate_pdfs(plot_dir)
 
-    # Write file relating plot.pdf names to reaction names
-    with open(os.path.join(plot_dir, 'names.txt'), 'w') as name_file:
-        name_file.write(file_name_str)
+    # # Write file relating plot.pdf names to reaction names
+    # with open(os.path.join(plot_dir, 'names.txt'), 'w') as name_file:
+    #     name_file.write(file_name_str)
 
 
 def _build_figure(nreactions):

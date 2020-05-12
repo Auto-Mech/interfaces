@@ -7,6 +7,7 @@ import numpy as np
 from mako.template import Template
 from qcelemental import constants as qcc
 from qcelemental import periodictable as ptab
+from projrot_io import util
 
 
 # Conversion factors
@@ -60,7 +61,7 @@ def rpht_input(geoms, grads, hessians,
     # Build a ProjRot input string
     rpht_string = Template(filename=template_file_path).render(**rpht_keys)
 
-    return rpht_string
+    return util.remove_trail_whitespace(rpht_string)
 
 
 def rpht_path_coord_en(coords, energy, bnd1=(), bnd2=()):
@@ -90,7 +91,7 @@ def rpht_path_coord_en(coords, energy, bnd1=(), bnd2=()):
         if i+1 != nsteps:
             path_str += '\n'
 
-    return path_str
+    return util.remove_trail_whitespace(path_str)
 
 
 def rotors(axis, group, remdummy=None):
@@ -114,7 +115,7 @@ def rotors(axis, group, remdummy=None):
     rotors_str += '{0:<32s}{1:<4d}\n'.format('atomsintopA', atomsintopa)
     rotors_str += '{0:<32s}{1}'.format('topAatoms', topaatoms)
 
-    return rotors_str
+    return util.remove_trail_whitespace(rotors_str)
 
 
 def _write_data_str(geoms, grads, hessians):
@@ -133,7 +134,7 @@ def _write_data_str(geoms, grads, hessians):
         if i != nsteps:
             data_str += '\n'
 
-    return data_str
+    return util.remove_trail_whitespace(data_str)
 
 
 def _format_geom_str(geo):
@@ -151,7 +152,7 @@ def _format_geom_str(geo):
         geom_str += '{0:2d}{1:4d}{2:4d}{3}\n'.format(
             i+1, anum, 0, coords_str)
 
-    return geom_str
+    return util.remove_trail_whitespace(geom_str)
 
 
 def _format_grad_str(geom, grad):
@@ -171,7 +172,7 @@ def _format_grad_str(geom, grad):
         full_grads_str += '{0:2d}{1:4d}{2}\n'.format(
             i+1, atom_list[i], grads_str)
 
-    return full_grads_str
+    return util.remove_trail_whitespace(full_grads_str)
 
 
 def _format_hessian_str(hess):
@@ -221,4 +222,4 @@ def _format_hessian_str(hess):
                 hess_str += '    ' + val_str + '\n'
         cnt += 1
 
-    return hess_str
+    return util.remove_trail_whitespace(hess_str)

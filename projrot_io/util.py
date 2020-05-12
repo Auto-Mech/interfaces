@@ -2,24 +2,11 @@
 Utility functions
 """
 
-import os
-from mako.template import Template
 import numpy
 import autoparse.pattern as app
 import autoparse.find as apf
 
 
-# Build the MESS string using the mako template
-def build_mako_str(template_file_name, template_src_path, template_keys):
-    """ Using dct of keys and file paths, write the string with template
-    """
-    template_file_path = os.path.join(template_src_path, template_file_name)
-    mess_str = Template(filename=template_file_path).render(**template_keys)
-
-    return remove_trail_whitespace(mess_str)
-
-
-# Format strings to have clean files
 def indent(string, nspaces):
     """ Indents a multiline string. Required for Python 2,
         import textwrap textwrap.indent works for Python 3

@@ -2,11 +2,11 @@
 various parser functions for varecof
 """
 
-import numpy as np
-import autoread as ar
-import autoparse.pattern as app
-import autoparse.find as apf
-import automol
+# import numpy as np
+# import autoread as ar
+# import autoparse.pattern as app
+# import autoparse.find as apf
+# import automol
 
 
 # def dividing_surface_fluxes(divsur_outstring, flux_outstring):

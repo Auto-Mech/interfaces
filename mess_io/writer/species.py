@@ -7,7 +7,6 @@ Takes in data from other MESS writer functions
 """
 
 import os
-from mako.template import Template
 from mess_io.writer import util
 
 
@@ -36,14 +35,10 @@ def atom(mass, elec_levels):
         'levels': levels
     }
 
-    # Set template name and path for an atom
-    template_file_name = 'atom.mako'
-    template_file_path = os.path.join(SPECIES_PATH, template_file_name)
-
-    # Build atom string
-    atom_str = Template(filename=template_file_path).render(**atom_keys)
-
-    return atom_str
+    return util.build_mako_str(
+        template_file_name='atom.mako',
+        template_src_path=SPECIES_PATH,
+        template_keys=atom_keys)
 
 
 def molecule(core, freqs, elec_levels,
@@ -58,6 +53,8 @@ def molecule(core, freqs, elec_levels,
         :return atom_str: String for the atom section
         :rtype: string
     """
+
+    # Add in infrared intensities at some point
 
     # Build a formatted frequencies and elec levels string
     nfreqs, freqs = util.freqs_format(freqs)
@@ -94,11 +91,7 @@ def molecule(core, freqs, elec_levels,
         'rot_dists': rot_dists,
     }
 
-    # Set template name and path for a molecule
-    template_file_name = 'molecule.mako'
-    template_file_path = os.path.join(SPECIES_PATH, template_file_name)
-
-    # Build molecule string
-    molecule_str = Template(filename=template_file_path).render(**molec_keys)
-
-    return molecule_str
+    return util.build_mako_str(
+        template_file_name='molecule.mako',
+        template_src_path=SPECIES_PATH,
+        template_keys=molec_keys)

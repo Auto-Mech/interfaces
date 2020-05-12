@@ -52,13 +52,13 @@ PRD_DISTS = [
     1.34701, 1.36265, 1.37782, 1.39250, 1.40671]
 
 
-def test_sct_rpht_inumpyut():
-    """ test projrot_io.writer.rpht_inumpyut
+def test_sct_rpht_input():
+    """ test projrot_io.writer.rpht_input
         test projrot_io.writer.rpht_path_coord_en
     """
 
     # Write the string for the ProjRot inumpyut
-    inumpy_str = projrot_io.writer.rpht_inumpyut(
+    inumpy_str = projrot_io.writer.rpht_input(
         GEOMS, GRADS, HESSES,
         saddle_idx=11, rotors_str='',
         coord_proj=CART_PROJ)
@@ -88,5 +88,5 @@ def test_sct_coord_en():
 
 
 if __name__ == '__main__':
-    test_sct_rpht_inumpyut()
+    test_sct_rpht_input()
     test_sct_coord_en()

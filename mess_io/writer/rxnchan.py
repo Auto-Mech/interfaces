@@ -3,7 +3,6 @@ Writes MESS input for a molecule
 """
 
 import os
-from mako.template import Template
 from mess_io.writer import util
 
 
@@ -31,17 +30,13 @@ def species(species_label, species_data, zero_energy):
         'zero_energy': zero_energy
     }
 
-    # Set template name and path for a species
-    template_file_name = 'species.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build species section string
-    species_str = Template(filename=template_file_path).render(**species_keys)
-
-    return species_str
+    return util.build_mako_str(
+        template_file_name='species.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=species_keys)
 
 
-def well(well_label, well_data, zero_energy):
+def well(well_label, well_data, zero_energy=None):
     """ Writes a well section.
     """
 
@@ -49,7 +44,8 @@ def well(well_label, well_data, zero_energy):
     well_data = util.indent(well_data, 4)
 
     # Format the precision of the zero energy
-    zero_energy = '{0:<8.2f}'.format(zero_energy)
+    if zero_energy is not None:
+        zero_energy = '{0:<8.2f}'.format(zero_energy)
 
     # Create dictionary to fill template
     well_keys = {
@@ -58,14 +54,10 @@ def well(well_label, well_data, zero_energy):
         'zero_energy': zero_energy
     }
 
-    # Set template name and path for a well
-    template_file_name = 'well.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build well section string
-    well_str = Template(filename=template_file_path).render(**well_keys)
-
-    return well_str
+    return util.build_mako_str(
+        template_file_name='well.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=well_keys)
 
 
 def bimolecular(bimol_label,
@@ -98,18 +90,14 @@ def bimolecular(bimol_label,
         'ground_energy': ground_energy
     }
 
-    # Set template name and path for a bimolecular set
-    template_file_name = 'bimolecular.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build bimolecular section string
-    bimol_str = Template(filename=template_file_path).render(**bimol_keys)
-
-    return bimol_str
+    return util.build_mako_str(
+        template_file_name='bimolecular.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=bimol_keys)
 
 
-def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
-             tunnel=''):
+def ts_sadpt(ts_label, reac_label, prod_label, ts_data,
+             zero_energy=None, tunnel=''):
     """ Writes a TS section containing only a saddle point
     """
 
@@ -119,7 +107,8 @@ def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
         tunnel = util.indent(tunnel, 4)
 
     # Format the precision of the zero energy
-    zero_energy = '{0:<8.2f}'.format(zero_energy)
+    if zero_energy is not None:
+        zero_energy = '{0:<8.2f}'.format(zero_energy)
 
     # Create dictionary to fill template
     ts_sadpt_keys = {
@@ -131,14 +120,10 @@ def ts_sadpt(ts_label, reac_label, prod_label, ts_data, zero_energy,
         'tunnel': tunnel
     }
 
-    # Set template name and path for a TS with only a single saddle point
-    template_file_name = 'ts_sadpt.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
-
-    # Build saddle point string
-    sadpt_str = Template(filename=template_file_path).render(**ts_sadpt_keys)
-
-    return sadpt_str
+    return util.build_mako_str(
+        template_file_name='ts_sadpt.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=ts_sadpt_keys)
 
 
 def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
@@ -160,11 +145,48 @@ def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
         'tunnel': tunnel
     }
 
-    # Set template name and path for a TS with an variational
-    template_file_name = 'ts_var.mako'
-    template_file_path = os.path.join(RXNCHAN_PATH, template_file_name)
+    return util.build_mako_str(
+        template_file_name='ts_var.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=var_keys)
 
-    # Build transition state with variational string
-    var_str = Template(filename=template_file_path).render(**var_keys)
 
-    return var_str
+def dummy(dummy_label):
+    """ Writes a section for a dummy species
+    """
+    # Create dictionary to fill template
+    dummy_keys = {
+        'dummy_label': dummy_label
+    }
+
+    return util.build_mako_str(
+        template_file_name='dummy.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=dummy_keys)
+
+
+def configs_union(mol_data_strs):
+    """ Writes a section for a union of species.
+    """
+
+    # Add 'End' statment to each of the data strings
+    mol_data_strs = [string+'End' for string in mol_data_strs]
+    mol_data_strs[-1] += '\n'
+
+    # Concatenate all of the molecule strings
+    union_data = '\n'.join(mol_data_strs)
+    union_data = util.indent(union_data, 2)
+
+    # Add the tunneling string (seems tunneling goes for all TSs in union)
+    # if tunnel != '':
+    #     tunnel = util.indent(tunnel, 4)
+
+    # Create dictionary to fill template
+    union_keys = {
+        'union_data': union_data
+    }
+
+    return util.build_mako_str(
+        template_file_name='union.mako',
+        template_src_path=RXNCHAN_PATH,
+        template_keys=union_keys)

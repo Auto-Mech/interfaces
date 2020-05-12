@@ -13,6 +13,7 @@ def _read_file(file_name):
         file_str = file_obj.read()
     return file_str
 
+
 # Set paths
 PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_PATH = os.path.join(PATH, 'data')
@@ -26,8 +27,8 @@ SYNGAS_CSV_STR = _read_file(
     os.path.join(DATA_PATH, SYNGAS_CSV_NAME))
 
 # Read species blocks
-SYNGAS_THERMO_BLOCK = chemkin_io.parser.util.clean_up_whitespace(
-    chemkin_io.parser.mechanism.thermo_block(SYNGAS_MECH_STR))
+SYNGAS_THERMO_BLOCK = chemkin_io.parser.mechanism.thermo_block(
+    SYNGAS_MECH_STR)
 SYNGAS_BLOCK_STRS = chemkin_io.parser.thermo.data_strings(
     SYNGAS_THERMO_BLOCK)
 

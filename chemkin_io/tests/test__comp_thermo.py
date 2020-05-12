@@ -3,6 +3,7 @@ compare thermo
 """
 
 import os
+from chemkin_io import parser
 from chemkin_io.calculator import combine
 
 
@@ -16,28 +17,36 @@ def _read_file(file_name):
     return file_str
 
 
+# Set paths
 PATH = os.path.dirname(os.path.realpath(__file__))
+DATA_PATH = os.path.join(PATH, 'data')
+HEPTANE_MECH_NAME = 'heptane_mechanism.txt'
+SYNGAS_MECH_NAME = 'syngas_mechanism.txt'
+FAKE1_MECH_NAME = 'fake1_mech.txt'
+FAKE2_MECH_NAME = 'fake2_mech.txt'
+FAKE_CSV_NAME = 'fake_species.csv'
 
-MECH1_PATH = os.path.join(PATH, '../data/syngas')
-MECH1_STR = _read_file(os.path.join(
-    MECH1_PATH, 'mechanism_green.txt'))
-MECH1_CSV_STR = _read_file(os.path.join(
-    MECH1_PATH, 'smiles_green.csv'))
+# Read mechanism and csv strings
+FAKE1_MECH_STR = _read_file(
+    os.path.join(DATA_PATH, FAKE1_MECH_NAME))
+FAKE2_MECH_STR = _read_file(
+    os.path.join(DATA_PATH, FAKE2_MECH_NAME))
+FAKE_CSV_STR = _read_file(
+    os.path.join(DATA_PATH, FAKE_CSV_NAME))
 
-MECH2_PATH = os.path.join(PATH, '../data/syngas')
-MECH2_STR = _read_file(os.path.join(
-    MECH2_PATH, 'mechanism_elte_2016_ijck.txt'))
-MECH2_CSV_STR = _read_file(os.path.join(
-    MECH2_PATH, 'smiles_elte_alt.csv'))
+# Read species blocks
+FAKE1_THERMO_BLOCK = parser.mechanism.thermo_block(
+    FAKE1_MECH_STR)
+FAKE1_BLOCK_STRS = parser.thermo.data_strings(
+    FAKE1_THERMO_BLOCK)
+FAKE2_THERMO_BLOCK = parser.util.clean_up_whitespace(
+    parser.mechanism.thermo_block(FAKE2_MECH_STR))
+FAKE2_BLOCK_STRS = parser.thermo.data_strings(
+    FAKE2_THERMO_BLOCK)
 
-# Set index for the data dictionaries for the mechanisms
-INDEX = 'inchi'
 
 # Temperatures to run
-# TEMPS = [500.0, 1000.0, 1500.0]
-TEMPS = [300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0,
-         1300.0, 1400.0, 1500.0, 1600.0, 1700.0, 1800.0, 1900.0, 2000.0,
-         2300.0, 2400.0, 2500.0, 2600.0, 2700.0, 2800.0, 2900.0, 3000.0]
+TEMPS = [500.0, 1000.0, 2000.0]
 
 
 def test__compare_thermo():
@@ -46,12 +55,13 @@ def test__compare_thermo():
 
     # Build dictionaries containing the thermo data strings for each species
     # Dictionaries indexed by the given mechanism names or InCHI string
-    if INDEX == 'name':
-        mech1_thermo_dct, mech2_thermo_dct = combine.build_thermo_name_dcts(
-            MECH1_STR, MECH2_STR, TEMPS)
-    elif INDEX == 'inchi':
-        mech1_thermo_dct, mech2_thermo_dct = combine.build_thermo_inchi_dcts(
-            MECH1_STR, MECH2_STR, MECH1_CSV_STR, MECH2_CSV_STR, TEMPS)
+    # Build name for test but use inchi
+    mech1_thermo_dct, mech2_thermo_dct = combine.build_thermo_name_dcts(
+        FAKE1_MECH_STR, FAKE2_MECH_STR, TEMPS)
+
+    mech1_thermo_dct, mech2_thermo_dct = combine.build_thermo_inchi_dcts(
+        FAKE1_MECH_STR, FAKE2_MECH_STR,
+        FAKE_CSV_STR, FAKE_CSV_STR, TEMPS)
 
     print('\nMech1 thermo dct')
     for key, val in mech1_thermo_dct.items():
@@ -70,18 +80,8 @@ def test__compare_thermo():
     print('\n\n\nCombined thermo vals')
     for idx in thermo_vals_dct:
 
-        # # Obtain the name of each species to print for ID purposes
-        # if INDEX == 'name':
-        #     mech1_name = idx
-        #     mech2_name = idx
-        # elif INDEX == 'inchi':
-        #     print('\n\nInChI: ', idx)
-        #     mech1_name, mech2_name = combine.mech_name_from_inchi(
-        #         MECH1_CSV_STR, MECH2_CSV_STR, idx)
-        # print('M1 Name: ', mech1_name)
-        # print('M2 Name: ', mech2_name)
-
         # Print all of the thermo quantities
+        print(idx, '\n')
         mech1_vals = thermo_vals_dct[idx]['mech1']
         mech2_vals = thermo_vals_dct[idx]['mech2']
         print('\nM1 Enthalpy', mech1_vals[0])
@@ -93,7 +93,6 @@ def test__compare_thermo():
         print('M1 Gibbs', mech1_vals[3])
         print('M2 Gibbs', mech2_vals[3])
 
-    print('\n\n\n\n\n\n')
     print(thermo_vals_dct)
 
 

@@ -3,7 +3,7 @@ Writes the global keyword section of a MESS input file
 """
 
 import os
-from mako.template import Template
+from mess_io.writer import util
 
 
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
@@ -30,14 +30,10 @@ def global_reaction(temperatures, pressures):
         'pressures': pressure_list
     }
 
-    # Set template name and path for the global keywords section
-    template_file_name = 'global_reaction.mako'
-    template_file_path = os.path.join(SECTION_PATH, template_file_name)
-
-    # Build global section string
-    globrxn_str = Template(filename=template_file_path).render(**globrxn_keys)
-
-    return globrxn_str
+    return util.build_mako_str(
+        template_file_name='global_reaction.mako',
+        template_src_path=SECTION_PATH,
+        template_keys=globrxn_keys)
 
 
 def global_pf(temperatures=(),
@@ -69,11 +65,7 @@ def global_pf(temperatures=(),
         'atom_dist_min': atom_dist_min
     }
 
-    # Set template name and path for the global keywords section for messpf run
-    template_file_name = 'global_pf.mako'
-    template_file_path = os.path.join(SECTION_PATH, template_file_name)
-
-    # Build global section string
-    globpf_str = Template(filename=template_file_path).render(**globpf_keys)
-
-    return globpf_str
+    return util.build_mako_str(
+        template_file_name='global_pf.mako',
+        template_src_path=SECTION_PATH,
+        template_keys=globpf_keys)

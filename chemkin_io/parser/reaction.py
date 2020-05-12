@@ -136,11 +136,6 @@ def high_p_parameters(rxn_dstr):
         prd_ptt=SPECIES_NAMES_PATTERN,
         coeff_ptt=app.capturing(COEFF_PATTERN)
     )
-    # params_string = apf.first_capture(pattern, rxn_dstr)
-    # if params_string is not None:
-    #     params = list(ap_cast(params_string.split()))
-    # else:
-    #     params = None
 
     string_lst = apf.all_captures(pattern, rxn_dstr)
     if string_lst:
@@ -164,18 +159,10 @@ def low_p_parameters(rxn_dstr):
         app.SPACES + app.capturing(app.NUMBER) +
         app.zero_or_more(app.SPACE) + app.escape('/')
     )
-    # params = apf.first_capture(pattern, rxn_dstr)
-    # if params:
-    #     params = [float(val) for val in params]
-    # else:
-    #     params = None
-    string_lst = apf.all_captures(pattern, rxn_dstr)
-    if string_lst:
-        params = []
-        for string in string_lst:
-            params.append(list(ap_cast(string.split())))
+    cap1 = apf.first_capture(pattern, rxn_dstr)
+    if cap1 is not None:
+        params = [[float(val) for val in cap1]]
     else:
-        print('here2')
         params = None
 
     return params
@@ -284,7 +271,6 @@ def plog_parameters(rxn_dstr):
         for params in params_lst:
             pressure = float(params[0])
             vals = list(map(float, params[1:]))
-            # params_dct[pressure] = vals
             if pressure not in params_dct:
                 params_dct[pressure] = [vals]
             else:
@@ -300,42 +286,97 @@ def buffer_enhance_factors(rxn_dstr):
         function currently only works if factors are
         on line directly after the reaction string
     """
+
+    first_str = _first_line_pattern(
+        rct_ptt=SPECIES_NAMES_PATTERN,
+        prd_ptt=SPECIES_NAMES_PATTERN,
+        coeff_ptt=COEFF_PATTERN)
+    bad_strings = ('DUP', 'LOW', 'TROE', 'CHEB', 'PLOG', first_str)
+
     species_char = app.one_of_these([
         app.LETTER, app.DIGIT,
         app.escape('('), app.escape(')'),
         app.UNDERSCORE])
     species_name = app.one_or_more(species_char)
 
-    # Get the line that could have the bath gas buffer enhancements
-    bath_line_pattern = (
-        _first_line_pattern(
-            rct_ptt=SPECIES_NAMES_PATTERN,
-            prd_ptt=SPECIES_NAMES_PATTERN,
-            coeff_ptt=COEFF_PATTERN) + '\n' +
-        app.capturing(app.LINE)
-    )
-    bath_string = apf.first_capture(bath_line_pattern, rxn_dstr)
-
-    # Check if this line has bath gas factors or is for something else
-    # If factors in string, get factors
-    bad_strings = ('DUP', 'LOW', 'TROE', 'CHEB', 'PLOG')
-    if (any(string in bath_string for string in bad_strings)
-            and bath_string.strip() != ''):
-        factors = None
-    else:
-        bath_string = '\n'.join(bath_string.strip().split())
-        factor_pattern = (
-            app.capturing(species_name) +
-            app.escape('/') +
-            app.capturing(app.NUMBER) +
-            app.escape('/')
-        )
-        baths = apf.all_captures(factor_pattern, bath_string)
-        factors = {}
-        for bath in baths:
-            factors[bath[0]] = float(bath[1])
+    # Loop over the lines and search for string with collider facts
+    factors = None
+    if apf.has_match('LOW', rxn_dstr) or apf.has_match('TROE', rxn_dstr):
+        for line in rxn_dstr.splitlines():
+            if not any(apf.has_match(string, line) for string in bad_strings):
+                factor_pattern = (
+                    app.capturing(species_name) +
+                    app.escape('/') + app.maybe(app.SPACE) +
+                    app.capturing(app.NUMBER) +
+                    app.escape('/')
+                )
+                baths = apf.all_captures(factor_pattern, line)
+                if baths:
+                    factors = {}
+                    for bath in baths:
+                        factors[bath[0]] = float(bath[1])
 
     return factors
+
+
+def ratek_fit_info(rxn_dstr):
+    """ Read the information describing features of the fits to the
+        rate constants
+    """
+
+    # Read the temperatures and the Errors from the lines
+    pressure_ptt = (
+        'Pressure:' + app.SPACES +
+        app.capturing(app.one_of_these([app.FLOAT, 'High']))
+    )
+    trange_ptt = (
+        'Temps: ' + app.SPACES +
+        app.capturing(app.INTEGER) + '-' + app.capturing(app.INTEGER) +
+        app.SPACES + 'K'
+    )
+    mean_ptt = (
+        'MeanAbsErr:' + app.SPACES +
+        app.capturing(app.FLOAT) + app.escape('%') +
+        ','
+    )
+    max_ptt = (
+        'MaxErr:' + app.SPACES +
+        app.capturing(app.FLOAT) + app.escape('%')
+    )
+    pressure_caps = apf.all_captures(pressure_ptt, rxn_dstr)
+    trange_caps = apf.all_captures(trange_ptt, rxn_dstr)
+    mean_caps = apf.all_captures(mean_ptt, rxn_dstr)
+    max_caps = apf.all_captures(max_ptt, rxn_dstr)
+
+    pressures = []
+    for pressure in pressure_caps:
+        if pressure != 'High':
+            pressures.append(float(pressure))
+        elif pressure == 'High':
+            pressures.append(pressure)
+    trange_vals = []
+    for cap in trange_caps:
+        temp1, temp2 = cap
+        trange_vals.append([int(temp1), int(temp2)])
+    if mean_caps is not None:
+        mean_vals = [float(val) for val in mean_caps]
+    else:
+        mean_vals = []
+    if max_caps is not None:
+        max_vals = [float(val) for val in max_caps]
+    else:
+        max_vals = []
+
+    # Build the inf_dct
+    inf_dct = {}
+    for idx, pressure in enumerate(pressures):
+        inf_dct[pressure] = {'temps': trange_vals[idx]}
+        if mean_vals:
+            inf_dct[pressure].update({'mean_err': mean_vals[idx]})
+        if max_vals:
+            inf_dct[pressure].update({'max_err': max_vals[idx]})
+
+    return inf_dct
 
 
 # helper functions #
