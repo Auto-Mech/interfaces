@@ -4,14 +4,18 @@ divsur input and output files
 """
 
 
-def frag_geoms_divsur_frame(divsur_string):
-    """ Read the geometries of the fragments out of divsur.out
-        which are in the coordinate system defined in the divsur.inp
-        frames
+def frag_geoms_divsur_frame(divsur_str):
+    """ Read the geometries of the fragments out of divsur.out file
+        which are in the coord system defined in the divsur.inp frames.
+        :param string divsur_str: string with geoms made from divsur frames
+        :return fgeo1: geometry of fragment 1 in divsur frame
+        :rtype: string
+        :return fgeo2: geometry of fragment 2 in divsur frame
+        :rtype: string
     """
 
     # Get where the fragment geometries are defined
-    lines = divsur_string.splitlines()
+    lines = divsur_str.splitlines()
     for i, line in enumerate(lines):
         if 'Fragment 1:' in line:
             f1_idx = i+1

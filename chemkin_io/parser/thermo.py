@@ -44,7 +44,11 @@ def data_dct(block_str, data_entry='strings'):
 
 # Functions for parsing the thermo block or single polyn string #
 def data_strings(block_str):
-    """ thermo strings
+    """ Parse all of the NASA polynomials given in the thermo block
+        of the mechanism input file.
+        :param string block_str: string for thermo block
+        :return thm_strs: strings containing NASA polynomials for all species
+        :rtype: list
     """
     headline_pattern = (
         app.LINE_START + app.not_followed_by(app.one_of_these(
@@ -60,15 +64,23 @@ def data_strings(block_str):
 
 
 def species_name(thm_dstr):
-    """ get the species name from a thermo data string
+    """ Parses the name of the species from the NASA polynomial
+        given in the data string for a species in the thermo block.
+        :param string thm_dstr: string species in thermo block
+        :return name: name of the species
+        :rtype: string
     """
     pattern = app.STRING_START + app.capturing(app.one_or_more(app.NONSPACE))
-    spc = apf.first_capture(pattern, thm_dstr)
-    return spc
+    name = apf.first_capture(pattern, thm_dstr)
+    return name
 
 
 def temperatures(thm_dstr):
-    """ get the common temperature from a thermo data string
+    """ Parses the temperatures from the NASA polynomial
+        given in the data string for a species in the thermo block.
+        :param string thm_dstr: string species in thermo block
+        :return temps: temperatures (K)
+        :rtype: tuple
     """
     headline = apf.split_lines(thm_dstr)[0]
     pattern = (app.LINESPACES + app.capturing(app.UNSIGNED_FLOAT) +
@@ -76,12 +88,16 @@ def temperatures(thm_dstr):
                app.LINESPACES + app.capturing(app.UNSIGNED_FLOAT))
     captures = apf.first_capture(pattern, headline)
     assert captures
-    tmps = tuple(map(float, captures))
-    return tmps
+    temps = tuple(map(float, captures))
+    return temps
 
 
 def low_coefficients(thm_dstr):
-    """ get the low temperature thermo coefficients
+    """ Parses the low temperature coefficients from the NASA polynomial
+        given in the data string for a species in the thermo block.
+        :param string thm_dstr: string species in thermo block
+        :return cfts: low temperature coefficients
+        :rtype: tuple
     """
     capture_lst = apf.all_captures(app.EXPONENTIAL_FLOAT, thm_dstr)
     assert len(capture_lst) in (14, 15)
@@ -90,7 +106,11 @@ def low_coefficients(thm_dstr):
 
 
 def high_coefficients(thm_dstr):
-    """ get the high temperature thermo coefficients
+    """ Parses the high temperature coefficients from the NASA polynomial
+        given in the data string for a species in the thermo block.
+        :param string thm_dstr: string species in thermo block
+        :return cfts: high temperature coefficients
+        :rtype: tuple
     """
     capture_lst = apf.all_captures(app.EXPONENTIAL_FLOAT, thm_dstr)
     assert len(capture_lst) in (14, 15)
@@ -99,7 +119,11 @@ def high_coefficients(thm_dstr):
 
 
 def temp_common_default(block_str):
-    """ temperature defaults from the thermo block
+    """ Parses the common temperature defaults from the thermo block
+        of the mechanism input file.
+        :param string block_str: string for thermo block
+        :return tmp_com_def: common temp defined in block
+        :rtype: float
     """
     pattern = (app.UNSIGNED_FLOAT + app.LINESPACES +
                app.capturing(app.UNSIGNED_FLOAT) + app.LINESPACES +

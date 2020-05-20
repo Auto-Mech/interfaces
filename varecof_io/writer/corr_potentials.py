@@ -16,7 +16,13 @@ TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 def species(rvalues, potentials, bnd_frm_idxs,
             dist_restrict_idxs=(), pot_labels=(), species_name='mol'):
     """ Writes string for correction potential for some species Fortran file
-        :return : String for the mol_corr.f file
+        :param list rvalues: Intermolecular distance to scan over
+        :param list potentials: list of potentials calculates along rvalues
+        :param list bnd_frm_idxs: indexes for the radical atoms that form bond
+        :param list dist_restrict_idxs: ???
+        :param list pot_labels: names of each of the potentials in .f file
+        :param string species_name: name given to mol_corr.f file
+        :return: String for the mol_corr.f file
         :rtype: string
     """
 
@@ -114,7 +120,7 @@ def species(rvalues, potentials, bnd_frm_idxs,
 
 def dummy():
     """ Writes string for the dummy correction potention potential Fortran file
-        :return : String for the dummy_corr.f file
+        :return: String for the dummy_corr.f file
         :rtype: string
     """
 
@@ -130,7 +136,7 @@ def dummy():
 
 def auxiliary():
     """ Writes string for the potential auxiliary functions Fortran file
-        :return : String for the pot_aux.f file
+        :return: String for the pot_aux.f file
         :rtype: string
     """
 
@@ -146,7 +152,9 @@ def auxiliary():
 
 def makefile(fortran_compiler, pot_file_names=()):
     """ Writes string for a makefile to compile correction potentials
-        :return : String for the makefile
+        :param string fortran_compiler: name of compiler to build potentials
+        :param list pot_file_names: names of files with various potentials 
+        :return: String for the makefile
         :rtype: string
     """
 
@@ -172,7 +180,7 @@ def makefile(fortran_compiler, pot_file_names=()):
 
 
 def compile_corr_pot(make_path):
-    """ compile the correction potential
+    """ Compilesthe correction potential
         :param str make_path: path to the makefile and correction potential src
     """
     subprocess.check_call(

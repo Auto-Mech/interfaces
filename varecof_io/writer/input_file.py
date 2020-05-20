@@ -22,6 +22,12 @@ def tst(nsamp_max, nsamp_min, flux_err, pes_size,
     """ Writes the tst.inp file for VaReCoF
         :param int nsamp_max: maximum number of samples
         :param int nsamp_min: minimum number of samples
+        :param float flux_err: allowed error in flux during sampling
+        :param in pes_size: number of PESs in the calculation ?
+        :param list faces: inde ?
+        :param list faces_symm: indices noting symmetry of face
+        :param list ener_grid:
+        :param list amom_grid:
         :return tst_inp_str: String for tst.inp file
         :rtype: string
     """
@@ -79,8 +85,23 @@ def divsur(rdists,
            **conditions
            ):
     """ Writes the divsur.inp file for VaReCoF
-        that contains info on the dividing surfaces.
-        :param float distances: List of temperatures (in Angstrom)
+         that contains info on the dividing surfaces.
+        :param float rdists: List of temperatures (in Angstrom)
+        :param int npivot1: number of pivot points on fragment 1
+        :param int npivot2: number of pivot points on fragment 2
+        :param list xyz_pivot1: xyz of fragment 1 where pivot pts centered
+        :param list xyz_pivot2: xyz of fragment 2 where pivot pts centered
+        :param list frame1: atom idxs for orientation of fragment 1 frame
+        :param list frame2: atom idxs for orientation of fragment 2 frame
+        :param list r2dists: cycle coordinates 
+        :param list d1dists: cycle coordinates 
+        :param list d2dists: cycle coordinates 
+        :param list t1angs: cycle coordinates
+        :param list t2angs: cycle coordinates
+        :param list p1angs: cycle coordinates
+        :param list p2angs: cycle coordinates
+        :param bool phi_dependence: signals if frames allow phi angles
+        :param dict conditions: criteria for
         :return divsur_inp_str: String for input file
         :rtype: string
     """
@@ -225,6 +246,8 @@ def elec_struct(exe_path, lib_path, base_name, npot,
 
 def structure(geo1, geo2):
     """ Writes the structure input file for VaReCoF
+        :param list geo1: geometry of fragment 1
+        :param list geo2: geometry of fragment 2
         :rtype: string
     """
 

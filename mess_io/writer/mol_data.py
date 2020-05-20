@@ -15,7 +15,14 @@ SPEC_INFO_PATH = os.path.join(SPECIES_PATH, 'info')
 
 
 def core_rigidrotor(geom, sym_factor, interp_emax=None):
-    """ Writes a rigid-rotor core section.
+    """ Writes the string that defines the 'Core' section
+        for a RigidRotor model of a species for a MESS input file.
+        Function takes input, formats them into strings and then
+        filss in the appropriate Mako template.
+        :param list geom: geometry of a species
+        :param float: symm_factor: symmetry factor of a species
+        :param float interp_emax: parameter for ...
+        :return 
     """
 
     # Format the geometry section

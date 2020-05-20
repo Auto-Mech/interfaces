@@ -11,7 +11,10 @@ from chemkin_io.parser import util
 
 
 def species_block(mech_str):
-    """ species block
+    """ Parses the species block out of the mechanism input file.
+        :param string mech_str: string of mechanism input file
+        :return block_str: string containing species block
+        :rtype: string
     """
     block_str = util.block(
         string=_clean_up(mech_str),
@@ -22,7 +25,10 @@ def species_block(mech_str):
 
 
 def reaction_block(mech_str, remove_comments=True):
-    """ reaction block
+    """ Parses the reaction block out of the mechanism input file.
+        :param string mech_str: string of mechanism input file
+        :return block_str: string containing reaction block
+        :rtype: string
     """
     block_str = util.block(
         string=_clean_up(mech_str, remove_comments=remove_comments),
@@ -33,7 +39,10 @@ def reaction_block(mech_str, remove_comments=True):
 
 
 def thermo_block(mech_str):
-    """ thermo block
+    """ Parses the thermo block out of the mechanism input file.
+        :param string mech_str: string of mechanism input file
+        :return block_str: string containing thermo block
+        :rtype: string
     """
     block_str = util.block(
         string=_clean_up(mech_str),
@@ -45,11 +54,21 @@ def thermo_block(mech_str):
 
 
 def reaction_units(mech_str):
-    """ reaction units
+    """ Parses from the mechanism input file, the units of the 
+        pre-exponential (A) and activation enery (Ea) fitting parameter.
+        :param string mech_str: string of mechanism input file
+        :return units: units for fitiing parameters (A unit, Ea unit)
+        :rtype: list
     """
 
     def _reaction_units(string, start_pattern, units_pattern):
-        """ return a block delimited by start and end patterns
+        """ Helper function used to parse the units at the head of 
+            the reaction block of the mechanism file string.
+            :param string string: mechanism string to parse
+            :param string start_pattern: start pattern at line at head
+            :param string units_pattern: patterns for various unit strings
+            :return units: units for fitiing parameters (A unit, Ea unit)
+            :rtype: list
         """
         rxn_line_pattern = start_pattern + app.capturing(app.LINE_FILL)
         units_string = apf.first_capture(rxn_line_pattern, string)
@@ -210,7 +229,12 @@ def _read_csv(csv_str):
 
 
 def _clean_up(mech_str, remove_comments=True):
-    """ Remove comment lines and whitespace from mech string
+    """ Cleans up mechanism input string by converting specific comment
+        lines that are used later and removes other comments and 
+        whitespace from mech string.
+        :param string mech_str: string of mechanism input file
+        :return mech_str: string with altered comment lines
+        :rtype: string
     """
     mech_str = _convert_comment_lines(mech_str)
     if remove_comments:
@@ -221,8 +245,15 @@ def _clean_up(mech_str, remove_comments=True):
 
 
 def _convert_comment_lines(mech_str):
-    """ try and convert special comments before removal
+    """ alter based on above...
+        Reads a string for the mechanism input file and alters certain
+        comment lines, by removing the comment symbols. This is so they 
+        are not removed later by functions which remove comments from string.
+        :param string mech_str: string of mechanism input file
+        :return mech_str: string with altered comment lines
+        :rtype: string
     """
+
     # Set the lines in the file (in_lines) and their replacements (out_lines)
     inlines = [
         app.escape('!') + app.SPACES + app.escape('Pressure:')
