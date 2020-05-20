@@ -1,5 +1,5 @@
 """
-Take data dictionaries from mechanisms and combine them under a common index
+  Take data dictionaries from mechanisms and combine them under a common index
 """
 
 import itertools

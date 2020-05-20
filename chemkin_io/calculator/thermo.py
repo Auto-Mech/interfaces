@@ -12,7 +12,12 @@ RC = 1.98720425864083e-3  # in kcal/mol.K
 # functions which calculate quantiies using data from the thermo section #
 def mechanism(block_str, temps):
     """ Loop over a dictionary of NASA polynomials for a mechanism
+        :param string block_str: String of Reaction block of CHEMKIN input
+        :param list temps: Temperatures to calculate Thermo quantities (K)
+        :return mech_thermo_dct: dct of thermo data [H(T), Cp(T), S(T), G(T)]
+        :rtype: dct
     """
+
     nasa_dct = thm_parser.data_dct(block_str)
 
     mech_thermo_dct = {}
@@ -32,6 +37,10 @@ def mechanism(block_str, temps):
 def enthalpy(thm_dstr, temp):
     """ Calculate the Enthalpy [H(T)] of a species using the
         coefficients of its NASA polynomial
+        :param string thm_dstr: String containing NASA polynomial of species
+        :param float temp: Temperature to calculate Enthalpy
+        :return h_t: Value for the Enthalpy
+        :rtype: float
     """
 
     cfts = _coefficients_for_specific_temperature(thm_dstr, temp)
@@ -55,6 +64,10 @@ def enthalpy(thm_dstr, temp):
 def heat_capacity(thm_dstr, temp):
     """ Calculate the Heat Capacity [Cp(T)] of a species using the
         coefficients of its NASA polynomial
+        :param string thm_dstr: String containing NASA polynomial of species
+        :param float temp: Temperature to calculate Heat Capacity
+        :return cp_t: Value for the Heat Capacity
+        :rtype: float
     """
     cfts = _coefficients_for_specific_temperature(thm_dstr, temp)
 
@@ -76,6 +89,10 @@ def heat_capacity(thm_dstr, temp):
 def entropy(thm_dstr, temp):
     """ Calculate the Entropy [S(T)] of a species using the
         coefficients of its NASA polynomial
+        :param string thm_dstr: String containing NASA polynomial of species
+        :param float temp: Temperature to calculate Entropy
+        :return s_t: Value for the Entropy
+        :rtype: float
     """
     cfts = _coefficients_for_specific_temperature(thm_dstr, temp)
 
@@ -98,6 +115,10 @@ def entropy(thm_dstr, temp):
 def gibbs(thm_dstr, temp):
     """ Calculate the Gibbs Free Energy [H(T)] of a species using the
         coefficients of its NASA polynomial
+        :param string thm_dstr: String containing NASA polynomial of species
+        :param float temp: Temperature to calculate Gibbs Free Energy
+        :return g_t: Value for the Gibbs Free Energy
+        :rtype: float
     """
 
     h_t = enthalpy(thm_dstr, temp)
@@ -111,8 +132,14 @@ def gibbs(thm_dstr, temp):
 
 
 def _coefficients_for_specific_temperature(thm_dstr, temp):
-    """ return the set of coefficients of the polynomial (low or high)
-        that should be used for a given temperature
+    """ Parse out the coefficients of a NASA polynomial from 
+        a CHEMKIN-formatted string. The input temperature value
+        determines whether the low- or high-temperature coefficients
+        are read from the string
+        :param string thm_dstr: String containing NASA polynomial of species
+        :param float temp: Temperature used to read the coefficients
+        :return cfts: low- or high-temperature coefficients of NASA polynomial
+        :rtype: list
     """
 
     temps = thm_parser.temperatures(thm_dstr)
