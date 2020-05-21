@@ -9,10 +9,10 @@ ${geom}
   Group                      ${group}
   Axis                       ${axis}
   Symmetry                   ${symmetry}
+  GridSize                   ${grid_size}
   MassExpansionSize          ${mass_exp_size}
   PotentialExpansionSize     ${pot_exp_size}
   HamiltonSizeMin            ${hmin}
   HamiltonSizeMax            ${hmax}
-  GridSize                   ${grid_size}
 End
 \

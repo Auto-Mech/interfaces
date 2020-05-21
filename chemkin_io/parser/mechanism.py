@@ -10,69 +10,94 @@ from automol.inchi import smiles as _smiles
 from chemkin_io.parser import util
 
 
-def species_block(mech_str):
+def species_block(mech_str, remove_comments=True):
     """ Parses the species block out of the mechanism input file.
-        :param string mech_str: string of mechanism input file
+
+        :param mech_str: string of mechanism input file
+        :type mech_str: str
+        :param remove_comments: elect to remove comment liness from string
+        :type remove_comments: bool
         :return block_str: string containing species block
         :rtype: string
     """
+
     block_str = util.block(
-        string=_clean_up(mech_str),
+        string=_clean_up(mech_str, remove_comments=remove_comments),
         start_pattern=app.one_of_these(['SPECIES', 'SPEC']),
         end_pattern='END'
     )
+
     return block_str
 
 
 def reaction_block(mech_str, remove_comments=True):
     """ Parses the reaction block out of the mechanism input file.
-        :param string mech_str: string of mechanism input file
+
+        :param mech_str: string of mechanism input file
+        :type mech_str: str
+        :param remove_comments: elect to remove comment liness from string
+        :type remove_comments: bool
         :return block_str: string containing reaction block
         :rtype: string
     """
+
     block_str = util.block(
         string=_clean_up(mech_str, remove_comments=remove_comments),
         start_pattern=app.one_of_these(['REACTIONS', 'REAC']),
         end_pattern='END'
     )
+
     return block_str
 
 
-def thermo_block(mech_str):
+def thermo_block(mech_str, remove_comments=True):
     """ Parses the thermo block out of the mechanism input file.
-        :param string mech_str: string of mechanism input file
+
+        :param mech_str: string of mechanism input file
+        :type mech_str: str
+        :param remove_comments: elect to remove comment liness from string
+        :type remove_comments: bool
         :return block_str: string containing thermo block
         :rtype: string
     """
+
     block_str = util.block(
-        string=_clean_up(mech_str),
+        string=_clean_up(mech_str, remove_comments=remove_comments),
         start_pattern=app.one_of_these(['THERMO ALL', 'THERM ALL', 'THER ALL',
                                         'THERMO', 'THERM', 'THER']),
         end_pattern='END'
     )
+
     return block_str
 
 
 def reaction_units(mech_str):
-    """ Parses from the mechanism input file, the units of the 
+    """ Parses from the mechanism input file, the units of the
         pre-exponential (A) and activation enery (Ea) fitting parameter.
-        :param string mech_str: string of mechanism input file
+
+        :param mech_str: string of mechanism input file
+        :type mech_str: str
         :return units: units for fitiing parameters (A unit, Ea unit)
-        :rtype: list
+        :rtype: list(float)
     """
 
-    def _reaction_units(string, start_pattern, units_pattern):
-        """ Helper function used to parse the units at the head of 
+    def _reaction_units(mech_str, start_pattern, units_pattern):
+        """ Helper function used to parse the units at the head of
             the reaction block of the mechanism file string.
-            :param string string: mechanism string to parse
-            :param string start_pattern: start pattern at line at head
-            :param string units_pattern: patterns for various unit strings
+
+            :param mech_str: string of mechanism input file
+            :type mech_str: str
+            :param start_pattern: start pattern at line at head
+            :type start_pattern: str
+            :param units_pattern: patterns for various unit strings
+            :type units_pattern: str
             :return units: units for fitiing parameters (A unit, Ea unit)
             :rtype: list
         """
+
         rxn_line_pattern = start_pattern + app.capturing(app.LINE_FILL)
-        units_string = apf.first_capture(rxn_line_pattern, string)
-        units_lst = apf.all_captures(units_pattern, units_string)
+        units_str = apf.first_capture(rxn_line_pattern, mech_str)
+        units_lst = apf.all_captures(units_pattern, units_str)
 
         ckin_ea_units = ['CAL/MOLE', 'KCAL/MOLE',
                          'JOULES/MOLE', 'KJOULES/MOLE',
@@ -99,7 +124,7 @@ def reaction_units(mech_str):
         return units
 
     units = _reaction_units(
-        string=_clean_up(mech_str),
+        mech_str=_clean_up(mech_str),
         start_pattern=app.one_of_these(['REACTIONS', 'REAC']),
         units_pattern=app.one_or_more(
             app.one_of_these([app.LETTER, app.escape('/')])),
@@ -109,8 +134,17 @@ def reaction_units(mech_str):
 
 
 def spc_name_dct(csv_str, entry):
-    """ build a dictionary of name idx and inchi entry
+    """ Read the species.csv file and generate a dictionary that relates
+        structural information to the CHEMKIN mechanism name.
+
+        :param csv_str: string of input csv file with species information
+        :type csv_str: str
+        :param entry: structural information that is desired
+        :type entry: str
+        :return spc_dct: all species with desired structural information
+        :rtype: dict[name:entry]
     """
+
     data = _read_csv(csv_str)
 
     if entry == 'inchi':
@@ -130,7 +164,15 @@ def spc_name_dct(csv_str, entry):
 
 
 def _read_name_inchi(data):
-    """ get dct[name]=inchi """
+    """ Build the species dictionary relating CHEMKIN name to InChI string.
+        The InChI strings are read directly from the data object if available.
+        Otherwise they are generated using the SMILES strings.
+
+        :param data: information from input species.csv file
+        :type data: pandas
+        :return spc_dct: output dictionary for all species
+        :rtype spc_dct: dict[name: InChI]
+    """
 
     if hasattr(data, 'inchi'):
         spc_dct = dict(zip(data.name, data.inchi))
@@ -146,7 +188,15 @@ def _read_name_inchi(data):
 
 
 def _read_name_smiles(data):
-    """ get dct[name]=smiles """
+    """ Build the species dictionary relating CHEMKIN name to SMILES string.
+        The SMILES strings are read directly from the data object if available.
+        Otherwise they are generated using the InChI strings.
+
+        :param data: information from input species.csv file
+        :type data: pandas
+        :return spc_dct: output dictionary for all species
+        :rtype spc_dct: dict[name: SMILES]
+    """
 
     spc_dct = {}
     if hasattr(data, 'smiles'):
@@ -162,7 +212,13 @@ def _read_name_smiles(data):
 
 
 def _read_name_mult(data):
-    """ get dct[name]=mult """
+    """ Build the species dictionary relating CHEMKIN name to multiplicity.
+
+        :param data: information from input species.csv file
+        :type data: pandas
+        :return spc_dct: output dictionary for all species
+        :rtype spc_dct: dict[name: multiplicity]
+    """
 
     if hasattr(data, 'mult'):
         spc_dct = dict(zip(data.name, data.mult))
@@ -174,7 +230,16 @@ def _read_name_mult(data):
 
 
 def _read_name_charge(data):
-    """ get dct[name]=charge """
+    """ Build the species dictionary relating CHEMKIN name to charge.
+        If the charge is missing for a given species, the dictionary
+        element will be set to zero, assuming a neutral species.
+
+        :param data: information from input species.csv file
+        :type data: pandas
+        :return spc_dct: output dictionary for all species
+        :rtype spc_dct: dict[name: charge]
+    """
+
     fill = 0
     if hasattr(data, 'charge'):
         spc_dct = dict(zip(data.name, data.charge))
@@ -188,7 +253,16 @@ def _read_name_charge(data):
 
 
 def _read_name_sensitivity(data):
-    """ get dct[name]=sensitivity """
+    """ Build the species dictionary relating CHEMKIN name to sensitivity.
+        If the sensitivity is missing for a given species, the dictionary
+        element will be set to zero.
+
+        :param data: information from input species.csv file
+        :type data: pandas
+        :return spc_dct: output dictionary for all species
+        :rtype spc_dct: dict[name: sensitivity]
+    """
+
     fill = 0.
     if hasattr(data, 'sens'):
         spc_dct = dict(zip(data.name, data.sens))
@@ -202,8 +276,15 @@ def _read_name_sensitivity(data):
 
 
 def spc_inchi_dct(csv_str):
-    """ build a dictionary of inchi idx and name entry
+    """ Read the species.csv file and generate a dictionary that relates
+        CHEMKIN mechanism name to InChI string.
+
+        :param csv_str: string of input csv file with species information
+        :type csv_str: str
+        :return spc_dct: all species with names and InChI strings
+        :rtype: dict[InChI: name]
     """
+
     data = _read_csv(csv_str)
 
     spc_dct = {}
@@ -219,20 +300,32 @@ def spc_inchi_dct(csv_str):
 
 
 def _read_csv(csv_str):
-    """ read the csv file; removes whitespace and makes everything lower
+    """ Read the csv file and generate data using pandas.
+
+        :param csv_str: string of input csv file with species information
+        :type csv_str: str
+        :return data: data for the species from csv file
+        :rtype: pandas.data object?
     """
+
+    # Read in csv file while removing whitespace and make all chars lowercase
     csv_file = StringIO(csv_str)
     data = pandas.read_csv(csv_file, comment='!', quotechar="'")
+
+    # Parse CSV string into data columns
     data.columns = data.columns.str.strip()
     data.columns = map(str.lower, data.columns)
+
     return data
 
 
 def _clean_up(mech_str, remove_comments=True):
     """ Cleans up mechanism input string by converting specific comment
-        lines that are used later and removes other comments and 
+        lines that are used later and removes other comments and
         whitespace from mech string.
-        :param string mech_str: string of mechanism input file
+
+        :param mech_str: string of mechanism input file
+        :param mech_str: str
         :return mech_str: string with altered comment lines
         :rtype: string
     """
@@ -247,9 +340,11 @@ def _clean_up(mech_str, remove_comments=True):
 def _convert_comment_lines(mech_str):
     """ alter based on above...
         Reads a string for the mechanism input file and alters certain
-        comment lines, by removing the comment symbols. This is so they 
+        comment lines, by removing the comment symbols. This is so they
         are not removed later by functions which remove comments from string.
-        :param string mech_str: string of mechanism input file
+
+        :param mech_str: string of mechanism input file
+        :type mech_str: str
         :return mech_str: string with altered comment lines
         :rtype: string
     """

@@ -18,6 +18,8 @@ def mc_species(geom, elec_levels,
                ground_energy, reference_energy,
                freqs=(), no_qc_corr=False, use_cm_shift=False):
     """ Writes a monte carlo species section
+
+
     """
 
     # Format the molecule specification section

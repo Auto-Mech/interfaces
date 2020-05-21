@@ -2,62 +2,17 @@
 Utility functions
 """
 
-import os
-from mako.template import Template
 import numpy
-import autoparse.pattern as app
-import autoparse.find as apf
-
-
-# Build the MESS string using the mako template
-def build_mako_str(template_file_name, template_src_path, template_keys):
-    """ Uses an input dictionary to fill in Mako template file containing the
-        keys of the dictionary, then writes a string corresponding to the 
-        filled-in Mako template.
-        :param string template_file_name: Name of the Mako template file
-        :param string template_src_path: Path where Mako template file resides
-        :param dct template_keys: keys and values used to fill Mako template 
-        :return mako_str: filled-in Mako template
-        :rtype: string
-    """
-    template_file_path = os.path.join(template_src_path, template_file_name)
-    mess_str = Template(filename=template_file_path).render(**template_keys)
-
-    return remove_trail_whitespace(mess_str)
-
-
-# Format strings to have clean files
-def indent(string, nspaces):
-    """ Indents each of the lines of a multiline string.
-        :param string string: Input string to indent
-        :param nspaces: number of spaces to indent the lines of the string
-        :return indented_string: string indented by nspaces
-        :rtype string
-    """
-    pad = nspaces * ' '
-    indented_string = ''.join(pad+line for line in string.splitlines(True))
-
-    return indented_string
-
-
-def remove_trail_whitespace(string):
-    """ Removes trailing spaces and empty lines from a input string.
-        :param string string: Input string to clean up
-        :return cleaned string
-        :rtype: string
-    """
-    empty_line = app.LINE_START + app.maybe(app.LINESPACES) + app.NEWLINE
-    trailing_spaces = app.LINESPACES + app.LINE_END
-    pattern = app.one_of_these([empty_line, trailing_spaces])
-    return apf.remove(pattern, string)
+from ioformat import indent
 
 
 # Format various pieces of data into strings for MESS input files
 def elec_levels_format(elec_levels):
     """ Formats the list of electronic energy levels into a string that
         is appropriate for a MESS input file.
-        :param list elec_levels: levels of a species, given as 
-                                 list-of-lists: [[energy, degeneracy], ...]
+
+        :param elec_levels: levels, given as [[energy, degeneracy], ...]
+        :type elec_levels: list(list(float))
         :return elec_levels_str: MESS-format string containing levels
         :rtype string
     """
@@ -81,7 +36,8 @@ def elec_levels_format(elec_levels):
 def geom_format(geom):
     """ Formats the geometry of a species into a string that
         is appropriate for a MESS input file.
-        :param list geom: geometry
+
+        :param geom: geometry of a species
         :return natoms: number of atoms in the geometry
         :rtype int
         :return geom_string: MESS-format string containing geometry
@@ -106,7 +62,9 @@ def geom_format(geom):
 def freqs_format(freqs):
     """ Formats the vibrational frequencies of a species into a string that
         is appropriate for a MESS input file.
-        :param list freqs: vibrational frequencies of species
+
+        :param freqs: vibrational frequencies of species
+        :type freqs: list(float)
         :return nfreqs: number of frequences for the species
         :rtype int
         :return freq_str: MESS-format string containing frequencies
@@ -134,8 +92,11 @@ def format_rotor_key_defs(rotor_keyword_vals, remdummy=None):
     """ Formats strings that contain the 'Group', 'Axis', and 'Symmetry'
         keywords and values that are used to define hindered rotors and
         internal rotors in MESS input files.
-        :param list rotor_keyword_vals: values for the for some rotor keyword
-        :param bool remdummy: idenitifies if a dummy atom requires val shift
+
+        :param rotor_keyword_vals: values for the for some rotor keyword
+        :type: rotor_keyword_vals: list(int)
+        :param remdummy: list of idxs of dummy atoms for shifting values
+        :type remdummy: list(int)
         :return rotor_keyword_str: MESS-format string containing values
         :rtype string
     """
@@ -155,12 +116,15 @@ def format_rotor_key_defs(rotor_keyword_vals, remdummy=None):
 def format_rotor_potential(potential):
     """ Formats the potential energy surface along a rotor into a string
         used to define hindered rotors and internal rotors in MESS input files.
-        :param list potential: values of potential along the rotor coordinate
-        :param bool remdummy: idenitifies if a dummy atom requires val shift
+
+        :param potential: value of the potential along torsion (kcal.mol-1)
+        :type potential: list(float)
+        :param remdummy: list of idxs of dummy atoms for shifting values
+        :type remdummy: list(int)
         :return npotential: number of values in the potential
         :rtype int
         :return potential_str: values of potential in a MESS-format string
-        :rtype string
+        :rtype str
     """
 
     # Get the number of the terms in the potential
@@ -183,9 +147,11 @@ def format_rotor_potential(potential):
 def format_rovib_coups(rovib_coups):
     """ Formats the matrix of rovibrational coupling terms for a species
         into a string appropriate for a MESS input file.
-        :param numpy.ndarray rovib_coups: rovibrational coupling matrix
+
+        :param rovib_coups: rovibrational coupling matrix
+        :type rovib_coups: numpy.ndarray
         :return rovib_coups_str: values of potential in a MESS-format string
-        :rtype string
+        :rtype str
     """
 
     # Join the values into a string
@@ -200,12 +166,11 @@ def format_rovib_coups(rovib_coups):
 def format_rot_dist_consts(rot_dists):
     """ Formats the list of rotational distortion constants
         into a string appropriate for a MESS input file.
-        :param list rot_dists: rotational distortion constants: 
-                               [['aaa'], [val],...]
+
+        :param rot_dists: rotational distortion constants: [['aaa'], [val]]
+        :type rot_dists: list(list(str), list(float))
         :return rot_dists_str: values of potential in a MESS-format string
         :rtype string
-    """
-    """ Format the rotational distortion constants.
     """
 
     # Build rotational dists string
@@ -224,11 +189,12 @@ def format_rot_dist_consts(rot_dists):
 def format_xmat(xmat):
     """ Formats the anharmonicity (X) matrix for a species
         into a string appropriate for a MESS input file.
-        :param list xmat: anharmonicity matrix
+
+        :param xmat: anharmonicity matrix
+        :type xmat: list(list(float))
         :return xmat_str: anharmonicity matrix in a MESS-format string
         :rtype string
     """
-
 
     xmat = numpy.array(xmat)
 
@@ -249,10 +215,12 @@ def format_xmat(xmat):
 
 
 def molec_spec_format(geom):
-    """ Parses out the atom labels of a Cartesian geometry and  
-        formats them into a string appropriate for definining 
-        molecular species for Monte Carlo calculations in MESS. 
-        :param list geom: geometry
+    """ Parses out the atom labels of a Cartesian geometry and
+        formats them into a string appropriate for definining
+        molecular species for Monte Carlo calculations in MESS.
+
+        :param geom: geometry
+        :type geom: list
         :return atom_lst_str
         :rtype: string
     """
@@ -271,17 +239,20 @@ def molec_spec_format(geom):
     return atom_lst_str
 
 
-def format_flux_mode_indices(atom_indices):
+def format_flux_mode_indices(atom_idxs):
     """ Formates the atom indices into a string that is used
         to define the fluxional (torsional) modes of a
-        molecular species for Monte Carlo calculations in MESS. 
+        molecular species for Monte Carlo calculations in MESS.
+
+        :param atom_idxs: idxs of atoms involved in fluxional mode
+        :type atom_idxs: list(int)
         :return flux_mode_idx_str: formatted string of indices
         :rtype: string
     """
 
     # Build string containing the values of each keyword
     flux_mode_idx_str = ''
-    for vals in atom_indices:
+    for vals in atom_idxs:
         flux_mode_idx_str += '{0:<4d}'.format(vals)
 
     return flux_mode_idx_str
@@ -290,9 +261,10 @@ def format_flux_mode_indices(atom_indices):
 # Helpful checker to set MESS string writing
 def is_atom_in_str(spc_str):
     """ Checks a MESS-formatted species data string to see
-        if the species is, or contains, an Atom definition.
-        param: spc_str: MESS string containing species definitions
-        return: is_atom_in_str
+        if the species is, or contains, an Atom species definition.
+
+        :param: spc_str: MESS species string
+        :type spc_str: str
         rtype: bool
     """
     return bool('Atom' in spc_str)

@@ -1,14 +1,19 @@
 """ Various formatting functions used by each I/O module
 """
 
+import os
+from mako.template import Template
+import autoparse.pattern as app
+import autoparse.find as apf
+
 
 def build_mako_str(template_file_name, template_src_path, template_keys):
     """ Uses an input dictionary to fill in Mako template file containing the
-        keys of the dictionary, then writes a string corresponding to the 
+        keys of the dictionary, then writes a string corresponding to the
         filled-in Mako template.
         :param string template_file_name: Name of the Mako template file
         :param string template_src_path: Path where Mako template file resides
-        :param dct template_keys: keys and values used to fill Mako template 
+        :param dct template_keys: keys and values used to fill Mako template
         :return mako_str: filled-in Mako template
         :rtype: string
     """
@@ -41,4 +46,3 @@ def remove_trail_whitespace(string):
     trailing_spaces = app.LINESPACES + app.LINE_END
     pattern = app.one_of_these([empty_line, trailing_spaces])
     return apf.remove(pattern, string)
-

@@ -7,6 +7,7 @@ Takes in data from other MESS writer functions
 """
 
 import os
+from ioformat import build_mako_str
 from mess_io.writer import util
 
 
@@ -17,12 +18,15 @@ SPECIES_PATH = os.path.join(TEMPLATE_PATH, 'species')
 
 
 def atom(mass, elec_levels):
-    """ Writes the atom section of a MESS input file.
-        :param int mass: mass of the atom (of desired isotope)
-        :param list float elec_levels: energy and degeneracy of
-                                       the atom's electronic states
-        :return atom_str: String for the atom section
-        :rtype: string
+    """ Writes the string that defines the `Species` section
+        for an atom for a MESS input file by
+        formatting input information into strings and filling Mako template.
+
+        :param mass: mass of the atom (of desired isotope)
+        :type mass: int
+        :param elec_levels: energy and degeneracy of atom's electronic states
+        :type elec_levels: list(float)
+        :rtype: str
     """
 
     # Build a formatted elec levels string
@@ -35,7 +39,7 @@ def atom(mass, elec_levels):
         'levels': levels
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='atom.mako',
         template_src_path=SPECIES_PATH,
         template_keys=atom_keys)
@@ -44,14 +48,18 @@ def atom(mass, elec_levels):
 def molecule(core, freqs, elec_levels,
              hind_rot='', xmat=(),
              rovib_coups=(), rot_dists=()):
-    """ Writes the molecule section of a MESS input file
-        :param str core: string for the "Core" section written
-                         by another mess_io function
-        :param list freqs: vibrational frequencies for the molecule
-        :param list float elec_levels: energy and degeneracy of
-                                       the molecule's electronic states
-        :return atom_str: String for the atom section
-        :rtype: string
+    """ Writes the string that defines the `Species` section
+        for a molecule for a MESS input file by
+        formatting input information into strings and filling Mako template.
+
+        :param core: `Core` section string in MESS format
+        :type core: str
+        :param freqs: vibrational frequencies for the molecule
+        :type freqs: list(float)
+        :param elec_levels: energy and degeneracy of atom's electronic states
+        :type elec_levels: list(float)
+        ...
+        :rtype: str
     """
 
     # Add in infrared intensities at some point
@@ -91,7 +99,7 @@ def molecule(core, freqs, elec_levels,
         'rot_dists': rot_dists,
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='molecule.mako',
         template_src_path=SPECIES_PATH,
         template_keys=molec_keys)
