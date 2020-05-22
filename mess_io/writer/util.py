@@ -1,5 +1,5 @@
 """
-Utility functions
+  Additional functions for formatting information for MESS strings
 """
 
 import numpy
@@ -98,7 +98,7 @@ def format_rotor_key_defs(rotor_keyword_vals, remdummy=None):
         :param remdummy: list of idxs of dummy atoms for shifting values
         :type remdummy: list(int)
         :return rotor_keyword_str: MESS-format string containing values
-        :rtype string
+        :rtype str
     """
 
     # Build string containing the values of each keyword

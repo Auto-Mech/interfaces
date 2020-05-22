@@ -15,15 +15,22 @@ TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
 def species(rvalues, potentials, bnd_frm_idxs,
             dist_restrict_idxs=(), pot_labels=(), species_name='mol'):
-    """ Writes string for correction potential for some species Fortran file
-        :param list rvalues: Intermolecular distance to scan over
-        :param list potentials: list of potentials calculates along rvalues
-        :param list bnd_frm_idxs: indexes for the radical atoms that form bond
-        :param list dist_restrict_idxs: ???
-        :param list pot_labels: names of each of the potentials in .f file
-        :param string species_name: name given to mol_corr.f file
-        :return: String for the mol_corr.f file
-        :rtype: string
+    """ Writes the string for a Fortran source file containing information
+        used to build the correction potential for a species.
+    
+        :param rvalues: Intermolecular distance to scan over
+        :type rvalues: list(float)
+        :param potentials: list of potentials calculates along rvalues
+        :type potentials: list(list(float))
+        :param bnd_frm_idxs: indexes for the radical atoms that form bond
+        :type bnd_frm_idxs: list(int)
+        :param dist_restrict_idxs: ???
+        :type dist_restrict_idxs: list(int)
+        :param pot_labels: names of each of the potentials in .f file
+        :type pot_labels: list(str)
+        :param species_name: name given to mol_corr.f file
+        :type species_name: str
+        :rtype: str
     """
 
     npot = len(potentials)
@@ -100,61 +107,50 @@ def species(rvalues, potentials, bnd_frm_idxs,
         'dv_vals': dv_vals,
         'rmin': rmin,
         'rmax': rmax,
-        # 'aidx': aidx,
-        # 'bidx': bidx,
         'bond_distance_string': bond_distance_string,
         'restrict_distance_strings': restrict_distance_strings,
         'delmlt_string': delmlt_string,
         'spline_strings': spline_strings
     }
 
-    # Set template name and path for the species_corr template
-    template_file_name = 'species_corr.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build species_corr.f string
-    spc_corr_str = Template(filename=template_file_path).render(**corr_keys)
-
-    return spc_corr_str
+    return build_mako_str(
+        template_file_name='species_corr.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys=corr_keys)
 
 
 def dummy():
-    """ Writes string for the dummy correction potention potential Fortran file
-        :return: String for the dummy_corr.f file
+    """ Writes string for the dummy correction potential Fortran file.
+
         :rtype: string
     """
 
-    # Set template name and path for the dummy_corr template
-    template_file_name = 'dummy_corr.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build dummy_corr.f string
-    dummy_corr_str = Template(filename=template_file_path).render()
-
-    return dummy_corr_str
+    return build_mako_str(
+        template_file_name='dummy_corr.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys={})
 
 
 def auxiliary():
-    """ Writes string for the potential auxiliary functions Fortran file
-        :return: String for the pot_aux.f file
+    """ Writes string for the potential auxiliary functions Fortran file.
+
         :rtype: string
     """
 
-    # Set template name and path for the pot_aux template
-    template_file_name = 'pot_aux.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build pot_aux.f string
-    pot_aux_str = Template(filename=template_file_path).render()
-
-    return pot_aux_str
+    return build_mako_str(
+        template_file_name='pot_aux.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys={})
 
 
 def makefile(fortran_compiler, pot_file_names=()):
-    """ Writes string for a makefile to compile correction potentials
-        :param string fortran_compiler: name of compiler to build potentials
-        :param list pot_file_names: names of files with various potentials 
-        :return: String for the makefile
+    """ Writes string for a makefile to compile correction potentials.
+
+        :param fortran_compiler: name of compiler to build potentials
+        :type fortran_compiler: str
+        :param pot_file_names: names of files with various potentials 
+        :type: pot_file_names: list(str)
+        :return: string for the makefile
         :rtype: string
     """
 
@@ -164,25 +160,25 @@ def makefile(fortran_compiler, pot_file_names=()):
         for potential in pot_file_names:
             corr_potential_names += '{0}_corr.f '.format(potential)
 
+    # Create dictionary to fill template
     make_keys = {
         'fc': fortran_compiler,
         'corr_potential_names': corr_potential_names
     }
 
-    # Set template name and path for the pot_aux template
-    template_file_name = 'makefile.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build pot_aux.f string
-    makefile_str = Template(filename=template_file_path).render(**make_keys)
-
-    return makefile_str
+    return build_mako_str(
+        template_file_name='makefile.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys=make_keys)
 
 
 def compile_corr_pot(make_path):
-    """ Compilesthe correction potential
-        :param str make_path: path to the makefile and correction potential src
+    """ Compiles the correction potential using make.
+
+        :param make_path: path to the makefile and correction potential src
+        :type make_path: str
     """
+
     subprocess.check_call(
         ['make'], cwd=make_path,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

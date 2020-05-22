@@ -20,18 +20,25 @@ def tst(nsamp_max, nsamp_min, flux_err, pes_size,
         faces=(0,), faces_symm=1,
         ener_grid=(), amom_grid=()):
     """ Writes the tst.inp file for VaReCoF
-        :param int nsamp_max: maximum number of samples
-        :param int nsamp_min: minimum number of samples
-        :param float flux_err: allowed error in flux during sampling
-        :param in pes_size: number of PESs in the calculation ?
-        :param list faces: inde ?
-        :param list faces_symm: indices noting symmetry of face
+        :param nsamp_max: maximum number of samples
+        :type nsamp_max: int
+        :param nsamp_min: minimum number of samples
+        :type nsamp_min: int
+        :param flux_err: allowed error in flux during sampling
+        :type flux_err: float
+        :param pes_size: number of PESs in the calculation ?
+        :type pes_size: int
+        :param faces: inde ?
+        :type fascs: list(int)
+        :param faces_symm: indices noting symmetry of face
+        :type faces_symm: list(int)
         :param list ener_grid:
-        :param list amom_grid:
-        :return tst_inp_str: String for tst.inp file
-        :rtype: string
+        :type ener_grid: list(float)
+        :param amom_grid:
+        :type amom_grid: list(float)
+        :rtype: str
     """
-    print(faces)
+
     # Set the energy and angular momentum grids
     if not ener_grid:
         ener_grid = [0, 10, 1.05, 179]
@@ -60,14 +67,10 @@ def tst(nsamp_max, nsamp_min, flux_err, pes_size,
         'faces_symm': faces_symm
     }
 
-    # Set template name and path for the global keywords section
-    template_file_name = 'tst.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build tst input string
-    tst_str = Template(filename=template_file_path).render(**tst_keys)
-
-    return tst_str
+    return build_mako_str(
+        template_file_name='tst.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys=tst_keys)
 
 
 def divsur(rdists,
@@ -86,23 +89,38 @@ def divsur(rdists,
            ):
     """ Writes the divsur.inp file for VaReCoF
          that contains info on the dividing surfaces.
-        :param float rdists: List of temperatures (in Angstrom)
-        :param int npivot1: number of pivot points on fragment 1
-        :param int npivot2: number of pivot points on fragment 2
-        :param list xyz_pivot1: xyz of fragment 1 where pivot pts centered
-        :param list xyz_pivot2: xyz of fragment 2 where pivot pts centered
-        :param list frame1: atom idxs for orientation of fragment 1 frame
-        :param list frame2: atom idxs for orientation of fragment 2 frame
-        :param list r2dists: cycle coordinates 
-        :param list d1dists: cycle coordinates 
-        :param list d2dists: cycle coordinates 
-        :param list t1angs: cycle coordinates
-        :param list t2angs: cycle coordinates
+        :param rdists: List of temperatures (in Angstrom)
+        :type rdists: float
+        :param npivot1: number of pivot points on fragment 1
+        :type npivot1: int
+        :param npivot2: number of pivot points on fragment 2
+        :type npivot2: int
+        :param xyz_pivot1: xyz of fragment 1 where pivot pts centered
+        :type xyz_pivot1: list(float)
+        :param xyz_pivot2: xyz of fragment 2 where pivot pts centered
+        :type xyz_pivot2: list(float)
+        :param frame1: atom idxs for orientation of fragment 1 frame
+        :type frame1: list(int)
+        :param frame2: atom idxs for orientation of fragment 2 frame
+        :type frame2: list(int)
+        :param r2dists: cycle coordinates 
+        :type r2dists: list(float)
+        :param d1dists: cycle coordinates 
+        :type d1dists: list(float)
+        :param d2dists: cycle coordinates 
+        :type d2dists: list(float)
+        :param t1angs: cycle coordinates
+        :type t1angs: list(float)
+        :param t2angs: cycle coordinates
+        :type t2angs: list(float)
         :param list p1angs: cycle coordinates
+        :type p1angs: list(float)
         :param list p2angs: cycle coordinates
-        :param bool phi_dependence: signals if frames allow phi angles
-        :param dict conditions: criteria for
-        :return divsur_inp_str: String for input file
+        :type p2angs: list(float)
+        :param phi_dependence: signals if frames allow phi angles
+        :type phi_dependence: bool
+        :param conditions: criteria for cycles
+        :type conditions: dict
         :rtype: string
     """
 
@@ -198,14 +216,10 @@ def divsur(rdists,
         'p2_string': p2_string,
     }
 
-    # Set template name and path for the global keywords section
-    template_file_name = 'divsur.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build divsur input string
-    divsur_str = Template(filename=template_file_path).render(**divsur_keys)
-
-    return divsur_str
+    return build_mako_str(
+        template_file_name='divsur.mako',
+        template_src_path=TEMPLATES_PATH,
+        template_keys=divsur_keys)
 
 
 def elec_struct(exe_path, lib_path, base_name, npot,

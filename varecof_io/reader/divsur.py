@@ -1,17 +1,18 @@
 """
-Functions to parse information out of the
-divsur input and output files
+  Functions to parse information out of the divsur input and output files
 """
 
 
 def frag_geoms_divsur_frame(divsur_str):
-    """ Read the geometries of the fragments out of divsur.out file
+    """ Read the geometries of the fragments out of divsur.out file string
         which are in the coord system defined in the divsur.inp frames.
-        :param string divsur_str: string with geoms made from divsur frames
+
+        :param divsur_str: string with geoms made from divsur frames
+        :type divsur_str: str
         :return fgeo1: geometry of fragment 1 in divsur frame
-        :rtype: string
+        :rtype: str
         :return fgeo2: geometry of fragment 2 in divsur frame
-        :rtype: string
+        :rtype: str
     """
 
     # Get where the fragment geometries are defined
