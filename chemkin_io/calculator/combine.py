@@ -14,7 +14,14 @@ RC = 1.98720425864083e-3  # in kcal/mol.K
 
 
 def mechanism_thermo(mech1_thermo_dct, mech2_thermo_dct):
-    """ Loop over the the Mech1 thermo entries
+    """ Combine together the thermo dictionaries for two mechanisms.
+
+        :param mech1_thermo_dct: thermo dct for mechanism 1
+        :type mech1_thermo_dct: dict[spc: [[H(t)], [Cp(T)], [S(T)], [G(T)]]
+        :param mech2_thermo_dct: thermo dct for mechanism 2
+        :type mech2_thermo_dct: dict[spc: [[H(t)], [Cp(T)], [S(T)], [G(T)]]
+        :return total_thermo_dct: dict with thermo from both mechanisms
+        :rtype: dict[mech: mech_thermo_dct]
     """
 
     total_thermo_dct = {}
@@ -44,7 +51,21 @@ def mechanism_thermo(mech1_thermo_dct, mech2_thermo_dct):
 
 def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
                     mech2_thermo_dct=None):
-    """ calculate the reactions rates for two mech files
+    """ Combine together the rate dictionaries for two mechanisms.
+        Currently, there are two assumptions to combining the dicts.
+          (1) k(T,P) values for both mechanisms have same temperature range.
+          (2) Reaction directions in combined dict match those from Mech1.
+
+        :param mech1_ktp_dct: rate constant dict for mechanism 1
+        :type mech1_ktp_dct: dict[reaction: dict[pressure: k(T,P)s]]
+        :param mech2_ktp_dct: rate constant dict for mechanism 2
+        :type mech2_ktp_dct: dict[reaction: dict[pressure: k(T,P)s]]
+        :param mech2_thermo_dct: thermo dict for mechanism 2; to reverse rxns
+        :type mech2_thermo_dct: dict[spc: [[H(t)], [Cp(T)], [S(T)], [G(T)]]
+        :param temps: Temperatures the k(T,P) values were calculated for (K)
+        :type temps: list(float)
+        :return total_ktp_dct: dict with thermo from both mechanisms
+        :rtype: dict[mech: mech_ktp_dct]
     """
 
     total_ktp_dct = {}
@@ -203,7 +224,9 @@ def _reverse_reaction_rates(mech_dct, thermo_dct, rxn, temps):
 
 
 def _calculate_equilibrium_constant(thermo_dct, rct_idxs, prd_idxs, temps):
-    """ use the thermo parameters to obtain the equilibrium
+    """ Calculate equilibrium constants  
+    
+    use the thermo parameters to obtain the equilibrium
         constant
     """
 
@@ -233,7 +256,21 @@ def _grab_gibbs(thermo_vals, temp_idx):
 
 # Functions to build dictionaries
 def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures):
-    """ builds the reaction dictionaries indexed by names
+    """ Parses the strings of two mechanism files and calculates
+        rate constants [k(T,P)]s at an input set of temperatures and pressures.
+
+        :param mech1_str: string of mechanism 1 input file
+        :type mech1_str: str
+        :param mech2_str: string of mechanism 2 input file
+        :type mech2_str: str
+        :param t_ref: Reference temperature (K)
+        :type t_ref: float
+        :param temps: List of Temperatures (K)
+        :type temps: numpy.ndarray
+    
+        at 
+    
+    builds the reaction dictionaries indexed by names
     """
 
     mech1_reaction_block = chemkin_io.parser.util.clean_up_whitespace(

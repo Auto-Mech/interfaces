@@ -133,8 +133,17 @@ def chebyshev(reaction, high_params, alpha_matrix, tmin, tmax, pmin, pmax):
 
 # Various formatting functions
 def _fit_info_str(pressures, temp_dct, err_dct):
-    """ Write the string detailing the temperatures and errors associated
-        with the rate constant fits at each pressure
+    """ Write the string detailing the temperature ranges and fitting errors
+        associated with the rate-constant fits at each pressure.
+
+        :param pressures: pressures the k(T,P)s were calculated at
+        :type pressures: list(float)
+        :param temp_dct: temperature ranges (K) fits were done at each pressure
+        :type temp_dct: dict[pressure, [temp range]]
+        :param err_dct: errors associated with the fits at each pressure
+        :type err_dct: dict[pressure, [mean err, max err]]
+        :return inf_str: string containing all of the fitting info
+        :rtype: str
     """
 
     # Make temp, err dcts empty if fxn receives None; add 'high' to pressures
@@ -179,12 +188,20 @@ def _fit_info_str(pressures, temp_dct, err_dct):
     return inf_str
 
 
-def _format_rxn_str_for_pdep(reaction, press='all'):
-    """ Add the M species to the reaction string
+def _format_rxn_str_for_pdep(reaction, pressure='all'):
+    """ Add the bath gas M species to the reaction string for 
+        pressure dependent reactions in the appropriate format.
+
+        :param reaction: chemical equation for the reaction
+        :type reaction: str
+        :param pressure: signifies the level of pressure dependence
+        :type pressure: str
+        :return: three_body_reaction: chemical equation with M body
+        :rtype: str
     """
     # Determine format of M string to be added to reaction string
-    assert press in ('low', 'all')
-    if press == 'all':
+    assert pressure in ('low', 'all')
+    if pressure == 'all':
         m_str = ' (+M)'
     else:
         m_str = ' + M'
@@ -197,9 +214,15 @@ def _format_rxn_str_for_pdep(reaction, press='all'):
 
 
 def _format_collider_string(colliders):
-    """ Write the string for collider efficiencies for
-        Lindemann and Troe fits
+    """ Write the string for the bath gas collider and their efficiencies
+        for the Lindemann and Troe functional expressions:
+
+        :param colliders:
+        :type colliders: list(str)
+        :return: collider_str: CHEMKIN-format string with colliders
+        :rtype: str
     """
+
     collider_str = ''.join(
         ('{0:s}/{1:4.3f}/ '.format(collider[0], collider[1])
          for collider in colliders))

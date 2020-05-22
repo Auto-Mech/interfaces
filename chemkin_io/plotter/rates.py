@@ -25,7 +25,17 @@ matplotlib.rc('font', **FONT)
 
 
 def build(ktp_dct, temps, dir_prefix='.', names=None):
-    """ run over the dictionary for plotting
+    """ Generates plots of rate constants for all the reactions
+        in two mechanisms.
+
+        :param ktp_dct: k(T,P)s at all temps and pressures
+        :type: dict[pressure: temps]
+        :param temps: Temps used to calculate high- and low-k(T)s
+        :type temps: numpy.ndarray
+        :param dir_prefix: path where the plot directory will be built
+        :type dir_prefix: str
+        :param names: names of each reaction that serve as titles of their plot
+        :type names: list(str)
     """
 
     # build new dct where we only have reactions with both mechs
@@ -94,7 +104,14 @@ def build(ktp_dct, temps, dir_prefix='.', names=None):
 
 
 def _build_figure(nreactions):
-    """ Initialize the figure object
+    """ Initialize the size and format of the plot figure.
+
+        :param nreactions: number of reactions on single page of figure
+        :type nreactions: int
+        :return: figure object for single page of plots
+        :rtype: matplotlib.pyplot object
+        :return: axes object for single page of plots
+        :rtype: matplotlib.pyplot object
     """
 
     # Initialize plot objects

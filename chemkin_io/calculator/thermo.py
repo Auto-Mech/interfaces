@@ -10,12 +10,17 @@ RC = 1.98720425864083e-3  # in kcal/mol.K
 
 
 # functions which calculate quantiies using data from the thermo section #
-def mechanism(block_str, temps):
-    """ Loop over a dictionary of NASA polynomials for a mechanism
-        :param string block_str: String of Reaction block of CHEMKIN input
-        :param list temps: Temperatures to calculate Thermo quantities (K)
+def mechanism(block_str, temps, rval=RC):
+    """ Parses the all the reactions data string in the thermo block 
+        in a mechanism file for their NASA polynomials and
+        uses them to calculate thermochemical values: H(T), Cp(T), S(T), G(T).
+
+        :param block_str: string of Reaction block of CHEMKIN input
+        :type block_str: str
+        :param temps: temperatures to calculate Thermo quantities (K)
+        :type temps: list(float)
         :return mech_thermo_dct: dct of thermo data [H(T), Cp(T), S(T), G(T)]
-        :rtype: dct
+        :rtype: dict[spc: [[H(T)], [Cp(T)], [S(T)], [G(T)]]]
     """
 
     nasa_dct = thm_parser.data_dct(block_str)
@@ -24,22 +29,25 @@ def mechanism(block_str, temps):
     for name, thermo_dstr in nasa_dct.items():
         h_t, cp_t, s_t, g_t, = [], [], [], []
         for temp in temps:
-            h_t.append(enthalpy(thermo_dstr, temp))
-            cp_t.append(heat_capacity(thermo_dstr, temp))
-            s_t.append(entropy(thermo_dstr, temp))
-            g_t.append(gibbs(thermo_dstr, temp))
+            h_t.append(enthalpy(thermo_dstr, temp, rval=rval))
+            cp_t.append(heat_capacity(thermo_dstr, temp, rval=rval))
+            s_t.append(entropy(thermo_dstr, temp, rval=rval))
+            g_t.append(gibbs(thermo_dstr, temp, rval=rval))
 
         mech_thermo_dct[name] = [h_t, cp_t, s_t, g_t]
 
     return mech_thermo_dct
 
 
-def enthalpy(thm_dstr, temp):
+def enthalpy(thm_dstr, temp, rval=RC):
     """ Calculate the Enthalpy [H(T)] of a species using the
-        coefficients of its NASA polynomial
-        :param string thm_dstr: String containing NASA polynomial of species
-        :param float temp: Temperature to calculate Enthalpy
-        :return h_t: Value for the Enthalpy
+        coefficients of its NASA polynomial.
+
+        :param thm_dstr: string containing NASA polynomial of species
+        :type thm_dstr: str
+        :param temp: temperature to calculate Enthalpy (K)
+        :type temp: float
+        :return h_t: value for the Enthalpy (???)
         :rtype: float
     """
 
@@ -54,19 +62,22 @@ def enthalpy(thm_dstr, temp):
             ((cfts[4] * temp**4) / 5.0) +
             (cfts[5] / temp)
         )
-        h_t *= (RC * temp)
+        h_t *= (rval * temp)
     else:
         h_t = None
 
     return h_t
 
 
-def heat_capacity(thm_dstr, temp):
+def heat_capacity(thm_dstr, temp, rval=RC):
     """ Calculate the Heat Capacity [Cp(T)] of a species using the
-        coefficients of its NASA polynomial
-        :param string thm_dstr: String containing NASA polynomial of species
-        :param float temp: Temperature to calculate Heat Capacity
-        :return cp_t: Value for the Heat Capacity
+        coefficients of its NASA polynomial.
+
+        :param thm_dstr: string containing NASA polynomial of species
+        :type thm_dstr: str
+        :param temp: temperature to calculate heat capacity (K)
+        :type temp: float
+        :return cp_t: value for the Heat Capacity
         :rtype: float
     """
     cfts = _coefficients_for_specific_temperature(thm_dstr, temp)
@@ -79,19 +90,21 @@ def heat_capacity(thm_dstr, temp):
             (cfts[3] * temp**3) +
             (cfts[4] * temp**4)
         )
-        cp_t *= RC
+        cp_t *= rval
     else:
         cp_t = None
 
     return cp_t
 
 
-def entropy(thm_dstr, temp):
+def entropy(thm_dstr, temp, rval=RC):
     """ Calculate the Entropy [S(T)] of a species using the
-        coefficients of its NASA polynomial
-        :param string thm_dstr: String containing NASA polynomial of species
-        :param float temp: Temperature to calculate Entropy
-        :return s_t: Value for the Entropy
+        coefficients of its NASA polynomial.
+
+        :param thm_dstr: string containing NASA polynomial of species
+        :type thm_dstr: str
+        :param float temp: temperature to calculate Entropy
+        :return s_t: value for the Entropy
         :rtype: float
     """
     cfts = _coefficients_for_specific_temperature(thm_dstr, temp)
@@ -105,24 +118,27 @@ def entropy(thm_dstr, temp):
             ((cfts[4] * temp**4) / 4.0) +
             (cfts[6])
         )
-        s_t *= RC
+        s_t *= rval
     else:
         s_t = None
 
     return s_t
 
 
-def gibbs(thm_dstr, temp):
-    """ Calculate the Gibbs Free Energy [H(T)] of a species using the
-        coefficients of its NASA polynomial
-        :param string thm_dstr: String containing NASA polynomial of species
-        :param float temp: Temperature to calculate Gibbs Free Energy
-        :return g_t: Value for the Gibbs Free Energy
+def gibbs(thm_dstr, temp, rval=RC):
+    """ Calculate the Gibbs Free Energy [G(T)] of a species using the
+        coefficients of its NASA polynomial.
+
+        :param thm_dstr: string containing NASA polynomial of species
+        :type thm_dstr: str
+        :param temp: temperature to calculate Gibbs Free Energy
+        :type temp: float
+        :return g_t: value for the Gibbs Free Energy
         :rtype: float
     """
 
-    h_t = enthalpy(thm_dstr, temp)
-    s_t = entropy(thm_dstr, temp)
+    h_t = enthalpy(thm_dstr, temp, rval=rval)
+    s_t = entropy(thm_dstr, temp, rval=rval)
     if enthalpy is not None and entropy is not None:
         g_t = h_t - (s_t * temp)
     else:
@@ -135,11 +151,14 @@ def _coefficients_for_specific_temperature(thm_dstr, temp):
     """ Parse out the coefficients of a NASA polynomial from 
         a CHEMKIN-formatted string. The input temperature value
         determines whether the low- or high-temperature coefficients
-        are read from the string
-        :param string thm_dstr: String containing NASA polynomial of species
-        :param float temp: Temperature used to read the coefficients
+        are read from the string.
+
+        :param thm_dstr: String containing NASA polynomial of species
+        :type thm_dstr: str
+        :param temp: Temperature used to read the coefficients
+        :type temp: float
         :return cfts: low- or high-temperature coefficients of NASA polynomial
-        :rtype: list
+        :rtype: list(float)
     """
 
     temps = thm_parser.temperatures(thm_dstr)

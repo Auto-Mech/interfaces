@@ -20,7 +20,24 @@ KEL2KCAL = qcc.conversion_factor('kelvin', 'kcal/mol')
 
 
 def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
-    """ calculate the reactions rates for a whole block via a dict
+    """ Parses the all the reactions data string in the reaction block 
+        in a mechanism file for their fitting parameters and
+        uses them to calculate rate constants [k(T,P)]s.
+    
+        :param rxn_block: string for reaction block from the mechanism input
+        :type rxn_block: str
+        :param rxn_units: units for parameters specifies
+        :type rxn_units: str
+        :param t_ref: Reference temperature (K)
+        :type t_ref: float
+        :param temps: Temps used to calculate high- and low-k(T)s
+        :type temps: numpy.ndarray
+        :param pressures: Pressures used to calculate k(T,P)s
+        :type pressures: list(float)
+        :return: branch_dct: branching fractions for all reactions in mechanism
+        :rtype: dict[reaction: branch_ktp_dict]
+        :return: total_rate_dct: total k(T,P)s for all reactants in mechanism
+        :rtype: dict[reactants: total_ktp_dict]
     """
 
     reaction_data_strings = rxn_parser.data_strings(rxn_block)
@@ -57,8 +74,27 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
     return mech_dct
 
 
-def branching_ratios(rxn_block, rxn_units, t_ref, temps, pressures):
-    """ Calculate all of the branching ratios
+def branching_fractions(rxn_block, rxn_units, t_ref, temps, pressures):
+    """ Parses the all the reactions data string in the reaction block 
+        in a mechanism file for their fitting parameters and
+        uses them to calculate rate constants [k(T,P)]s.
+        These rate constants are then used to calculate the
+        branching fractions for all the unique reactants in the mechanism.
+    
+        :param rxn_block: string for reaction block from the mechanism input
+        :type rxn_block: str
+        :param rxn_units: units for parameters specifies
+        :type rxn_units: str
+        :param t_ref: Reference temperature (K)
+        :type t_ref: float
+        :param temps: Temps used to calculate high- and low-k(T)s
+        :type temps: numpy.ndarray
+        :param pressures: Pressures used to calculate k(T,P)s
+        :type pressures: list(float)
+        :return: branch_dct: branching fractions for all reactions in mechanism
+        :rtype: dict[reaction: branch_ktp_dict]
+        :return: total_rate_dct: total k(T,P)s for all reactants in mechanism
+        :rtype: dict[reactants: total_ktp_dict]
     """
 
     # Build mechanism dct with rates for all reactions
@@ -99,22 +135,38 @@ def branching_ratios(rxn_block, rxn_units, t_ref, temps, pressures):
     return branch_dct, total_rate_dct
 
 
-def reaction(rxn_str, rxn_units, t_ref, temps, pressures=None):
-    """ calculate the rate constant using the rxn_string
+def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
+    """ Parses the data string for a reaction for fitting parameters and
+        uses those parameters to calculate rate constants at input temps
+        and pressures [k(T,P)]s.
+
+        :param rxn_dstr: string for reaction containing fitting parameters
+        :type rxn_dstr: str
+        :param rxn_units: units for parameters specifies
+        :type rxn_units: str
+        :param t_ref: Reference temperature (K)
+        :type t_ref: float
+        :param temps: Temps used to calculate high- and low-k(T)s
+        :type temps: numpy.ndarray
+        :param pressures: Pressures used to calculate k(T,P)s
+        :type pressures: list(float)
+        :return ktp_dct: k(T,P)s at all temps and pressures
+        :rtype: dict[pressure: temps]
     """
+
     rate_constants = {}
 
     # Accepts a params dictionary
     # Read the parameters from the reactions string
-    highp_params = rxn_parser.high_p_parameters(rxn_str)
-    lowp_params = rxn_parser.low_p_parameters(rxn_str)
-    troe_params = rxn_parser.troe_parameters(rxn_str)
-    chebyshev_params = rxn_parser.chebyshev_parameters(rxn_str)
-    plog_params = rxn_parser.plog_parameters(rxn_str)
+    highp_params = rxn_parser.high_p_parameters(rxn_dstr)
+    lowp_params = rxn_parser.low_p_parameters(rxn_dstr)
+    troe_params = rxn_parser.troe_parameters(rxn_dstr)
+    chebyshev_params = rxn_parser.chebyshev_parameters(rxn_dstr)
+    plog_params = rxn_parser.plog_parameters(rxn_dstr)
 
     # Calculate high_pressure rates
     highp_ks = _arrhenius(highp_params, temps, t_ref, rxn_units)
-    rate_constants['high'] = highp_ks
+    ktp_dct['high'] = highp_ks
 
     # Calculate pressure-dependent rate constants based on discovered params
     # Either (1) Plog, (2) Chebyshev, (3) Lindemann, or (4) Troe
@@ -125,83 +177,166 @@ def reaction(rxn_str, rxn_units, t_ref, temps, pressures=None):
 
     pdep_dct = {}
     if plog_params is not None:
-        pdep_dct = _plog(plog_params, pressures, temps, t_ref, rxn_units)
+        pdep_dct = _plog(plog_params, temps, pressures, t_ref, rxn_units)
 
     elif chebyshev_params is not None:
-        pdep_dct = _chebyshev(chebyshev_params, pressures, temps)
+        pdep_dct = _chebyshev(chebyshev_params, temps, pressures)
 
     elif lowp_params is not None:
         lowp_ks = _arrhenius(lowp_params, temps, t_ref, rxn_units)
         if troe_params is not None:
             pdep_dct = _troe(troe_params, highp_ks, lowp_ks,
-                             pressures, temps)
+                             temps, pressures)
         else:
             pdep_dct = ratefit.calc.lindemann(
-                highp_ks, lowp_ks, pressures, temps)
+                highp_ks, lowp_ks, temps, pressures)
 
     # Build the rate constants dictionary with the pdep dict
     if pdep_dct:
-        rate_constants.update(pdep_dct)
+        ktp_dct.update(pdep_dct)
 
-    return rate_constants
+    return ktp_dct
 
 
 def _add_rates(ktp_dct1, ktp_dct2):
-    """ add the rates of two dictionaries together
+    """ Adds the rates of two dictionaries together.
+
+        :param ktp_dct1: k(T,P)s at all temps and pressures for mechanism 1
+        :type ktp_dct1: dict[pressure: temps]
+        :param ktp_dct2: k(T,P)s at all temps and pressures for mechanism 2
+        :type ktp_dct2: dict[pressure: temps]
+        :return ktp_dct1: combined k(T,P)s at all temps and pressures
+        :rtype: dict[pressure: temps]
     """
+
     for pressure in ktp_dct1:
         ktp_dct1[pressure] += ktp_dct2[pressure]
+
     return ktp_dct1
 
 
+# Rate calculators
 def _arrhenius(arr_params, temps, t_ref, rxn_units):
-    """ calc arrhenius
+    """ Calculates rate constants [k(T)]s with the Arrhenius expression
+        using the parameters parsed from the reaction string.
+
+        :param arr_params: Arrhenius fitting parameters from string
+        :type arr_params: list(float)
+        :param temps: Temps used to calculate high- and low-k(T)s
+        :type temps: numpy.ndarray
+        :param t_ref: Reference temperature (K)
+        :type t_ref: float
+        :param rxn_units: units for parameters specifies
+        :type rxn_units: str
+        :return kts: k(T)s at all temps and pressures
+        :rtype: numpy.ndarray
     """
+
     arr_params = _update_params_units(arr_params, rxn_units)
-    rate_ks = ratefit.calc.arrhenius(arr_params, t_ref, temps)
-    return rate_ks
+    kts = ratefit.calc.arrhenius(arr_params, t_ref, temps)
+
+    return kts
 
 
-def _plog(plog_params, pressures, temps, t_ref, rxn_units):
-    """ calc plog
+def _plog(plog_params, temps, pressures, t_ref, rxn_units):
+    """ Calculates rate constants [k(T,P)]s with the PLOG expression
+        using the parameters parsed from the reaction string.
+
+        :param plog_params: PLOG fitting parameters from string
+        :type plog_params: dict[pressure: params]
+        :param temps: Temps used to calculate high- and low-k(T)s
+        :type temps: numpy.ndarray
+        :param pressures: Pressures used to calculate k(T,P)s
+        :type pressures: list(float)
+        :param t_ref: Reference temperature (K)
+        :type t_ref: float
+        :param rxn_units: units for parameters specifies
+        :type rxn_units: str
+        :return ktp_dct: k(T,P)s at all temps and pressures
+        :rtype: dict[pressure: temps]
     """
+
     for pressure, params in plog_params.items():
         plog_params[pressure] = _update_params_units(params, rxn_units)
-    pdep_dct = ratefit.calc.plog(plog_params, t_ref, pressures, temps)
-    return pdep_dct
+    ktp_dct = ratefit.calc.plog(plog_params, t_ref, temps, pressures)
+
+    return ktp_dct
 
 
-def _chebyshev(chebyshev_params, pressures, temps):
-    """ calc chebyshev
+def _chebyshev(chebyshev_params, temps, pressures):
+    """ Calculates rate constants [k(T,P)]s with the Chebyshev expression
+        using the parameters parsed from the reaction string.
+
+        :param chebyshev_params: Chebyshev fitting parameters from string
+        :type chebyshev_params: dict[param: val]
+        :param temps: Temps used to calculate high- and low-k(T)s
+        :type temps: numpy.ndarray
+        :param pressures: Pressures used to calculate k(T,P)s
+        :type pressures: list(float)
+        :return ktp_dct: k(T,P)s at all temps and pressures
+        :rtype: dict[pressure: temps]
     """
+
     [tmin, tmax] = chebyshev_params['t_limits']
     [pmin, pmax] = chebyshev_params['p_limits']
     [arows, acols] = chebyshev_params['alpha_dim']
     alpha = np.array(chebyshev_params['alpha_elm'])
     assert alpha.shape == (arows, acols)
-    pdep_dct = ratefit.calc.chebyshev(
-        alpha, tmin, tmax, pmin, pmax, pressures, temps)
-    return pdep_dct
+    ktp_dct = ratefit.calc.chebyshev(
+        alpha, tmin, tmax, pmin, pmax, temps, pressures)
+
+    return ktp_dct
 
 
-def _troe(troe_params, highp_ks, lowp_ks, pressures, temps):
-    """ calc troe
+def _troe(troe_params, highp_ks, lowp_ks, temps, pressures):
+    """ Calculates rate constants [k(T,P)]s with the Troe expression
+        using the parameters parsed from the reaction string.
+
+        :param troe_params: Troe fitting parameters from string
+        :type troe_params: list(float)
+        :param highp_ks: k(T)s determined at high-pressure
+        :type highp_ks: numpy.ndarray
+        :param lowp_ks: k(T)s determined at low-pressure
+        :type lowp_ks: numpy.ndarray
+        :param temps: Temps used to calculate high- and low-k(T)s
+        :type temps: numpy.ndarray
+        :param pressures: Pressures used to calculate k(T,P)s
+        :type pressures: list(float)
+        :return ktp_dct: k(T,P)s at all temps and pressures
+        :rtype: dict[pressure: temps]
     """
+
     if len(troe_params) == 3:
         ts2 = None
     elif len(troe_params) == 4:
         ts2 = troe_params[3]
-    pdep_dct = ratefit.calc.troe(
-        highp_ks, lowp_ks, pressures, temps,
+    ktp_dct = ratefit.calc.troe(
+        highp_ks, lowp_ks, temps, pressures,
         troe_params[0], troe_params[1], troe_params[2], ts2=ts2)
-    return pdep_dct
+
+    return ktp_dct
 
 
 def _update_params_units(params, rxn_units):
-    """ change the units if necessary
-        only needed for highp, lowp, and plog
+    """  Check the units of the Arrhenius fitting parameters
+         in the reaction string according to the units given in
+         the mechanism file.
+   
+        :param params: Arrhenius fitting parameters
+        :type params: list(float)
+        :param rxn_units: units for parameters specifies
+        :type rxn_units: str
+        :return params: Arrhenius fitting parameters (A->mol, Ea->kcal.mol-1)
+        :rtype: list(float)
     """
-    # Determine converstion factor for Ea Units
+
+    # Determine converstion factor for A parameter units
+    if rxn_units[1] == 'molecules':
+        a_conv_factor = NAVO
+    else:
+        a_conv_factor = 1.0
+
+    # Determine converstion factor for Ea parameter units
     ea_units = rxn_units[0]
     if ea_units == 'cal/mole':
         ea_conv_factor = CAL2KCAL
@@ -214,13 +349,7 @@ def _update_params_units(params, rxn_units):
     else:
         ea_conv_factor = 1.0
 
-    # Determine converstion factor for A Units
-    if rxn_units[1] == 'molecules':
-        a_conv_factor = NAVO
-    else:
-        a_conv_factor = 1.0
-
-    # update units of params
+    # Set the units of the parameters using the conversion factors
     if params is not None:
         params[0][0] *= a_conv_factor
         params[0][2] *= ea_conv_factor
