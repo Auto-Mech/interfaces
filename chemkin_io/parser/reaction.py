@@ -3,20 +3,10 @@
 
 
 import itertools
-from qcelemental import constants as qcc
 import autoparse.pattern as app
 import autoparse.find as apf
 from autoparse import cast as ap_cast
-from chemkin_io.parser import util
-
-
-# Constants and Conversion factors
-# NAVO = qcc.constants.avogadro_constant
-NAVO = 6.0221409e+23
-CAL2KCAL = qcc.conversion_factor('cal/mol', 'kcal/mol')
-J2KCAL = qcc.conversion_factor('J/mol', 'kcal/mol')
-KJ2KCAL = qcc.conversion_factor('kJ/mol', 'kcal/mol')
-KEL2KCAL = qcc.conversion_factor('kelvin', 'kcal/mol')
+from ioformat import headlined_sections
 
 
 # Various strings needed to parse the data sections of the Reaction block
@@ -40,14 +30,20 @@ REACTION_PATTERN = (SPECIES_NAMES_PATTERN + app.padded(CHEMKIN_ARROW) +
 COEFF_PATTERN = (app.NUMBER + app.LINESPACES + app.NUMBER +
                  app.LINESPACES + app.NUMBER)
 
-# Constants
-NAVO = 6.02214076e23
-
 
 # Functions which use thermo parsers to collate the data
 def data_block(block_str):
-    """ get the reaction data
+    """ Parses all of the chemical equations and corresponding fitting
+        parameters in the reactions block of the mechanism input file
+        and subsequently pulls all of the species names and fitting
+        parameters from the data string; this information is stored in a list.
+
+        :param block_str: string for reactions block
+        :type block_str: str
+        :return data_block: all the data from the data string for each reaction
+        :rtype: list(list(str))
     """
+
     rxn_dstr_lst = data_strings(block_str)
     rxn_dat_lst = tuple(zip(
         map(reactant_names, rxn_dstr_lst),
@@ -63,8 +59,16 @@ def data_block(block_str):
 
 
 def data_dct(block_str, data_entry='strings'):
-    """ build a dictionary with the name dictionary
+    """ Parses all of the chemical equations and corresponding fitting
+        parameters in the reactions block of the mechanism input file
+        and stores them in a dictionary.
+
+        :param block_str: string for reactions block
+        :type block_str: str
+        :return data_dct: dictionary of all the reaction data strings
+        :rtype: dict[reaction: data string]
     """
+
     rxn_dstr_lst = data_strings(block_str)
     if data_entry == 'strings':
         rxn_dct = {}
@@ -93,8 +97,9 @@ def data_dct(block_str, data_entry='strings'):
 
 # Functions for parsing the reactuins block or single reaction string #
 def data_strings(block_str):
-    """ Parse all of the chemcial equations and corresponding fitting
-        parameters in the reactions block of the mechanism input file.
+    """ Parses all of the chemical equations and corresponding fitting
+        parameters in the reactions block of the mechanism input file
+        and stores them in a list.
 
         :param block_str: string for reactions block
         :type block_str: str
@@ -102,7 +107,7 @@ def data_strings(block_str):
         :rtype: list(str)
     """
 
-    rxn_dstrs = util.headlined_sections(
+    rxn_dstrs = headlined_sections(
         string=block_str.strip(),
         headline_pattern=CHEMKIN_ARROW
     )
@@ -477,7 +482,6 @@ def _split_reagent_string(rgt_str):
         :return rgts: names of the species in the reaction
         :type rgts: list(str)
     """
-
 
     def _interpret_reagent_count(rgt_cnt_str):
         """ Count the species in a string containing one side

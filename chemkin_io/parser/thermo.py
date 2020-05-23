@@ -4,28 +4,39 @@
 
 import autoparse.pattern as app
 import autoparse.find as apf
-from chemkin_io.parser.util import headlined_sections
-
-
-RC = 1.98720425864083e-3  # in kcal/mol.K
+from ioformat import headlined_sections
 
 
 # Functions which use thermo parsers to collate the data
 def data_block(block_str):
-    """ find all thermo data
+    """ Parses all of the NASA polynomials in the species block of the
+        mechanism file and subsequently pulls all of the species names
+        and thermochemical properties.
+
+        :param block_str: string for thermo block
+        :type block_str: str
+        :return data_block: all the data from the data string for each species
+        :rtype: list(list(str/float))
     """
+
     thm_dstr_lst = data_strings(block_str)
     thm_dat_lst = tuple(zip(
         map(species_name, thm_dstr_lst),
         map(temperatures, thm_dstr_lst),
         map(low_coefficients, thm_dstr_lst),
         map(high_coefficients, thm_dstr_lst)))
+
     return thm_dat_lst
 
 
 def data_dct(block_str, data_entry='strings'):
-    """ build a dictionary indexes by the species' CHEMKIN mechanism name
-        contains block entry
+    """ Parse all of the NASA polynomials given in the thermo block
+        of the mechanism input file and stores them in a dictionary.
+
+        :param block_str: string for thermo block
+        :type block_str: str
+        :return therm_dct: all the data from the data string for each speices
+        :rtype: dict[species: NASA polynomial string]
     """
 
     if data_entry == 'strings':
@@ -45,7 +56,7 @@ def data_dct(block_str, data_entry='strings'):
 # Functions for parsing the thermo block or single polyn string #
 def data_strings(block_str):
     """ Parse all of the NASA polynomials given in the thermo block
-        of the mechanism input file.
+        of the mechanism input file and stores them in a list.
 
         :param block_str: string for thermo block
         :type block_str: str
@@ -61,7 +72,7 @@ def data_strings(block_str):
     )
     thm_strs = headlined_sections(
         string=block_str.strip(),
-        headline_pattern=headline_pattern,
+        headline_pattern=headline_pattern
     )
 
     return thm_strs

@@ -3,19 +3,17 @@
 
 
 import numpy as np
+from ioformat import phycon
 from chemkin_io.parser import thermo as thm_parser
 
 
-RC = 1.98720425864083e-3  # in kcal/mol.K
-
-
 # functions which calculate quantiies using data from the thermo section #
-def mechanism(block_str, temps, rval=RC):
+def mechanism(block_str, temps, rval=phycon.RC):
     """ Parses the all the reactions data string in the thermo block
         in a mechanism file for their NASA polynomials and
         uses them to calculate thermochemical values: H(T), Cp(T), S(T), G(T).
 
-        :param block_str: string of Reaction block of CHEMKIN input
+        :param block_str: string of Reaction block of ChemKin input
         :type block_str: str
         :param temps: temperatures to calculate Thermo quantities (K)
         :type temps: list(float)
@@ -39,7 +37,7 @@ def mechanism(block_str, temps, rval=RC):
     return mech_thermo_dct
 
 
-def enthalpy(thm_dstr, temp, rval=RC):
+def enthalpy(thm_dstr, temp, rval=phycon.RC):
     """ Calculate the Enthalpy [H(T)] of a species using the
         coefficients of its NASA polynomial.
 
@@ -69,7 +67,7 @@ def enthalpy(thm_dstr, temp, rval=RC):
     return h_t
 
 
-def heat_capacity(thm_dstr, temp, rval=RC):
+def heat_capacity(thm_dstr, temp, rval=phycon.RC):
     """ Calculate the Heat Capacity [Cp(T)] of a species using the
         coefficients of its NASA polynomial.
 
@@ -97,7 +95,7 @@ def heat_capacity(thm_dstr, temp, rval=RC):
     return cp_t
 
 
-def entropy(thm_dstr, temp, rval=RC):
+def entropy(thm_dstr, temp, rval=phycon.RC):
     """ Calculate the Entropy [S(T)] of a species using the
         coefficients of its NASA polynomial.
 
@@ -125,7 +123,7 @@ def entropy(thm_dstr, temp, rval=RC):
     return s_t
 
 
-def gibbs(thm_dstr, temp, rval=RC):
+def gibbs(thm_dstr, temp, rval=phycon.RC):
     """ Calculate the Gibbs Free Energy [G(T)] of a species using the
         coefficients of its NASA polynomial.
 
@@ -149,7 +147,7 @@ def gibbs(thm_dstr, temp, rval=RC):
 
 def _coefficients_for_specific_temperature(thm_dstr, temp):
     """ Parse out the coefficients of a NASA polynomial from
-        a CHEMKIN-formatted string. The input temperature value
+        a ChemKin-formatted string. The input temperature value
         determines whether the low- or high-temperature coefficients
         are read from the string.
 

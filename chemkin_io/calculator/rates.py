@@ -5,18 +5,9 @@
 import itertools
 import operator
 import numpy as np
-from qcelemental import constants as qcc
 import ratefit
+from ioformat import phycon
 from chemkin_io.parser import reaction as rxn_parser
-
-
-# Constants and Conversion factors
-# NAVO = qcc.constants.avogadro_constant
-NAVO = 6.0221409e+23
-CAL2KCAL = qcc.conversion_factor('cal/mol', 'kcal/mol')
-J2KCAL = qcc.conversion_factor('J/mol', 'kcal/mol')
-KJ2KCAL = qcc.conversion_factor('kJ/mol', 'kcal/mol')
-KEL2KCAL = qcc.conversion_factor('kelvin', 'kcal/mol')
 
 
 def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
@@ -331,20 +322,20 @@ def _update_params_units(params, rxn_units):
 
     # Determine converstion factor for A parameter units
     if rxn_units[1] == 'molecules':
-        a_conv_factor = NAVO
+        a_conv_factor = phycon.NAVO
     else:
         a_conv_factor = 1.0
 
     # Determine converstion factor for Ea parameter units
     ea_units = rxn_units[0]
     if ea_units == 'cal/mole':
-        ea_conv_factor = CAL2KCAL
+        ea_conv_factor = phycon.CAL2KCAL
     elif ea_units == 'joules/mole':
-        ea_conv_factor = J2KCAL
+        ea_conv_factor = phycon.J2KCAL
     elif ea_units == 'kjoules/mole':
-        ea_conv_factor = KJ2KCAL
+        ea_conv_factor = phycon.KJ2KCAL
     elif ea_units == 'kelvin':
-        ea_conv_factor = KEL2KCAL
+        ea_conv_factor = phycon.KEL2KCAL
     else:
         ea_conv_factor = 1.0
 
