@@ -20,10 +20,10 @@ KEL2KCAL = qcc.conversion_factor('kelvin', 'kcal/mol')
 
 
 def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
-    """ Parses the all the reactions data string in the reaction block 
+    """ Parses the all the reactions data string in the reaction block
         in a mechanism file for their fitting parameters and
         uses them to calculate rate constants [k(T,P)]s.
-    
+
         :param rxn_block: string for reaction block from the mechanism input
         :type rxn_block: str
         :param rxn_units: units for parameters specifies
@@ -75,12 +75,12 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
 
 
 def branching_fractions(rxn_block, rxn_units, t_ref, temps, pressures):
-    """ Parses the all the reactions data string in the reaction block 
+    """ Parses the all the reactions data string in the reaction block
         in a mechanism file for their fitting parameters and
         uses them to calculate rate constants [k(T,P)]s.
         These rate constants are then used to calculate the
         branching fractions for all the unique reactants in the mechanism.
-    
+
         :param rxn_block: string for reaction block from the mechanism input
         :type rxn_block: str
         :param rxn_units: units for parameters specifies
@@ -154,8 +154,6 @@ def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
         :rtype: dict[pressure: temps]
     """
 
-    rate_constants = {}
-
     # Accepts a params dictionary
     # Read the parameters from the reactions string
     highp_params = rxn_parser.high_p_parameters(rxn_dstr)
@@ -166,6 +164,7 @@ def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
 
     # Calculate high_pressure rates
     highp_ks = _arrhenius(highp_params, temps, t_ref, rxn_units)
+    ktp_dct = {}
     ktp_dct['high'] = highp_ks
 
     # Calculate pressure-dependent rate constants based on discovered params
@@ -321,7 +320,7 @@ def _update_params_units(params, rxn_units):
     """  Check the units of the Arrhenius fitting parameters
          in the reaction string according to the units given in
          the mechanism file.
-   
+
         :param params: Arrhenius fitting parameters
         :type params: list(float)
         :param rxn_units: units for parameters specifies

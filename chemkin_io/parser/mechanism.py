@@ -367,9 +367,3 @@ def _convert_comment_lines(mech_str):
         mech_str = apf.replace(inline, outline, mech_str, case=True)
 
     return mech_str
-
-
-if __name__ == '__main__':
-    with open('species.csv', 'r') as f:
-        csstr = f.read()
-    print(spc_name_dct(cssstr, 'inchi'))

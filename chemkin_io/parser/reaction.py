@@ -93,7 +93,7 @@ def data_dct(block_str, data_entry='strings'):
 
 # Functions for parsing the reactuins block or single reaction string #
 def data_strings(block_str):
-    """ Parse all of the chemcial equations and corresponding fitting 
+    """ Parse all of the chemcial equations and corresponding fitting
         parameters in the reactions block of the mechanism input file.
 
         :param block_str: string for reactions block
@@ -111,7 +111,7 @@ def data_strings(block_str):
 
 def reactant_names(rxn_dstr):
     """ Parses the data string for a reaction in the reactions block
-        for the line containing the chemical equation in order to 
+        for the line containing the chemical equation in order to
         read the names of the reactant species.
 
         :param rxn_dstr: data string for species in reaction block
@@ -133,7 +133,7 @@ def reactant_names(rxn_dstr):
 
 def product_names(rxn_dstr):
     """ Parses the data string for a reaction in the reactions block
-        for the line containing the chemical equation in order to 
+        for the line containing the chemical equation in order to
         read the names of the product species.
 
         :param rxn_dstr: data string for species in reaction block
@@ -155,7 +155,7 @@ def product_names(rxn_dstr):
 
 def high_p_parameters(rxn_dstr):
     """ Parses the data string for a reaction in the reactions block
-        for the line containing the chemical equation in order to 
+        for the line containing the chemical equation in order to
         read the fitting parameters that are on the same line.
 
         :param rxn_dstr: data string for species in reaction block
@@ -349,7 +349,7 @@ def plog_parameters(rxn_dstr):
 
 def buffer_enhance_factors(rxn_dstr):
     """ Parses the data string for a reaction in the reactions block
-        for the line containing the names of several bath gases and 
+        for the line containing the names of several bath gases and
         their corresponding collision enhancement factors.
 
         :param rxn_dstr: data string for species in reaction block
@@ -469,7 +469,7 @@ def _first_line_pattern(rct_ptt, prd_ptt, param_ptt):
 
 
 def _split_reagent_string(rgt_str):
-    """ Parses out the names of all the species given in a string with 
+    """ Parses out the names of all the species given in a string with
         the chemical equation within the reactions block.
 
         :param rgt_str: string with the reaction chemical equation
@@ -477,10 +477,10 @@ def _split_reagent_string(rgt_str):
         :return rgts: names of the species in the reaction
         :type rgts: list(str)
     """
-        
+
 
     def _interpret_reagent_count(rgt_cnt_str):
-        """ Count the species in a string containing one side 
+        """ Count the species in a string containing one side
             of a chemical rquation.
 
             :param rgt_cnt_str: string of one side of chemcial equation

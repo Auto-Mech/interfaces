@@ -29,7 +29,7 @@ def troe(reaction, high_params, low_params, troe_params, colliders=()):
     [high_a, high_n, high_ea] = high_params
 
     # Write reaction header (with third body added) and high-pressure params
-    reaction = _format_rxn_str_for_pdep(reaction, press='all')
+    reaction = _format_rxn_str_for_pdep(reaction, pressure='all')
     troe_str = '{0:<32s}{1:>10.3E}{2:>9.3f}{3:9.0f} /\n'.format(
         reaction, high_a, high_n, 1000*high_ea)
 
@@ -62,7 +62,7 @@ def lindemann(reaction, high_params, low_params, colliders=()):
     [high_a, high_n, high_ea] = high_params
 
     # Write reaction header (with third body added) and high-pressure params
-    reaction = _format_rxn_str_for_pdep(reaction, press='low')
+    reaction = _format_rxn_str_for_pdep(reaction, pressure='low')
     lind_str = '{0:<32s}{1:>10.3E}{2:>9.3f}{3:9.0f} /\n'.format(
         reaction, high_a, high_n, 1000*high_ea)
 
@@ -161,7 +161,7 @@ def chebyshev(reaction, high_params, alpha, tmin, tmax, pmin, pmax):
     [high_a, high_n, high_ea] = high_params
 
     # Write reaction header (with third body added) and high-pressure params
-    reaction = _format_rxn_str_for_pdep(reaction, press='all')
+    reaction = _format_rxn_str_for_pdep(reaction, pressure='all')
     cheb_str = '{0:<32s}{1:>10.3E}{2:>9.3f}{3:9.0f} /\n'.format(
         reaction, high_a, high_n, 1000*high_ea)
 
@@ -240,7 +240,7 @@ def _fit_info_str(pressures, temp_dct, err_dct):
 
 
 def _format_rxn_str_for_pdep(reaction, pressure='all'):
-    """ Add the bath gas M species to the reaction string for 
+    """ Add the bath gas M species to the reaction string for
         pressure dependent reactions in the appropriate format.
 
         :param reaction: chemical equation for the reaction
@@ -286,7 +286,7 @@ def _format_params_string(header, params, newline=False):
     """ Write a string containing fitting params used for several
         functional forms.
 
-        :param header: name of functional form the parameters correspond to 
+        :param header: name of functional form the parameters correspond to
         :type header: str
         :param params: fitting parameters
         :type params: list(float)

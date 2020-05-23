@@ -11,7 +11,7 @@ RC = 1.98720425864083e-3  # in kcal/mol.K
 
 # functions which calculate quantiies using data from the thermo section #
 def mechanism(block_str, temps, rval=RC):
-    """ Parses the all the reactions data string in the thermo block 
+    """ Parses the all the reactions data string in the thermo block
         in a mechanism file for their NASA polynomials and
         uses them to calculate thermochemical values: H(T), Cp(T), S(T), G(T).
 
@@ -148,7 +148,7 @@ def gibbs(thm_dstr, temp, rval=RC):
 
 
 def _coefficients_for_specific_temperature(thm_dstr, temp):
-    """ Parse out the coefficients of a NASA polynomial from 
+    """ Parse out the coefficients of a NASA polynomial from
         a CHEMKIN-formatted string. The input temperature value
         determines whether the low- or high-temperature coefficients
         are read from the string.

@@ -8,12 +8,12 @@ import automol
 CM2K = 1.438776877
 
 
-def lennard_jones(names, geos, epsilons, sigmas,
-                  tot_dip_moms, polars,
-                  z_rots=None):
+def transport(names, geos, epsilons, sigmas,
+              tot_dip_moms, polars,
+              z_rots=None):
     """ Writes the string in containing data from several mechanism species
         used in calculating transport properties during ChemKin simulations.
-    
+
         :param names: names of each species
         :type names: list(string)
         :param geos: geometries of each species
@@ -76,9 +76,9 @@ def lennard_jones(names, geos, epsilons, sigmas,
 
     # Add the headers for each of the columns
     chemkin_str += ('{0:<'+nameslen+'}{1:>5s}{2:>12s}{3:>8s}' +
-                       '{4:>8s}{5:>8s}{6:>8s}\n').format(
-                           '! Species', 'Shape', 'Epsilon', 'Sigma',
-                           'Mu', 'Alpha', 'Z_Rot')
+                    '{4:>8s}{5:>8s}{6:>8s}\n').format(
+                        '! Species', 'Shape', 'Epsilon', 'Sigma',
+                        'Mu', 'Alpha', 'Z_Rot')
 
     # Add the values to the string
     mol_data = zip(names, shape_idxs, epsilons,
