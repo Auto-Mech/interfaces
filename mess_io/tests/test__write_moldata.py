@@ -41,7 +41,7 @@ def test__core_multirotor_writer():
     geom = (('O', (1.911401284, 0.16134481659, -0.05448080419)),
             ('N', (4.435924209, 0.16134481659, -0.05448080419)),
             ('N', (6.537299661, 0.16134481659, -0.05448080419)))
-    pot_surf = 'surf.dat'
+    pot_surf_file = 'surf.dat'
 
     # Write a string for the internal rotor
     group = [11, 10, 9, 8, 7, 6]
@@ -60,7 +60,7 @@ def test__core_multirotor_writer():
     core_multirotor_str = mess_io.writer.mol_data.core_multirotor(
         geom=geom,
         sym_factor=sym_factor,
-        pot_surf=pot_surf,
+        pot_surf_file=pot_surf_file,
         int_rot_str=rotor_int_str,
         interp_emax=100,
         quant_lvl_emax=9)
@@ -89,7 +89,8 @@ def test__core_phasespace_writer():
         geom2=geom2,
         sym_factor=sym_factor,
         stoich=stoich,
-        pot_prefactor=10, pot_power_exp=6)
+        pot_prefactor=10,
+        pot_exp=6)
 
     # Print the core string
     print(core_phasespace_str)

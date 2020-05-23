@@ -2,6 +2,7 @@
 """
 
 import os
+from ioformat import build_mako_str
 from thermp_io import util
 
 

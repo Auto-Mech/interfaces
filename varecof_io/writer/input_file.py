@@ -3,8 +3,8 @@ Writes the global keyword section of a MESS input file
 """
 
 import os
-from mako.template import Template
 from qcelemental import constants as qcc
+from ioformat import build_mako_str
 from varecof_io.writer import util
 
 
@@ -103,11 +103,11 @@ def divsur(rdists,
         :type frame1: list(int)
         :param frame2: atom idxs for orientation of fragment 2 frame
         :type frame2: list(int)
-        :param r2dists: cycle coordinates 
+        :param r2dists: cycle coordinates
         :type r2dists: list(float)
-        :param d1dists: cycle coordinates 
+        :param d1dists: cycle coordinates
         :type d1dists: list(float)
-        :param d2dists: cycle coordinates 
+        :param d2dists: cycle coordinates
         :type d2dists: list(float)
         :param t1angs: cycle coordinates
         :type t1angs: list(float)
@@ -218,7 +218,7 @@ def divsur(rdists,
 
     return build_mako_str(
         template_file_name='divsur.mako',
-        template_src_path=TEMPLATES_PATH,
+        template_src_path=TEMPLATE_PATH,
         template_keys=divsur_keys)
 
 
@@ -248,14 +248,10 @@ def elec_struct(exe_path, lib_path, base_name, npot,
         'pot_params_str': pot_params_str
     }
 
-    # Set template name and path for the global keywords section
-    template_file_name = 'els.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build tst input string
-    els_str = Template(filename=template_file_path).render(**els_keys)
-
-    return els_str
+    return build_mako_str(
+        template_file_name='els.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys=els_keys)
 
 
 def structure(geo1, geo2):
@@ -283,14 +279,10 @@ def structure(geo1, geo2):
         'coords2': coords2,
     }
 
-    # Set template name and path for the global keywords section
-    template_file_name = 'struct.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build structure input string
-    struct_str = Template(filename=template_file_path).render(**struct_keys)
-
-    return struct_str
+    return build_mako_str(
+        template_file_name='struct.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys=struct_keys)
 
 
 def tml(memory, basis, wfn, method, inf_sep_energy):
@@ -315,32 +307,34 @@ def tml(memory, basis, wfn, method, inf_sep_energy):
         'inf_sep_energy': inf_sep_energy
     }
 
-    # Set template name and path for the tml input file string
-    template_file_name = 'tml.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build structure input string
-    tml_str = Template(filename=template_file_path).render(**tml_keys)
-
-    return tml_str
+    return build_mako_str(
+        template_file_name='tml.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys=tml_keys)
 
 
 def mc_flux():
-    """ Writes the mc_flux.inp file
+    """ Writes the mc_flux.inp file.
+
         :return mc_flux_inp_str: String for input file
         :rtype: string
     """
+
     mc_flux_inp_str = 'MultiInputFile          tst.inp\n'
     mc_flux_inp_str += 'OutputFile              mc_flux.out\n'
     mc_flux_inp_str += 'Face                    0\n'
     mc_flux_inp_str += 'ElectronicSurface       0'
+
     return mc_flux_inp_str
 
 
 def convert():
-    """ Writes the convert.inp file
+    """ Writes the convert.inp file.
+
         :return convert_inp_str: String for input file
         :rtype: string
     """
+
     convert_inp_str = 'MultiInputFile    tst.inp'
+
     return convert_inp_str

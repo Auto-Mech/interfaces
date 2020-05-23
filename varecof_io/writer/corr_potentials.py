@@ -4,7 +4,7 @@ Writes the fortran files needed for the correction potential
 
 import os
 import subprocess
-from mako.template import Template
+from ioformat import build_mako_str
 from varecof_io.writer import util
 
 
@@ -17,7 +17,7 @@ def species(rvalues, potentials, bnd_frm_idxs,
             dist_restrict_idxs=(), pot_labels=(), species_name='mol'):
     """ Writes the string for a Fortran source file containing information
         used to build the correction potential for a species.
-    
+
         :param rvalues: Intermolecular distance to scan over
         :type rvalues: list(float)
         :param potentials: list of potentials calculates along rvalues
@@ -148,7 +148,7 @@ def makefile(fortran_compiler, pot_file_names=()):
 
         :param fortran_compiler: name of compiler to build potentials
         :type fortran_compiler: str
-        :param pot_file_names: names of files with various potentials 
+        :param pot_file_names: names of files with various potentials
         :type: pot_file_names: list(str)
         :return: string for the makefile
         :rtype: string

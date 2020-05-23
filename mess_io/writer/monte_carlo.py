@@ -4,6 +4,8 @@ Writes MESS input for a monte carlo partition function calculation
 
 import os
 from mess_io.writer import util
+from ioformat import build_mako_str
+from ioformat import remove_trail_whitespace
 
 
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
@@ -19,23 +21,23 @@ def mc_species(geom, elec_levels,
                freqs=(), no_qc_corr=False, use_cm_shift=False):
     """ Writes a monte carlo species section
 
-        :param core: `Core` section string in MESS format
+        :param core: `MonteCarlo` section string in MESS format
         :type core: str
-        :param freqs: vibrational frequencies
+        :param freqs: vibrational frequencies without fluxional mode (cm-1)
         :type freqs: list(float)
         :param elec_levels: energy and degeneracy of atom's electronic states
         :type elec_levels: list(float)
         :param hind_rot: string of MESS-format `Rotor` sections for all rotors
         :type hind_rot: str
-        :param ground_energy:
+        :param ground_energy: energy relative to reference (kcal.mol-1)
         :type ground_energy: float
-        :param reference_energy:
+        :param reference_energy: reference energy (kcal.mol-1)
         :type reference_energy: float
-        :param freqs: vibrational frequencies
+        :param freqs: vibrational frequencies (cm-1)
         :type freqs: list(float)
-        :param no_qc_corr:
+        :param no_qc_corr: signal to preclude quantum correction
         :type no_qc_corr: bool
-        :param use_cm_chift:
+        :param use_cm_chift: signal to include a CM shift
         :type use_cm_shift: bool
         :rtype: str
     """
@@ -69,7 +71,7 @@ def mc_species(geom, elec_levels,
         'use_cm_shift': use_cm_shift
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='monte_carlo.mako',
         template_src_path=MONTE_CARLO_PATH,
         template_keys=monte_carlo_keys)
@@ -113,7 +115,7 @@ def mc_data(geos, enes, grads=(), hessians=()):
             dat_str += 'Hessian'+'\n'
             dat_str += hessians[idx]+'\n'
 
-    return util.remove_trail_whitespace(dat_str)
+    return remove_trail_whitespace(dat_str)
 
 
 def fluxional_mode(atom_indices, span=360.0):
@@ -137,7 +139,7 @@ def fluxional_mode(atom_indices, span=360.0):
         'span': span,
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='fluxional_mode.mako',
         template_src_path=MONTE_CARLO_PATH,
         template_keys=flux_mode_keys)

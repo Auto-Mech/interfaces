@@ -4,7 +4,7 @@
 
 
 def rpht_output(output_str):
-    """ Parses the ProjRot frequency output file strings for 
+    """ Parses the ProjRot frequency output file strings for
         the projected frequencies.
 
         :param output_str: string of lines of MESS output file

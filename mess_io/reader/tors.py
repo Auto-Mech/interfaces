@@ -10,7 +10,7 @@ import autoparse.find as apf
 
 
 def freqs(output_str):
-    """ Reads the analytic frequencies for each of the 
+    """ Reads the analytic frequencies for each of the
         hindered rotors from MESS output file string.
 
         :param output_str: string of lines of MESS output file
@@ -32,7 +32,7 @@ def freqs(output_str):
 
 
 def zpves(output_str):
-    """ Reads the zero-point energies for each of the 
+    """ Reads the zero-point energies for each of the
         hindered rotors from MESS output file string.
 
         :param output_str: string of lines of MESS output file

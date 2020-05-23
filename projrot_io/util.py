@@ -2,11 +2,27 @@
   Additional functions for formatting information for MESS strings
 """
 
+import numpy
+from qcelemental import constants as qcc
+from qcelemental import periodictable as ptab
 from ioformat import remove_trail_whitespace
 
 
+BOHR2ANG = qcc.conversion_factor('bohr', 'angstrom')
+
+
 def write_data_str(geoms, grads, hessians):
-    """ Combine all of the data information into a string
+    """ Writes a string containing the geometry, gradient, and Hessian
+        for either a single species or points along a reaction path
+        that is formatted appropriately for the ProjRot input file.
+
+        :param geoms: geometries
+        :type geoms: list
+        :param grads: gradients
+        :type grads: list
+        :param hessians: Hessians
+        :type hessians: list
+        :rtype: str
     """
 
     if not isinstance(geoms, list):
@@ -32,14 +48,17 @@ def write_data_str(geoms, grads, hessians):
     return remove_trail_whitespace(data_str)
 
 
-def _format_geom_str(geo):
-    """ Write the geometry section of the input file
-        geometry in Angstroms
+def _format_geom_str(geom):
+    """ Formats the geometry into a string used for the ProjRot input file.
+
+        :param geoms: geometries (Angstrom)
+        :type geoms: list
+        :rtype: str
     """
 
     # Format the strings for the xyz coordinates
     geom_str = ''
-    for i, (sym, coords) in enumerate(geo):
+    for i, (sym, coords) in enumerate(geom):
         anum = int(ptab.to_Z(sym))
         coords = [coord * BOHR2ANG for coord in coords]
         coords_str = '{0:>14.8f}{1:>14.8f}{2:>14.8f}'.format(
@@ -51,8 +70,13 @@ def _format_geom_str(geo):
 
 
 def _format_grad_str(geom, grad):
-    """ Write the gradient section of the input file
-        grads in Hartrees/Bohr
+    """ Formats the gradient into a string used for the ProjRot input file.
+
+        :param geom: geometries (Angstrom)
+        :type geom: list
+        :param grads: gradients (Eh/Bohr)
+        :type grads: list
+        :rtype: str
     """
 
     atom_list = []
@@ -71,13 +95,17 @@ def _format_grad_str(geom, grad):
 
 
 def _format_hessian_str(hess):
-    """ Write the Hessian section of the input file
+    """ Formats the Hessian into a string used for the ProjRot input file.
+
+        :param hess: hessians (Eh/Bohr^2)
+        :type hess: list
+        :rtype: str
     """
 
     # Format the Hessian
-    hess = np.array(hess)
-    nrows = np.shape(hess)[0]
-    ncols = np.shape(hess)[1]
+    hess = numpy.array(hess)
+    nrows = numpy.shape(hess)[0]
+    ncols = numpy.shape(hess)[1]
 
     if nrows % 5 == 0:
         nchunks = nrows // 5
@@ -118,4 +146,3 @@ def _format_hessian_str(hess):
         cnt += 1
 
     return remove_trail_whitespace(hess_str)
-
