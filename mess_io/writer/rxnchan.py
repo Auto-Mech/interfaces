@@ -15,6 +15,13 @@ RXNCHAN_PATH = os.path.join(SECTION_PATH, 'reaction_channel')
 
 def species(species_label, species_data, zero_energy):
     """ Writes a species section.
+
+        :param species_label: label for input species used by MESS
+        :type species_label: str
+        :param species_data: MESS-string with all data for species
+        :type species_data: str
+        :param zero_energy: elec+zpve energy relative to PES reference
+        :rtype: str
     """
 
     # Indent the string containing all of data for the well

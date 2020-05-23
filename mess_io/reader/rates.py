@@ -6,7 +6,7 @@
 
 
 def highp_ks(output_str, reactant, product):
-    """ Parses the MESS output file string for the rate constants [k(T)]s 
+    """ Parses the MESS output file string for the rate constants [k(T)]s
         for a single reaction at the high-pressure limit.
 
         :param output_str: string of lines of MESS output file
@@ -38,7 +38,7 @@ def highp_ks(output_str, reactant, product):
     for i in range(block_start, len(mess_lines)):
         if reaction in mess_lines[i]:
             rate_const_block_start = i
-             rate_constants = _parse_rate_constants(
+            rate_constants = _parse_rate_constants(
                 mess_lines, rate_const_block_start, reaction)
             break
 
@@ -55,7 +55,7 @@ def pdep_ks(output_str, reactant, product, pressure):
         :type reactant: str
         :param product: label for the product used in the MESS output
         :type product: str
-        :param pressure: pressure that k(T,P)s will be read for 
+        :param pressure: pressure that k(T,P)s will be read for
         :return rate_constants: k(T,P)s for the reaction at given pressure
         :rtype list(float)
     """
@@ -113,9 +113,8 @@ def _parse_rate_constants(mess_lines, block_start, reaction):
         if mess_lines[i].strip() == '':
             break
         rate_constants.append(mess_lines[i].strip().split()[reaction_col])
-    
+
     # Convert temps and rate constants to floats
-    temps = [float(temp) for temp in temps]
     rate_constants = [float(rate_constant)
                       if rate_constant != '***' else rate_constant
                       for rate_constant in rate_constants]
@@ -220,7 +219,7 @@ def get_temperatures_input(input_str):
     """
 
     # Get the MESS input lines
-    mess_lines = input_string.splitlines()
+    mess_lines = input_str.splitlines()
     for line in mess_lines:
         if 'TemperatureList' in line:
             temperatures = [float(val) for val in line.strip().split()[1:]]
@@ -241,9 +240,9 @@ def get_pressures_input(input_str):
         :return pressure_unit: unit of the pressures in the input
         :rtype: str
     """
-    
+
     # Get the MESS input lines
-    mess_lines = input_string.splitlines()
+    mess_lines = input_str.splitlines()
     for line in mess_lines:
         if 'PressureList' in line:
             pressures = [float(val) for val in line.strip().split()[1:]]

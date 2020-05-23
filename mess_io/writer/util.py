@@ -190,7 +190,7 @@ def format_xmat(xmat):
     """ Formats the anharmonicity (X) matrix for a species
         into a string appropriate for a MESS input file.
 
-        :param xmat: anharmonicity matrix
+        :param xmat: anharmonicity matrix (cm-1)
         :type xmat: list(list(float))
         :return xmat_str: anharmonicity matrix in a MESS-format string
         :rtype string

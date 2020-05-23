@@ -184,6 +184,11 @@ def _read_name_inchi(data):
         spc_dct = {}
         print('No "inchi" or "SMILES" column in csv file')
 
+    # Fill remaining inchi entries if inchi
+    for i, name in enumerate(data.name):
+        if str(spc_dct[name]) == 'nan':
+            spc_dct[name] = _inchi(data.smiles[i])
+
     return spc_dct
 
 
@@ -310,10 +315,10 @@ def _read_csv(csv_str):
 
     # Read in csv file while removing whitespace and make all chars lowercase
     csv_file = StringIO(csv_str)
-    data = pandas.read_csv(csv_file, comment='!', quotechar="'")
+    data = pandas.read_csv(csv_file, comment='#', quotechar="'")
 
     # Parse CSV string into data columns
-    data.columns = data.columns.str.strip()
+    # data.columns = data.columns.str.strip()
     data.columns = map(str.lower, data.columns)
 
     return data
@@ -362,3 +367,9 @@ def _convert_comment_lines(mech_str):
         mech_str = apf.replace(inline, outline, mech_str, case=True)
 
     return mech_str
+
+
+if __name__ == '__main__':
+    with open('species.csv', 'r') as f:
+        csstr = f.read()
+    print(spc_name_dct(cssstr, 'inchi'))

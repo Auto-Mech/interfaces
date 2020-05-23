@@ -8,20 +8,37 @@ import automol
 CM2K = 1.438776877
 
 
-def lennard_jones(names, geos,
-                  epsilons, sigmas,
-                  dipole_moments, polarizabilities,
+def lennard_jones(names, geos, epsilons, sigmas,
+                  tot_dip_moms, polars,
                   z_rots=None):
-    """ writes the string for the transport
+    """ Writes the string in containing data from several mechanism species
+        used in calculating transport properties during ChemKin simulations.
+    
+        :param names: names of each species
+        :type names: list(string)
+        :param geos: geometries of each species
+        :type geos: list
+        :param epsilons: Lennard-Jones epsilon param. for each species (K)
+        :type epsilons: list(float)
+        :param sigmas: Lennard-Jones sigma param. for each species (Angstrom)
+        :type sigmas: list(float)
+        :param tot_dip_moms: Total dipole moment of each species (Debye)
+        :type tot_dip_moms: list(float)
+        :param polars: Mean static polarizability of each species (Angstrom^3)
+        :type polars: list(float)
+        :param z_rots: 298 K rotational relazxation collision number
+        :type z_rots: type(float)
+        :return: chemkin_str: ChemKin string with data
+        :rtype: str
     """
 
     data_length = len(names)
     assert all(len(lst) == data_length
                for lst in [geos, epsilons, sigmas,
-                           dipole_moments, polarizabilities])
+                           tot_dip_moms, polars])
 
     # Initialize string with common header
-    chemkin_string = """! THEORETICAL TRANSPORT PROPERTIES
+    chemkin_str = """! THEORETICAL TRANSPORT PROPERTIES
 !
 ! (1) Shape, index denotes atom (0), linear molec. (1), nonlinear molec. (2);
 ! (2) Epsilon, the Lennard-Jones well depth, in K;
@@ -58,18 +75,18 @@ def lennard_jones(names, geos,
         z_rots = [1.0 for i in range(data_length)]
 
     # Add the headers for each of the columns
-    chemkin_string += ('{0:<'+nameslen+'}{1:>5s}{2:>12s}{3:>8s}' +
+    chemkin_str += ('{0:<'+nameslen+'}{1:>5s}{2:>12s}{3:>8s}' +
                        '{4:>8s}{5:>8s}{6:>8s}\n').format(
                            '! Species', 'Shape', 'Epsilon', 'Sigma',
                            'Mu', 'Alpha', 'Z_Rot')
 
     # Add the values to the string
     mol_data = zip(names, shape_idxs, epsilons,
-                   sigmas, dipole_moments, polarizabilities, z_rots)
+                   sigmas, tot_dip_moms, polars, z_rots)
     for name, shape, eps, sig, dmom, polr, zrot in mol_data:
-        chemkin_string += (
+        chemkin_str += (
             '{0:<'+nameslen+'}{1:>5d}{2:>12.3f}{3:>8.3f}' +
             '{4:>8.3f}{5:>8.3f}{6:>8.3f}\n').format(
                 name, shape, eps, sig, dmom, polr, zrot)
 
-    return chemkin_string
+    return chemkin_str

@@ -54,11 +54,18 @@ def molecule(core, freqs, elec_levels,
 
         :param core: `Core` section string in MESS format
         :type core: str
-        :param freqs: vibrational frequencies for the molecule
+        :param freqs: vibrational frequencies
         :type freqs: list(float)
         :param elec_levels: energy and degeneracy of atom's electronic states
         :type elec_levels: list(float)
-        ...
+        :param hind_rot: string of MESS-format `Rotor` sections for all rotors
+        :type hind_rot: str
+        :param xmat: anharmonicity matrix (cm-1)
+        :type xmat: list(list(float))
+        :param rovib_coups: rovibrational coupling matrix
+        :type rovib_coups: numpy.ndarray
+        :param rot_dists: rotational distortion constants: [['aaa'], [val]]
+        :type rot_dists: list(list(str), list(float))
         :rtype: str
     """
 

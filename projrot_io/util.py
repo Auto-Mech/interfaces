@@ -16,7 +16,6 @@ def write_data_str(geoms, grads, hessians):
     if not isinstance(hessians, list):
         hessians = [hessians]
     nsteps = len(geoms)
-    natoms = len(geoms[0])
 
     data_str = ''
     for i, (geo, grad, hess) in enumerate(zip(geoms, grads, hessians)):

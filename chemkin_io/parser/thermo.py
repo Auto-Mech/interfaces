@@ -71,7 +71,7 @@ def species_name(thm_dstr):
     """ Parses the name of the species from the NASA polynomial
         given in the data string for a species in the thermo block.
 
-        :param thm_dstr: string species in thermo block
+        :param thm_dstr: data string for species in thermo block
         :type thm_dstr: str
         :return name: name of the species
         :rtype: str
@@ -87,7 +87,7 @@ def temperatures(thm_dstr):
     """ Parses the temperatures from the NASA polynomial
         given in the data string for a species in the thermo block.
 
-        :param thm_dstr: string species in thermo block
+        :param thm_dstr: data string for species in thermo block
         :type thm_dstr: str
         :return temps: temperatures (K)
         :rtype: tuple(float)
@@ -108,7 +108,7 @@ def low_coefficients(thm_dstr):
     """ Parses the low temperature coefficients from the NASA polynomial
         given in the data string for a species in the thermo block.
 
-        :param thm_dstr: string species in thermo block
+        :param thm_dstr: data string for species in thermo block
         :type thm_dstr: str
         :return cfts: low temperature coefficients
         :rtype: tuple(float)
@@ -125,7 +125,7 @@ def high_coefficients(thm_dstr):
     """ Parses the high temperature coefficients from the NASA polynomial
         given in the data string for a species in the thermo block.
 
-        :param thm_dstr: string species in thermo block
+        :param thm_dstr: data string for species in thermo block
         :type thm_dstr: str
         :return cfts: high temperature coefficients
         :rtype: tuple(float)

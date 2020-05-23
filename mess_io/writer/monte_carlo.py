@@ -19,7 +19,25 @@ def mc_species(geom, elec_levels,
                freqs=(), no_qc_corr=False, use_cm_shift=False):
     """ Writes a monte carlo species section
 
-
+        :param core: `Core` section string in MESS format
+        :type core: str
+        :param freqs: vibrational frequencies
+        :type freqs: list(float)
+        :param elec_levels: energy and degeneracy of atom's electronic states
+        :type elec_levels: list(float)
+        :param hind_rot: string of MESS-format `Rotor` sections for all rotors
+        :type hind_rot: str
+        :param ground_energy:
+        :type ground_energy: float
+        :param reference_energy:
+        :type reference_energy: float
+        :param freqs: vibrational frequencies
+        :type freqs: list(float)
+        :param no_qc_corr:
+        :type no_qc_corr: bool
+        :param use_cm_chift:
+        :type use_cm_shift: bool
+        :rtype: str
     """
 
     # Format the molecule specification section
@@ -58,8 +76,22 @@ def mc_species(geom, elec_levels,
 
 
 def mc_data(geos, enes, grads=(), hessians=()):
-    """ Writes a monte carlo species section
+    """ Writes the string for an auxliary data file required for
+        Monte Carlo calculations in MESS that contains the
+        geometries, energies, gradients, and Hessians obtained
+        from Monte Carlo sampling of the fluxional modes.
+
+        :param geos: geometries from sampling
+        :type geos: list
+        :param enes: energies from energies
+        :type enes: list(float)
+        :param grads: gradients from sampling
+        :type grads: list
+        :param hessians: Hessians from sampling
+        :type hessians: list
+        :rtype: str
     """
+
     if not grads and not hessians:
         assert len(geos) == len(enes)
     elif grads or hessians:
@@ -85,7 +117,15 @@ def mc_data(geos, enes, grads=(), hessians=()):
 
 
 def fluxional_mode(atom_indices, span=360.0):
-    """ Writes the string for each fluxional mode
+    """ Writes the string that defines the `FluxionalMode` section for a
+        single fluxional mode (torsion) of a species for a MESS input file by
+        formatting input information into strings a filling Mako template.
+
+        :param atom_idxs: idxs of atoms involved in fluxional mode
+        :type atom_indices: list(int)
+        :param span: range from 0.0 to value that mode was sampled over (deg.)
+        :type span: float
+        :rtype: str
     """
 
     # Format the aotm indices string

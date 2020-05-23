@@ -3,12 +3,10 @@
 """
 
 import os
-import numpy as np
 from qcelemental import constants as qcc
-from qcelemental import periodictable as ptab
 from ioformat import build_mako_str
 from ioformat import remove_trail_whitespace
-from projrot import util
+from projrot_io import util
 
 
 # Conversion factors
@@ -36,7 +34,7 @@ def rpht_input(geoms, grads, hessians,
         :type saddle_idx: int
         :param rotors_str: ProjRot-format string with all the rotor definitions
         :type rotors_str: str
-        :param coord_proj: choice of coordinate system to perform projections 
+        :param coord_proj: choice of coordinate system to perform projections
         :type coord_proj: str
         :param proj_rxn_coord: whether to project out reaction coordinate
         :type proj_rxn_coord: bool
@@ -45,6 +43,7 @@ def rpht_input(geoms, grads, hessians,
 
     # Format the molecule info
     data_str = util.write_data_str(geoms, grads, hessians)
+    natoms = len(geoms[0])
     nsteps = len(geoms)
     nrotors = rotors_str.count('pivotA')
 
@@ -67,7 +66,7 @@ def rpht_input(geoms, grads, hessians,
     return build_mako_str(
         template_file_name='rpht_input.mako',
         template_src_path=TEMPLATE_PATH,
-        template_keys=thermp_keys)
+        template_keys=rpht_keys)
 
 
 def rpht_path_coord_en(coords, energies, bnd1=(), bnd2=()):
@@ -100,11 +99,11 @@ def rpht_path_coord_en(coords, energies, bnd1=(), bnd2=()):
 
     # Check that all the lists are not empty and have the same length
     assert all(lst for lst in (coords, energies, bnd_strs))
-    assert all(len(lst) == nsteps for lst in (coords, energy, bnd_strs))
+    assert all(len(lst) == nsteps for lst in (coords, energies, bnd_strs))
 
     path_str = '{0:<7s}{1:<12s}{2:<10s}{3:<10s}{4:<10s}\n'.format(
         'Point', 'Coordinate', 'Energy', 'Bond1', 'Bond2')
-    for i, (crd, ene, bnd_str) in enumerate(zip(coords, energy, bnd_strs)):
+    for i, (crd, ene, bnd_str) in enumerate(zip(coords, energies, bnd_strs)):
         path_str += '{0:<7d}{1:<12.5f}{2:<10.5f}{3:<20s}'.format(
             i+1, crd, ene, bnd_str)
         if i+1 != nsteps:
