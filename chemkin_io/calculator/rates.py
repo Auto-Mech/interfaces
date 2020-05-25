@@ -10,7 +10,8 @@ from ioformat import phycon
 from chemkin_io.parser import reaction as rxn_parser
 
 
-def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
+def mechanism(rxn_block, rxn_units, t_ref, temps, pressures,
+              ignore_reverse=True):
     """ Parses the all the reactions data string in the reaction block
         in a mechanism file for their fitting parameters and
         uses them to calculate rate constants [k(T,P)]s.
@@ -25,26 +26,35 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures):
         :type temps: numpy.ndarray
         :param pressures: Pressures used to calculate k(T,P)s
         :type pressures: list(float)
+        :param ignore_reverse: don't include any reverse reactions
+        :type ignore_reverse: bool
         :return: branch_dct: branching fractions for all reactions in mechanism
         :rtype: dict[reaction: branch_ktp_dict]
         :return: total_rate_dct: total k(T,P)s for all reactants in mechanism
         :rtype: dict[reactants: total_ktp_dict]
     """
 
-    reaction_data_strings = rxn_parser.data_strings(rxn_block)
+    # reaction_data_strings = rxn_parser.data_strings(rxn_block)
+    reaction_data_dct = rxn_parser.data_dct(rxn_block)
     mech_dct = {}
-    for dstr in reaction_data_strings:
+    for dstr in reaction_data_dct.values():
         rct_names = rxn_parser.reactant_names(dstr)
         prd_names = rxn_parser.product_names(dstr)
         rxn = (rct_names, prd_names)
-        # rxn_rev = (prd_names, rct_names)
-        if rxn not in mech_dct:
+        rxn_rev = (prd_names, rct_names)
+        if rxn not in mech_dct and rxn_rev not in mech_dct:
             mech_dct[rxn] = reaction(dstr, rxn_units,
                                      t_ref, temps, pressures=pressures)
-        else:
-            new_ktp_dct = reaction(dstr, rxn_units,
-                                   t_ref, temps, pressures=pressures)
-            mech_dct[rxn] = _add_rates(mech_dct[rxn], new_ktp_dct)
+        elif rxn not in mech_dct and rxn_rev in mech_dct:
+            if not ignore_reverse:
+                # have to flip
+                new_ktp_dct = reaction(dstr, rxn_units,
+                                       t_ref, temps, pressures=pressures)
+                mech_dct[rxn] = _add_rates(mech_dct[rxn], new_ktp_dct)
+        # elif rxn in mech_dct:
+        #     new_ktp_dct = reaction(dstr, rxn_units,
+        #                            t_ref, temps, pressures=pressures)
+        #     mech_dct[rxn] = _add_rates(mech_dct[rxn], new_ktp_dct)
         # if rxn not in mech_dct and rxn_rev not in mech_dct:
         #     mech_dct[rxn] = reaction(dstr, rxn_units,
         #                              t_ref, temps, pressures=pressures)

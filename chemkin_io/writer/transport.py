@@ -8,9 +8,9 @@ import automol
 CM2K = 1.438776877
 
 
-def transport(names, geos, epsilons, sigmas,
-              tot_dip_moms, polars,
-              z_rots=None):
+def properties(names, geos, epsilons, sigmas,
+               tot_dip_moms, polars,
+               z_rots=None):
     """ Writes the string in containing data from several mechanism species
         used in calculating transport properties during ChemKin simulations.
 

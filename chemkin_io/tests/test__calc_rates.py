@@ -132,11 +132,11 @@ def test__mechanism():
         print(ktp)
 
 
-def test__branching_ratios():
-    """ test chemkin_io.calculator.reaction.branching_ratios
+def test__branching_fractions():
+    """ test chemkin_io.calculator.reaction.branching_fractions
     """
     print('\n\n')
-    tot_dct, branch_dct = chemkin_io.calculator.rates.branching_ratios(
+    tot_dct, branch_dct = chemkin_io.calculator.rates.branching_fractions(
         FAKE1_REACTION_BLOCK, UNITS, T_REF, TEMPS, pressures=PRESSURES)
     for spc, ktp in tot_dct.items():
         print(spc)
@@ -154,4 +154,4 @@ if __name__ == '__main__':
     test__plog_rate_constants()
     test__chebyshev_rate_constants()
     test__mechanism()
-    test__branching_ratios()
+    test__branching_fractions()

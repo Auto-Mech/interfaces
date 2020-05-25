@@ -301,7 +301,8 @@ def _grab_gibbs(thermo_vals, temp_idx):
 
 
 # Functions to build dictionaries
-def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures):
+def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures,
+                             ignore_reverse=True):
     """ Parses the strings of two mechanism files and calculates
         rate constants [k(T,P)]s at an input set of temperatures and pressures.
 
@@ -323,25 +324,29 @@ def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures):
         mech_parser.reaction_block(mech1_str))
     mech1_units = reaction_units(mech1_str)
     mech1_ktp_dct = rates.mechanism(
-        mech1_reaction_block, mech1_units, t_ref, temps, pressures)
+        mech1_reaction_block, mech1_units, t_ref, temps, pressures,
+        ignore_reverse=ignore_reverse)
 
     mech2_reaction_block = remove_whitespace(
         mech_parser.reaction_block(mech2_str))
     mech2_units = reaction_units(mech2_str)
     mech2_ktp_dct = rates.mechanism(
-        mech2_reaction_block, mech2_units, t_ref, temps, pressures)
+        mech2_reaction_block, mech2_units, t_ref, temps, pressures,
+        ignore_reverse=ignore_reverse)
 
     return mech1_ktp_dct, mech2_ktp_dct
 
 
 def build_reaction_inchi_dcts(mech1_str, mech2_str,
                               mech1_csv_str, mech2_csv_str,
-                              t_ref, temps, pressures):
+                              t_ref, temps, pressures,
+                              ignore_reverse=True):
     """ builds new reaction dictionaries indexed by inchis
     """
     # Get dicts: dict[name] = rxn_dstr
     mech1_reaction_dct, mech2_reaction_dct = build_reaction_name_dcts(
-        mech1_str, mech2_str, t_ref, temps, pressures)
+        mech1_str, mech2_str, t_ref, temps, pressures,
+        ignore_reverse=ignore_reverse)
 
     # Get dicts: dict[name] = inchi
     mech1_name_inchi_dct = mech_parser.spc_name_dct(
@@ -377,8 +382,7 @@ def conv_ich_to_name_ktp_dct(ktp_ich_dct, csv_str):
     """ convert ktp dct from using ichs to using names
     """
     # Get dicts: dict[name] = inchi
-    mech1_inchi_name_dct = mech_parser.spc_inchi_dct(
-        csv_str)
+    mech1_inchi_name_dct = mech_parser.spc_inchi_dct(csv_str)
 
     # Convert name dict to get: dict[inchi] = rxn_data
     ktp_name_dct = {}

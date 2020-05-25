@@ -4,6 +4,7 @@ compare thermo
 
 import os
 import numpy
+from ioformat import remove_whitespace
 from chemkin_io import parser
 from chemkin_io.calculator import combine
 
@@ -35,7 +36,7 @@ FAKE1_THERMO_BLOCK = parser.mechanism.thermo_block(
     FAKE1_MECH_STR)
 FAKE1_BLOCK_STRS = parser.thermo.data_strings(
     FAKE1_THERMO_BLOCK)
-FAKE2_THERMO_BLOCK = parser.util.clean_up_whitespace(
+FAKE2_THERMO_BLOCK = remove_whitespace(
     parser.mechanism.thermo_block(FAKE2_MECH_STR))
 FAKE2_BLOCK_STRS = parser.thermo.data_strings(
     FAKE2_THERMO_BLOCK)
