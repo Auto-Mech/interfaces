@@ -11,7 +11,7 @@ from chemkin_io.parser import reaction as rxn_parser
 
 
 def mechanism(rxn_block, rxn_units, t_ref, temps, pressures,
-              ignore_reverse=True):
+              ignore_reverse=True, remove_bad_fits=False):
     """ Parses the all the reactions data string in the reaction block
         in a mechanism file for their fitting parameters and
         uses them to calculate rate constants [k(T,P)]s.
@@ -35,7 +35,8 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures,
     """
 
     # reaction_data_strings = rxn_parser.data_strings(rxn_block)
-    reaction_data_dct = rxn_parser.data_dct(rxn_block)
+    reaction_data_dct = rxn_parser.data_dct(
+        rxn_block, remove_bad_fits=remove_bad_fits)
     mech_dct = {}
     for dstr in reaction_data_dct.values():
         rct_names = rxn_parser.reactant_names(dstr)
@@ -75,31 +76,20 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures,
     return mech_dct
 
 
-def branching_fractions(rxn_block, rxn_units, t_ref, temps, pressures):
+def branching_fractions(mech_dct, pressures):
     """ Parses the all the reactions data string in the reaction block
         in a mechanism file for their fitting parameters and
         uses them to calculate rate constants [k(T,P)]s.
         These rate constants are then used to calculate the
         branching fractions for all the unique reactants in the mechanism.
 
-        :param rxn_block: string for reaction block from the mechanism input
-        :type rxn_block: str
-        :param rxn_units: units for parameters specifies
-        :type rxn_units: str
-        :param t_ref: Reference temperature (K)
-        :type t_ref: float
-        :param temps: Temps used to calculate high- and low-k(T)s
-        :type temps: numpy.ndarray
-        :param pressures: Pressures used to calculate k(T,P)s
-        :type pressures: list(float)
+        :param mech_dct: mechanism dct
+        :type mech_dct: dict
         :return: branch_dct: branching fractions for all reactions in mechanism
         :rtype: dict[reaction: branch_ktp_dict]
         :return: total_rate_dct: total k(T,P)s for all reactants in mechanism
         :rtype: dict[reactants: total_ktp_dict]
     """
-
-    # Build mechanism dct with rates for all reactions
-    mech_dct = mechanism(rxn_block, rxn_units, t_ref, temps, pressures)
 
     # Obtain groups of rxns which share common reactants
     rcts, rct_grps = [], []
@@ -117,8 +107,11 @@ def branching_fractions(rxn_block, rxn_units, t_ref, temps, pressures):
                 zip(pressures, [None for _ in range(len(pressures))]))
             # Sum over all the rates for each reaction, at each pressure
             for pressure in pressures:
-                total_rate_dct[rct][pressure] = sum(
-                    (mech_dct[grp][pressure] for grp in rct_grp))
+                if all(pressure in mech_dct[grp] for grp in rct_grp):
+                    total_rate_dct[rct][pressure] = sum(
+                        (mech_dct[grp][pressure] for grp in rct_grp))
+                else:
+                    total_rate_dct[rct][pressure] = None
 
     # Now get a dct of the branching ration
     branch_dct = {}
@@ -129,9 +122,12 @@ def branching_fractions(rxn_block, rxn_units, t_ref, temps, pressures):
                 zip(pressures, [None for _ in range(len(pressures))]))
             # Calc ratio: rate / total rate for each reaction, at each pressure
             for pressure in pressures:
-                branch_dct[rxn][pressure] = (
-                    rate_dct[pressure] / total_rate_dct[rxn[0]][pressure]
-                )
+                if total_rate_dct[rxn[0]][pressure] is not None:
+                    branch_dct[rxn][pressure] = (
+                        rate_dct[pressure] / total_rate_dct[rxn[0]][pressure]
+                    )
+                else:
+                    branch_dct[rxn][pressure] = None
 
     return branch_dct, total_rate_dct
 
@@ -166,7 +162,12 @@ def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
     # Calculate high_pressure rates
     highp_ks = _arrhenius(highp_params, temps, t_ref, rxn_units)
     ktp_dct = {}
-    ktp_dct['high'] = highp_ks
+    if 'high' in pressures:
+        ktp_dct['high'] = highp_ks
+
+    # Get a pdep list of pressures
+    pdep_pressures = [pressure for pressure in pressures
+                      if pressure != 'high']
 
     # Calculate pressure-dependent rate constants based on discovered params
     # Either (1) Plog, (2) Chebyshev, (3) Lindemann, or (4) Troe
@@ -177,19 +178,19 @@ def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
 
     pdep_dct = {}
     if plog_params is not None:
-        pdep_dct = _plog(plog_params, temps, pressures, t_ref, rxn_units)
+        pdep_dct = _plog(plog_params, temps, pdep_pressures, t_ref, rxn_units)
 
     elif chebyshev_params is not None:
-        pdep_dct = _chebyshev(chebyshev_params, temps, pressures)
+        pdep_dct = _chebyshev(chebyshev_params, temps, pdep_pressures)
 
     elif lowp_params is not None:
         lowp_ks = _arrhenius(lowp_params, temps, t_ref, rxn_units)
         if troe_params is not None:
             pdep_dct = _troe(troe_params, highp_ks, lowp_ks,
-                             temps, pressures)
+                             temps, pdep_pressures)
         else:
             pdep_dct = ratefit.calc.lindemann(
-                highp_ks, lowp_ks, temps, pressures)
+                highp_ks, lowp_ks, temps, pdep_pressures)
 
     # Build the rate constants dictionary with the pdep dict
     if pdep_dct:

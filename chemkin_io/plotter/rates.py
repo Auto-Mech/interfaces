@@ -136,6 +136,14 @@ def _build_axes(ax_col, reaction_mech_dcts, isbimol, temps):
     """ plot the rates for various pressures
         certain checks are made throughout to deal with plotting
         only one reaction on a page
+
+        :param ax_col: column of the axis
+        :type ax_col: matplotlib.pyplot axis object
+        :param isbimol: signal reaction is bimolecular
+        :type isbimol: bool
+        :param temps: Temperatures (K)
+        :type temps: numpy.ndarray
+        :return:
     """
 
     # Obtain a list of the pressures and sort from low to high pressure
@@ -151,7 +159,17 @@ def _build_axes(ax_col, reaction_mech_dcts, isbimol, temps):
 
 
 def _full_plot(ax_obj, mech_ktp_dcts, mech_pressures, temps):
-    """ plot all the rate constants from two mechanisms
+    """ Place data points corresponding to all of the rate constants 
+        from the two mechanisms on a plot.
+
+        :param ax_obj: axes onject to put points on
+        :type ax_obj: matplotlib.pyplot object
+        :param mech_ktp_dcts: rate constants for two mechanisms
+        :type mech_ktp_dcts: list(dict[rxn: dict[pressure: rate constant]])
+        :param mech_pressures: Pressures (atm)
+        :type mech_pressures: list(float)
+        :param temps: Temperatures (K)
+        :type temps: list(float)
     """
     for i, ktp_dct in enumerate(mech_ktp_dcts):
         for j, pressure in enumerate(mech_pressures[i]):

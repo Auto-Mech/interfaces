@@ -30,6 +30,8 @@ REACTION_PATTERN = (SPECIES_NAMES_PATTERN + app.padded(CHEMKIN_ARROW) +
 COEFF_PATTERN = (app.NUMBER + app.LINESPACES + app.NUMBER +
                  app.LINESPACES + app.NUMBER)
 
+BAD_STRS = ['inf', 'INF', 'nan']
+
 
 # Functions which use thermo parsers to collate the data
 def data_block(block_str):
@@ -58,7 +60,7 @@ def data_block(block_str):
     return rxn_dat_lst
 
 
-def data_dct(block_str, data_entry='strings'):
+def data_dct(block_str, data_entry='strings', remove_bad_fits=False):
     """ Parses all of the chemical equations and corresponding fitting
         parameters in the reactions block of the mechanism input file
         and stores them in a dictionary.
@@ -69,7 +71,7 @@ def data_dct(block_str, data_entry='strings'):
         :rtype: dict[reaction: data string]
     """
 
-    rxn_dstr_lst = data_strings(block_str)
+    rxn_dstr_lst = data_strings(block_str, remove_bad_fits=remove_bad_fits)
     if data_entry == 'strings':
         rxn_dct = {}
         for string in rxn_dstr_lst:
@@ -96,13 +98,15 @@ def data_dct(block_str, data_entry='strings'):
 
 
 # Functions for parsing the reactuins block or single reaction string #
-def data_strings(block_str):
+def data_strings(block_str, remove_bad_fits=False):
     """ Parses all of the chemical equations and corresponding fitting
         parameters in the reactions block of the mechanism input file
         and stores them in a list.
 
         :param block_str: string for reactions block
         :type block_str: str
+        :param remove_bad_fits: remove reactions with bad fits
+        :type remove_bad_fits: bool
         :return rxn_dstrs: strings containing eqns and params for all reactions
         :rtype: list(str)
     """
@@ -111,6 +115,10 @@ def data_strings(block_str):
         string=block_str.strip(),
         headline_pattern=CHEMKIN_ARROW
     )
+
+    if remove_bad_fits:
+        rxn_dstrs = [dstr for dstr in rxn_dstrs
+                     if not any(string in dstr for string in BAD_STRS)]
     return rxn_dstrs
 
 
