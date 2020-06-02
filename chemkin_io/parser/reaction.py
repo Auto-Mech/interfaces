@@ -3,6 +3,7 @@
 
 
 import itertools
+import numpy
 import autoparse.pattern as app
 import autoparse.find as apf
 from autoparse import cast as ap_cast
@@ -75,6 +76,7 @@ def data_dct(block_str, data_entry='strings', remove_bad_fits=False):
     if data_entry == 'strings':
         rxn_dct = {}
         for string in rxn_dstr_lst:
+            # print(string)
             rct_names = reactant_names(string)
             prd_names = product_names(string)
             key = (rct_names, prd_names)
@@ -192,6 +194,19 @@ def high_p_parameters(rxn_dstr):
         params = None
 
     return params
+
+
+def are_highp_fake(highp_params):
+    """ Assess whether high-pressure parameters parsed out of a reac
+        string are fake.
+    """
+
+    are_fake = False
+    for params in highp_params:
+        if numpy.allclose(params, [1.0, 0.0, 0.0], atol=0.0000001):
+            are_fake = True
+
+    return are_fake
 
 
 def low_p_parameters(rxn_dstr):
@@ -453,7 +468,9 @@ def ratek_fit_info(rxn_dstr):
 
     # Build the inf_dct
     inf_dct = {}
+    print(rxn_dstr)
     for idx, pressure in enumerate(pressures):
+        print(pressure)
         inf_dct[pressure] = {'temps': trange_vals[idx]}
         if mean_vals:
             inf_dct[pressure].update({'mean_err': mean_vals[idx]})

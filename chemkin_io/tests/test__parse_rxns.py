@@ -41,6 +41,7 @@ TROE2_REACTION = GROUPED_REACTION_STRS[4]
 PLOG_REACTION = GROUPED_REACTION_STRS[5]
 DUP_PLOG_REACTION = GROUPED_REACTION_STRS[6]
 CHEBYSHEV_REACTION = GROUPED_REACTION_STRS[7]
+FAKE_HIGHP_REACTION2 = GROUPED_REACTION_STRS[9]
 
 
 def test__data_objs():
@@ -53,8 +54,8 @@ def test__data_objs():
     rxn_dct = chemkin_io.parser.reaction.data_dct(
         FAKE1_REACTION_BLOCK)
 
-    assert len(rxn_strs) == 10
-    assert len(rxn_dct) == 8
+    assert len(rxn_strs) == 13
+    assert len(rxn_dct) == 10
 
 
 def test__reactant_names():
@@ -75,6 +76,7 @@ def test__product_names():
 
 def test__high_p_parameters():
     """ test chemkin_io.parser.reaction.high_p_parameters
+        test chemkin_io.parser.reaction.are_highp_fake
     """
     params1 = chemkin_io.parser.reaction.high_p_parameters(
         HIGHP_REACTION)
@@ -90,6 +92,8 @@ def test__high_p_parameters():
         DUP_PLOG_REACTION)
     params7 = chemkin_io.parser.reaction.high_p_parameters(
         CHEBYSHEV_REACTION)
+    params8 = chemkin_io.parser.reaction.high_p_parameters(
+        FAKE_HIGHP_REACTION2)
 
     ref_params1 = [[24100000000000.0, 0.0, 3970.0]]
     ref_params2 = [[1740000000000.0, 0.0, 318.0],
@@ -100,6 +104,8 @@ def test__high_p_parameters():
     ref_params6 = [[1770000000000.0, 0.16, 4206],
                    [1760000000000.0, 0.25, 4305]]
     ref_params7 = [[1.0, 0.0, 0.0]]
+    ref_params8 = [[1.0, 0.0, 0.0],
+                   [1.0, 0.0, 0.0]]
 
     assert numpy.allclose(params1, ref_params1)
     assert numpy.allclose(params2, ref_params2)
@@ -108,6 +114,33 @@ def test__high_p_parameters():
     assert numpy.allclose(params5, ref_params5)
     assert numpy.allclose(params6, ref_params6)
     assert numpy.allclose(params7, ref_params7)
+    assert numpy.allclose(params8, ref_params8)
+
+    arefake1 = chemkin_io.parser.reaction.are_highp_fake(
+        params1)
+    arefake2 = chemkin_io.parser.reaction.are_highp_fake(
+        params2)
+    arefake3 = chemkin_io.parser.reaction.are_highp_fake(
+        params3)
+    arefake4 = chemkin_io.parser.reaction.are_highp_fake(
+        params4)
+    arefake5 = chemkin_io.parser.reaction.are_highp_fake(
+        params5)
+    arefake6 = chemkin_io.parser.reaction.are_highp_fake(
+        params6)
+    arefake7 = chemkin_io.parser.reaction.are_highp_fake(
+        params7)
+    arefake8 = chemkin_io.parser.reaction.are_highp_fake(
+        params8)
+
+    assert not arefake1
+    assert not arefake2
+    assert not arefake3
+    assert not arefake4
+    assert not arefake5
+    assert not arefake6
+    assert arefake7
+    assert arefake8
 
 
 def test__low_p_parameters():

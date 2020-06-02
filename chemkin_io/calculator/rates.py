@@ -37,6 +37,8 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures,
     # reaction_data_strings = rxn_parser.data_strings(rxn_block)
     reaction_data_dct = rxn_parser.data_dct(
         rxn_block, remove_bad_fits=remove_bad_fits)
+    # for rxn in reaction_data_dct:
+    #    print('ckin calc rate', rxn)
     mech_dct = {}
     for dstr in reaction_data_dct.values():
         rct_names = rxn_parser.reactant_names(dstr)
@@ -159,11 +161,20 @@ def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
     chebyshev_params = rxn_parser.chebyshev_parameters(rxn_dstr)
     plog_params = rxn_parser.plog_parameters(rxn_dstr)
 
+    # Determine if any pdep params at all are found
+    any_pdep = any(params is not None
+                   for params in (lowp_params, troe_params,
+                                  chebyshev_params, plog_params))
+
     # Calculate high_pressure rates
+    print('dstr\n', rxn_dstr)
+    print('any_pdep', any_pdep)
     highp_ks = _arrhenius(highp_params, temps, t_ref, rxn_units)
     ktp_dct = {}
     if 'high' in pressures:
-        ktp_dct['high'] = highp_ks
+        if not any_pdep:
+            if not rxn_parser.are_highp_fake(highp_params):
+                ktp_dct['high'] = highp_ks
 
     # Get a pdep list of pressures
     pdep_pressures = [pressure for pressure in pressures
@@ -172,12 +183,12 @@ def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
     # Calculate pressure-dependent rate constants based on discovered params
     # Either (1) Plog, (2) Chebyshev, (3) Lindemann, or (4) Troe
     # Update units if necessary
-    if any(params is not None
-           for params in (plog_params, chebyshev_params, lowp_params)):
-        assert pressures is not None
+    # if any_pdep:
+    #    assert pressures is not None
 
     pdep_dct = {}
     if plog_params is not None:
+        # print('plog params', plog_params)
         pdep_dct = _plog(plog_params, temps, pdep_pressures, t_ref, rxn_units)
 
     elif chebyshev_params is not None:

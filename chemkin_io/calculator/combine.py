@@ -49,7 +49,7 @@ def mechanism_thermo(mech1_thermo_dct, mech2_thermo_dct):
 
 
 def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
-                    mech2_thermo_dct=None):
+                    mech2_thermo_dct=None, ignore_reverse=False):
     """ Combine together the rate dictionaries for two mechanisms.
         Currently, there are two assumptions to combining the dicts.
           (1) k(T,P) values for both mechanisms have same temperature range.
@@ -82,9 +82,13 @@ def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
             if not reverse_rates:
                 mech2_ktp = mech2_ktp_dct[mech1_name]
             else:
-                assert mech2_thermo_dct is not None
-                mech2_ktp = _reverse_reaction_rates(
-                    mech2_ktp_dct, mech2_thermo_dct, mech2_name_match, temps)
+                if not ignore_reverse:
+                    assert mech2_thermo_dct is not None
+                    mech2_ktp = _reverse_reaction_rates(
+                        mech2_ktp_dct, mech2_thermo_dct,
+                        mech2_name_match, temps)
+                else:
+                    continue
         else:
             mech2_ktp = {}
 
@@ -302,7 +306,7 @@ def _grab_gibbs(thermo_vals, temp_idx):
 
 # Functions to build dictionaries
 def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures,
-                             ignore_reverse=True):
+                             ignore_reverse=True, remove_bad_fits=False):
     """ Parses the strings of two mechanism files and calculates
         rate constants [k(T,P)]s at an input set of temperatures and pressures.
 
@@ -325,14 +329,17 @@ def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures,
     mech1_units = reaction_units(mech1_str)
     mech1_ktp_dct = rates.mechanism(
         mech1_reaction_block, mech1_units, t_ref, temps, pressures,
-        ignore_reverse=ignore_reverse)
+        ignore_reverse=ignore_reverse, remove_bad_fits=remove_bad_fits)
 
-    mech2_reaction_block = remove_whitespace(
-        mech_parser.reaction_block(mech2_str))
-    mech2_units = reaction_units(mech2_str)
-    mech2_ktp_dct = rates.mechanism(
-        mech2_reaction_block, mech2_units, t_ref, temps, pressures,
-        ignore_reverse=ignore_reverse)
+    if mech2_str:
+        mech2_reaction_block = remove_whitespace(
+            mech_parser.reaction_block(mech2_str))
+        mech2_units = reaction_units(mech2_str)
+        mech2_ktp_dct = rates.mechanism(
+            mech2_reaction_block, mech2_units, t_ref, temps, pressures,
+            ignore_reverse=ignore_reverse, remove_bad_fits=remove_bad_fits)
+    else:
+        mech2_ktp_dct = {}
 
     return mech1_ktp_dct, mech2_ktp_dct
 
