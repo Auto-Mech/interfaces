@@ -3,7 +3,7 @@ Writes the energy transfer section of a MESS input file
 """
 
 import os
-from mess_io.writer import util
+from ioformat import build_mako_str
 
 
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
@@ -16,16 +16,27 @@ def energy_transfer(exp_factor, exp_power, exp_cutoff,
                     eps1, eps2,
                     sig1, sig2,
                     mass1, mass2):
-    """ Writes the energy transfer section of the MESS input file
-        :param float exp_factor: Exponent factor
-        :param float exp_power: Exponent power
-        :param float exp_cutoff: Exponent cutoff
-        :param float eps1: Epsilon of Species 1
-        :param float eps2: Epsilon of Species 2
-        :param float sig1: Sigma of Species 1
-        :param float sig2: Sigma of Species 2
-        :param float mass1: Mass of Species 1
-        :param float mass2: Mass of Species 2
+    """ Writes the energy transfer section of the MESS input file by
+        formatting input information into strings a filling Mako template.
+
+        :param exp_factor: 300 K energy-down value for collision model (cm-1)
+        :type exp_factor: float
+        :param exp_power: n, for [energy-down * (T/300K)^n] for collision model
+        :type exp_power: float
+        :param exp_cutoff: cutoff for assuming transition probability is zero
+        :type exp_cutoff: float
+        :param eps1: Lennard-Jones epsilon parameter of species 1 (K to cm-1)
+        :type eps1: float
+        :param eps2: Lennard-Jones epsilon parameter of species 2 (K to cm-1)
+        :type eps2: float
+        :param sig1: Lennard-Jones sigma parameter of species 1 (Angstrom)
+        :type sig1: float
+        :param sig2: Lennard-Jones sigma parameter of species 2 (Angstrom)
+        :type sig2: float
+        :param mass1: mass of Species 1 (amu)
+        :type mass1: float
+        :param mass2: mass of Species 2 (amu)
+        :type mass2: float
         :return etrans_str: String for section
         :rtype: string
     """
@@ -45,7 +56,7 @@ def energy_transfer(exp_factor, exp_power, exp_cutoff,
         'masses': mass_str
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='energy_transfer.mako',
         template_src_path=SECTION_PATH,
         template_keys=etrans_keys)

@@ -4,6 +4,7 @@
 
 import chemkin_io
 
+
 # String for testing??? fix later
 TRANS_STR = """! THEORETICAL TRANSPORT PROPERTIES
 !
@@ -42,7 +43,7 @@ def test__transport_writer():
     dipole_moments = [0.000, 0.000, 0.593, 0.000]
     polarizabilities = [0.204, 1.756, 2.137, 2.454]
 
-    transport_str = chemkin_io.writer.transport.lennard_jones(
+    transport_str = chemkin_io.writer.transport.properties(
         names, geoms, epsilons, sigmas,
         dipole_moments, polarizabilities, z_rots=None)
     print('\ntransport_str')

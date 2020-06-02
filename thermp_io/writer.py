@@ -1,9 +1,10 @@
-""" Write THERMP input file
+""" Write THERMP input file information
 """
 
 import os
-from mako.template import Template
+from ioformat import build_mako_str
 from thermp_io import util
+
 
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
 SRC_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -11,14 +12,19 @@ TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
 
 def input_file(ntemps, formula, delta_h, enthalpy_temp=0.0, break_temp=1000.0):
-    """ Writes the input file for thermp
-        :param list float ntemps: Number of temperatures
-        :param string formula: Chemical formula for species
-        :param float delta_h: Enthalpy of formation
-        :param float enthalpy_temp: Temperature corresponding to enthalpy
-        :param float break_temp: Temperature delineating low-and-high for fits
-        :return thermp_str: String for the ThermP input file
-        :rtype: string
+    """ Writes a string for the input file for ThermP.
+
+        :param ntemps: number of temperatures
+        :type ntemps: int
+        :param formula: chemical formula for species
+        :type formula: str
+        :param delta_h: enthalpy of formation
+        :type delta_h: float
+        :param enthalpy_temp: temperature corresponding to enthalpy
+        :type enthalpy_temp: float
+        :param break_temp: temperature delineating low-T and high-T for fits
+        :type break_temp: float
+        :rtype: str
     """
 
     # Get the stoichiometry of all elements to build composition string
@@ -38,11 +44,7 @@ def input_file(ntemps, formula, delta_h, enthalpy_temp=0.0, break_temp=1000.0):
         'composition_str': composition_str
     }
 
-    # Set template name and path for an atom
-    template_file_name = 'thermp.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build a ProjRot input string
-    thermp_str = Template(filename=template_file_path).render(**thermp_keys)
-
-    return thermp_str
+    return build_mako_str(
+        template_file_name='thermp.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys=thermp_keys)

@@ -1,24 +1,29 @@
 """
   Reads the output of a MESS calculation for the
-  high-pressure and pressure-dependent rate constants corresponding to
-  a given reaction
+  high-pressure and pressure-dependent rate constants
+  corresponding to a given reaction.
 """
 
 
-def highp_ks(output_string, reactant, product):
-    """ Reads rate constants for a reaction at the high-pressure limit
-        :param str output_string: string of lines for MESS output file
-        :param str reactant: label for the reactant used in the MESS output
-        :param str product: label for the product used in the MESS output
-        :return rate_constants: all rate constants for the reaction
-        :rtype: list: str
+def highp_ks(output_str, reactant, product):
+    """ Parses the MESS output file string for the rate constants [k(T)]s
+        for a single reaction at the high-pressure limit.
+
+        :param output_str: string of lines of MESS output file
+        :type output_str: str
+        :param reactant: label for the reactant used in the MESS output
+        :type reactant: str
+        :param product: label for the product used in the MESS output
+        :type product: str
+        :return rate_constants: all high-P rate constants for the reaction
+        :rtype list(float)
     """
 
     # Build the reaction string found in the MESS output
     reaction = reactant + '->' + product
 
     # Get the MESS output lines
-    mess_lines = output_string.splitlines()
+    mess_lines = output_str.splitlines()
 
     # Find where the block of text where the high-pressure rates exist
     block_str = ('High Pressure Rate Coefficients ' +
@@ -33,28 +38,33 @@ def highp_ks(output_string, reactant, product):
     for i in range(block_start, len(mess_lines)):
         if reaction in mess_lines[i]:
             rate_const_block_start = i
-            rate_constants = grab_rate_constants(
+            rate_constants = _parse_rate_constants(
                 mess_lines, rate_const_block_start, reaction)
             break
 
     return rate_constants
 
 
-def pdep_ks(output_string, reactant, product, pressure):
-    """ Reads rate constants for a reaction at some pressure
-        :param str output_string: string of lines for MESS output file
-        :param str reactant: label for the reactant used in the MESS output
-        :param str product: label for the product used in the MESS output
-        :param str pressure: pressure for which rate constants are desired
-        :return rate_constants: all rate constants for the reaction
-        :rtype: list: str
+def pdep_ks(output_str, reactant, product, pressure):
+    """ Parses the MESS output file string for the rate constants [k(T,P)]s
+        for a single reaction at a given numerical pressure, P.
+
+        :param output_str: string of lines of MESS output file
+        :type output_str: str
+        :param reactant: label for the reactant used in the MESS output
+        :type reactant: str
+        :param product: label for the product used in the MESS output
+        :type product: str
+        :param pressure: pressure that k(T,P)s will be read for
+        :return rate_constants: k(T,P)s for the reaction at given pressure
+        :rtype list(float)
     """
 
     # Build the reaction string found in the MESS output
     reaction = reactant + '->' + product
 
     # Get the MESS output lines
-    mess_lines = output_string.splitlines()
+    mess_lines = output_str.splitlines()
 
     # Find where the block of text where the high-pressure rates exist
     block_str = ('Temperature-Species Rate Tables:')
@@ -69,20 +79,24 @@ def pdep_ks(output_string, reactant, product, pressure):
                     mess_press = mess_lines[j-2].strip().split()[2]
                     if float(mess_press) == pressure:
                         rate_const_block_start = j
-                        rate_constants = grab_rate_constants(
+                        rate_constants = _parse_rate_constants(
                             mess_lines, rate_const_block_start, reaction)
 
     return rate_constants
 
 
-def grab_rate_constants(mess_lines, block_start, reaction):
-    """ Utility function to grab specific rate constants
-        at some pressure for the reaction requested.
-        :param list str mess_lines: all of the lines of MESS output
-        :param int block_start: line num corresponding to rxn and pressure
-        :param reaction: string matching reaction in MESS output
+def _parse_rate_constants(mess_lines, block_start, reaction):
+    """ Parses specific rate constants from the correct column
+        in the MESS output file string.
+
+        :param mess_lines: all of the lines of MESS output
+        :type mess_lines: list(str)
+        :param block_start: line num corresponding to reaction and pressure
+        :type block_start: int
+        :param reaction: string matching reaction line in MESS output
+        :type reaction: str
         :return rate_constants: all rate constants for the reaction
-        :rtype: list: str
+        :rtype: list(str, float)
     """
 
     # Find the column corresponding to the reaction
@@ -100,21 +114,28 @@ def grab_rate_constants(mess_lines, block_start, reaction):
             break
         rate_constants.append(mess_lines[i].strip().split()[reaction_col])
 
+    # Convert temps and rate constants to floats
+    rate_constants = [float(rate_constant)
+                      if rate_constant != '***' else rate_constant
+                      for rate_constant in rate_constants]
+
     return rate_constants
 
 
-def get_temperatures(output_string):
-    """ Reads the temperatures from the MESS output file corresponding
-        to the temperatures used in the master-equation calculation.
-        :param str output_string: string of lines for MESS output file
+def get_temperatures(output_str):
+    """ Reads the temperatures from the MESS output file string
+        that were used in the master-equation calculation.
+
+        :param output_str: string of lines of MESS output file
+        :type output_str: str
         :return temperatures: temperatures in the output
-        :rtype: list: str
-        :return temperature_unit: unit the temperatures are reported in
+        :rtype: list(float)
+        :return temperature_unit: unit of the temperatures in the output
         :rtype: str
     """
 
     # Get the MESS output lines
-    mess_lines = output_string.splitlines()
+    mess_lines = output_str.splitlines()
 
     # Find the block of lines where the temperatures can be read
     temp_str = 'Pressure-Species Rate Tables:'
@@ -131,9 +152,9 @@ def get_temperatures(output_string):
             temperature_unit = tmp[3]
             if tmp[2] not in temperatures:
                 temperatures.append(float(tmp[2]))
-            else:
-                temperature_unit = tmp[3]
-                break
+            # else:
+            #     temperature_unit = tmp[3]
+            #     break
 
     # Read unit
     for i in range(block_start, len(mess_lines)):
@@ -144,32 +165,20 @@ def get_temperatures(output_string):
     return temperatures, temperature_unit
 
 
-def get_pressures_input(input_string):
-    """ Reads pressures from MESS output or input as desired
-    """
-    # Get the MESS output lines
-    mess_lines = input_string.splitlines()
-    for line in mess_lines:
-        if 'PressureList' in line:
-            pressures = [float(val) for val in line.strip().split()[1:]]
-            pressure_unit = line.strip().split('[')[1].split(']')[0]
-            break
+def get_pressures(output_str):
+    """ Reads the pressures from the MESS output file string
+        that were used in the master-equation calculation.
 
-    return pressures, pressure_unit
-
-
-def get_pressures(output_string):
-    """ Reads the pressures from the MESS output file corresponding
-        to the pressures used in the master-equation calculation.
-        :param str output_string: string of lines for MESS output file
+        :param output_str: string of lines of MESS output file
+        :type output_str: str
         :return pressures: pressures in the output
-        :rtype: list: str
-        :return pressure_unit: unit the pressures are reported in
+        :rtype: list(str, float)
+        :return pressure_unit: unit of the pressures in the output
         :rtype: str
     """
 
     # Get the MESS output lines
-    mess_lines = output_string.splitlines()
+    mess_lines = output_str.splitlines()
 
     # Find the block of lines where the pressures can be read
     pressure_str = 'Pressure-Species Rate Tables:'
@@ -191,7 +200,56 @@ def get_pressures(output_string):
                 pressures.append(float(tmp[0]))
             break
 
-    # append high pressure
+    # Append high pressure
+    pressures.append('high')
+
+    return pressures, pressure_unit
+
+
+def get_temperatures_input(input_str):
+    """ Reads the temperatures from the MESS input file string
+        that were used in the master-equation calculation.
+
+        :param input_str: string of lines of MESS input file
+        :type input_str: str
+        :return temperatures: temperatures in the input
+        :rtype: list(float)
+        :return temperature_unit: unit of the temperatures in the input
+        :rtype: str
+    """
+
+    # Get the MESS input lines
+    mess_lines = input_str.splitlines()
+    for line in mess_lines:
+        if 'TemperatureList' in line:
+            temperatures = [float(val) for val in line.strip().split()[1:]]
+            temperature_unit = line.strip().split('[')[1].split(']')[0]
+            break
+
+    return temperatures, temperature_unit
+
+
+def get_pressures_input(input_str):
+    """ Reads the pressures from the MESS input file string
+        that were used in the master-equation calculation.
+
+        :param input_str: string of lines of MESS input file
+        :type input_str: str
+        :return pressures: pressures in the input
+        :rtype: list(str, float)
+        :return pressure_unit: unit of the pressures in the input
+        :rtype: str
+    """
+
+    # Get the MESS input lines
+    mess_lines = input_str.splitlines()
+    for line in mess_lines:
+        if 'PressureList' in line:
+            pressures = [float(val) for val in line.strip().split()[1:]]
+            pressure_unit = line.strip().split('[')[1].split(']')[0]
+            break
+
+    # Append high pressure
     pressures.append('high')
 
     return pressures, pressure_unit

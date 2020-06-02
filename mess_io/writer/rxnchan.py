@@ -3,6 +3,7 @@ Writes MESS input for a molecule
 """
 
 import os
+from ioformat import build_mako_str
 from mess_io.writer import util
 
 
@@ -13,31 +14,49 @@ SECTION_PATH = os.path.join(TEMPLATE_PATH, 'sections')
 RXNCHAN_PATH = os.path.join(SECTION_PATH, 'reaction_channel')
 
 
-def species(species_label, species_data, zero_energy):
-    """ Writes a species section.
+def species(spc_label, spc_data, zero_energy):
+    """ Writes the string that defines the `Species` section for
+        for a given species for a MESS input file by
+        formatting input information into strings a filling Mako template.
+
+        :param spc_label: label for input species used by MESS
+        :type spc_label: str
+        :param spc_data: MESS string with required electronic structure data
+        :type spc_data: str
+        :param zero_energy: elec+zpve energy relative to PES reference
+        :rtype: str
     """
 
     # Indent the string containing all of data for the well
-    species_data = util.indent(species_data, 2)
+    spc_data = util.indent(spc_data, 2)
 
     # Format the precision of the zero energy
     zero_energy = '{0:<8.2f}'.format(zero_energy)
 
     # Create dictionary to fill template
-    species_keys = {
-        'species_label': species_label,
-        'species_data': species_data,
+    spc_keys = {
+        'spc_label': spc_label,
+        'spc_data': spc_data,
         'zero_energy': zero_energy
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='species.mako',
         template_src_path=RXNCHAN_PATH,
-        template_keys=species_keys)
+        template_keys=spc_keys)
 
 
 def well(well_label, well_data, zero_energy=None):
-    """ Writes a well section.
+    """ Writes the string that defines the `Well` section for
+        for a given species for a MESS input file by
+        formatting input information into strings a filling Mako template.
+
+        :param well_label: label for input well used by MESS
+        :type well_label: str
+        :param well_data: MESS string with required electronic structure data
+        :type well_data: str
+        :param zero_energy: elec+zpve energy relative to PES reference
+        :rtype: str
     """
 
     # Indent the string containing all of data for the well
@@ -54,7 +73,7 @@ def well(well_label, well_data, zero_energy=None):
         'zero_energy': zero_energy
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='well.mako',
         template_src_path=RXNCHAN_PATH,
         template_keys=well_keys)
@@ -90,7 +109,7 @@ def bimolecular(bimol_label,
         'ground_energy': ground_energy
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='bimolecular.mako',
         template_src_path=RXNCHAN_PATH,
         template_keys=bimol_keys)
@@ -98,7 +117,24 @@ def bimolecular(bimol_label,
 
 def ts_sadpt(ts_label, reac_label, prod_label, ts_data,
              zero_energy=None, tunnel=''):
-    """ Writes a TS section containing only a saddle point
+    """ Writes the string that defines the `Barrier` section for
+        for a given transition state, modeled as a PES saddle point,
+        for fixed transition state theory. MESS input file string built by
+        formatting input information into strings a filling Mako template.
+
+        :param ts_label: label for input TS used by MESS
+        :type ts_label: str
+        :param reac_label: label for reactant connected to TS used by MESS
+        :type reac_label: str
+        :param prod_label: label for product connected to TS used by MESS
+        :type prod_label: str
+        :param ts_data: MESS string with required electronic structure data
+        :type ts_data: str
+        :param zero_energy: elec+zpve energy relative to PES reference
+        :type zero_energy: float
+        :param tunnel: `Tunnel` section MESS-string for TS
+        :type tunnel: str
+        :rtype: str
     """
 
     # Indent the string containing all of data for the saddle point
@@ -120,14 +156,29 @@ def ts_sadpt(ts_label, reac_label, prod_label, ts_data,
         'tunnel': tunnel
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='ts_sadpt.mako',
         template_src_path=RXNCHAN_PATH,
         template_keys=ts_sadpt_keys)
 
 
 def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
-    """ Writes a TS section containing variational information
+    """ Writes the string that defines the `Barrier` section for
+        for a given transition state, modeled using points along reaction path,
+        for varational transition state theory. MESS input file string built by
+        formatting input information into strings a filling Mako template.
+
+        :param ts_label: label for input TS used by MESS
+        :type ts_label: str
+        :param reac_label: label for reactant connected to TS used by MESS
+        :type reac_label: str
+        :param prod_label: label for product connected to TS used by MESS
+        :type prod_label: str
+        :param rpath_pt_strs: MESS strings for each point on reaction path
+        :type rpath_pt_strs: list(str)
+        :param tunnel: `Tunnel` section MESS-string for TS
+        :type tunnel: str
+        :rtype: str
     """
 
     # Concatenate all of the variational point strings and indent them
@@ -145,28 +196,41 @@ def ts_variational(ts_label, reac_label, prod_label, rpath_pt_strs, tunnel=''):
         'tunnel': tunnel
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='ts_var.mako',
         template_src_path=RXNCHAN_PATH,
         template_keys=var_keys)
 
 
 def dummy(dummy_label):
-    """ Writes a section for a dummy species
+    """ Writes the string that defines the `Dummy` section,
+        for dummy reaction products, for a MESS input file by
+        formatting input information into strings a filling Mako template.
+
+        :param dummy_label: label for dummy product used by MESS
+        :type dummy_label: str
+        :rtype: str
     """
+
     # Create dictionary to fill template
     dummy_keys = {
         'dummy_label': dummy_label
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='dummy.mako',
         template_src_path=RXNCHAN_PATH,
         template_keys=dummy_keys)
 
 
 def configs_union(mol_data_strs):
-    """ Writes a section for a union of species.
+    """ Writes the string that defines the `Union` section, containing
+        multiple configurations for a given species, for a MESS input file by
+        formatting input information into strings a filling Mako template.
+
+        :param mol_data_strs: MESS strings with data for all configurations
+        :type mol_data_strs: list(str)
+        :rtype: str
     """
 
     # Add 'End' statment to each of the data strings
@@ -186,7 +250,7 @@ def configs_union(mol_data_strs):
         'union_data': union_data
     }
 
-    return util.build_mako_str(
+    return build_mako_str(
         template_file_name='union.mako',
         template_src_path=RXNCHAN_PATH,
         template_keys=union_keys)

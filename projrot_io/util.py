@@ -1,212 +1,148 @@
 """
-Utility functions
+  Additional functions for formatting information for MESS strings
 """
 
 import numpy
-import autoparse.pattern as app
-import autoparse.find as apf
+from qcelemental import constants as qcc
+from qcelemental import periodictable as ptab
+from ioformat import remove_trail_whitespace
 
 
-def indent(string, nspaces):
-    """ Indents a multiline string. Required for Python 2,
-        import textwrap textwrap.indent works for Python 3
-    """
-    pad = nspaces * ' '
-    indented_string = ''.join(pad+line for line in string.splitlines(True))
-
-    return indented_string
+BOHR2ANG = qcc.conversion_factor('bohr', 'angstrom')
 
 
-def remove_trail_whitespace(string):
-    """ remove trailing spaces, and empty lines from a string
-    """
-    empty_line = app.LINE_START + app.maybe(app.LINESPACES) + app.NEWLINE
-    trailing_spaces = app.LINESPACES + app.LINE_END
-    pattern = app.one_of_these([empty_line, trailing_spaces])
-    return apf.remove(pattern, string)
+def write_data_str(geoms, grads, hessians):
+    """ Writes a string containing the geometry, gradient, and Hessian
+        for either a single species or points along a reaction path
+        that is formatted appropriately for the ProjRot input file.
 
-
-# Format various pieces of data into strings for MESS input files
-def elec_levels_format(elec_levels):
-    """ Helps format the elec levels
+        :param geoms: geometries
+        :type geoms: list
+        :param grads: gradients
+        :type grads: list
+        :param hessians: Hessians
+        :type hessians: list
+        :rtype: str
     """
 
-    # Get the number of elec levles
-    nlevels = len(elec_levels)
+    if not isinstance(geoms, list):
+        geoms = [geoms]
+    if not isinstance(grads, list):
+        grads = [grads]
+    if not isinstance(hessians, list):
+        hessians = [hessians]
+    nsteps = len(geoms)
 
-    # Build elec levels string
-    elec_levels_string = ''
-    for i, level in enumerate(elec_levels):
-        elec_levels_string += '  '.join(map(str, level))
-        if (i+1) != len(elec_levels):
-            elec_levels_string += '\n'
+    data_str = ''
+    for i, (geo, grad, hess) in enumerate(zip(geoms, grads, hessians)):
+        data_str += 'Step    {0}\n'.format(str(i+1))
+        data_str += 'geometry\n'
+        data_str += _format_geom_str(geo)
+        data_str += 'gradient\n'
+        data_str += _format_grad_str(geo, grad)
+        data_str += 'Hessian\n'
+        data_str += _format_hessian_str(hess)
+        if i != nsteps-1:
+            data_str += '\n'
 
-    # Indent the lines
-    elec_levels_string = indent(elec_levels_string, 4)
-
-    return nlevels, elec_levels_string
+    return remove_trail_whitespace(data_str)
 
 
-def geom_format(geom):
-    """ Helps format the geometry
+def _format_geom_str(geom):
+    """ Formats the geometry into a string used for the ProjRot input file.
+
+        :param geoms: geometries (Angstrom)
+        :type geoms: list
+        :rtype: str
     """
 
-    # Get the number of atoms
-    natoms = len(geom)
+    # Format the strings for the xyz coordinates
+    geom_str = ''
+    for i, (sym, coords) in enumerate(geom):
+        anum = int(ptab.to_Z(sym))
+        coords = [coord * BOHR2ANG for coord in coords]
+        coords_str = '{0:>14.8f}{1:>14.8f}{2:>14.8f}'.format(
+            coords[0], coords[1], coords[2])
+        geom_str += '{0:2d}{1:4d}{2:4d}{3}\n'.format(
+            i+1, anum, 0, coords_str)
 
-    # Build geom string; converting the coordinates to angstrom
-    geom_string = ''
-    for (asymb, xyz) in geom:
-        geom_string += '{:<4s}{:>14.5f}{:>14.5f}{:>14.5f}\n'.format(
-                        asymb, *tuple([val*0.529177 for val in xyz]))
-
-    # Remove final newline character and indent the lines
-    geom_string = indent(geom_string.rstrip(), 4)
-
-    return natoms, geom_string
+    return remove_trail_whitespace(geom_str)
 
 
-def freqs_format(freqs):
-    """ Helps format the frequencies
+def _format_grad_str(geom, grad):
+    """ Formats the gradient into a string used for the ProjRot input file.
+
+        :param geom: geometries (Angstrom)
+        :type geom: list
+        :param grads: gradients (Eh/Bohr)
+        :type grads: list
+        :rtype: str
     """
 
-    # Get the number of freqs
-    nfreqs = len(freqs)
+    atom_list = []
+    for i, (sym, _) in enumerate(geom):
+        atom_list.append(int(ptab.to_Z(sym)))
 
-    # Build freqs string
-    freq_string = ''
-    for i, freq in enumerate(freqs):
-        if ((i+1) % 6) == 0 and (i+1) != len(freqs):
-            freq_string += '{0:<8.0f}\n'.format(int(freq))
-        else:
-            freq_string += '{0:<8.0f}'.format(freq)
+    # Format the strings for the xyz gradients
+    full_grads_str = ''
+    for i, grads in enumerate(grad):
+        grads_str = '{0:>14.8f}{1:>14.8f}{2:>14.8f}'.format(
+            grads[0], grads[1], grads[2])
+        full_grads_str += '{0:2d}{1:4d}{2}\n'.format(
+            i+1, atom_list[i], grads_str)
 
-    # Indent the lines
-    freq_string = indent(freq_string, 4)
-
-    return nfreqs, freq_string
+    return remove_trail_whitespace(full_grads_str)
 
 
-def format_rotor_key_defs(hind_rot_keyword_vals, remdummy=None):
-    """ formats Group, Axis, Symmetry keywords
+def _format_hessian_str(hess):
+    """ Formats the Hessian into a string used for the ProjRot input file.
+
+        :param hess: hessians (Eh/Bohr^2)
+        :type hess: list
+        :rtype: str
     """
 
-    # Build string containing the values of each keyword
-    hind_rot_keyword_string = ''
-    for vals in hind_rot_keyword_vals:
-        if remdummy is not None:
-            hind_rot_keyword_string += '{0:<4d}'.format(
-                int(vals - remdummy[vals-1]))
-        else:
-            hind_rot_keyword_string += '{0:<4d}'.format(vals)
+    # Format the Hessian
+    hess = numpy.array(hess)
+    nrows = numpy.shape(hess)[0]
+    ncols = numpy.shape(hess)[1]
 
-    return hind_rot_keyword_string
+    if nrows % 5 == 0:
+        nchunks = nrows // 5
+    else:
+        nchunks = (nrows // 5) + 1
 
+    hess_str = '   ' + '    '.join([str(val) for val in range(1, 6)]) + '\n'
+    cnt = 0
+    while cnt+1 <= nchunks:
+        for i in range(nrows):
+            col_tracker = 1
+            if i >= 5*cnt:
+                hess_str += '{0}'.format(str(i+1))
+                for j in range(5*cnt, ncols):
+                    if i >= j:
+                        if col_tracker <= 5:
+                            hess_str += '  {0:5.8f}'.format(hess[i][j])
+                            col_tracker += 1
+                            if col_tracker == 6:
+                                hess_str += '\n'
+                        else:
+                            continue
+                    elif i < j and col_tracker != 6:
+                        hess_str += '\n'
+                        break
+                    else:
+                        break
+            if i+1 == nrows and cnt+1 < nchunks-1:
+                val_str = '     '.join(
+                    [str(val)
+                     for val in range(5*(cnt+1) + 1, 5*(cnt+1) + 6)])
+                hess_str += '    ' + val_str + '\n'
+            if i+1 == nrows and cnt+1 == nchunks-1:
+                val_str = '     '.join(
+                    [str(val)
+                     for val in range(5*(cnt+1) + 1, nrows+1)])
+                hess_str += '    ' + val_str + '\n'
+        cnt += 1
 
-def format_rotor_potential(potential):
-    """ Helps format hindered rotor potential sections
-    """
-
-    # Get the number of the terms in the potential
-    npotential = len(potential)
-
-    # Build potentials string
-    potential_string = ''
-    for i, energy in enumerate(potential):
-        if ((i+1) % 6) == 0 and (i+1) != npotential:
-            potential_string += '{0:<8.2f}\n'.format(energy)
-        else:
-            potential_string += '{0:<8.2f}'.format(energy)
-
-    # Indent the lines
-    potential_string = indent(potential_string, 4)
-
-    return npotential, potential_string
-
-
-def format_rovib_coups(rovib_coups):
-    """ Format the rovibrational couplings
-    """
-
-    # Join the values into a string
-    rovib_coups_str = '  '.join(str(val) for val in rovib_coups)
-
-    # Indent the lines
-    rovib_coups_str = indent(rovib_coups_str, 4)
-
-    return rovib_coups_str
-
-
-def format_rot_dist_consts(rot_dists):
-    """ Format the rotational distortion constants.
-    """
-
-    # Build rotational dists string
-    rot_dists_string = ''
-    for i, const in enumerate(rot_dists):
-        rot_dists_string += '  '.join(map(str, const))
-        if (i+1) != len(rot_dists):
-            rot_dists_string += '\n'
-
-    # Indent the lines
-    rot_dists_string = indent(rot_dists_string, 4)
-
-    return rot_dists_string
-
-
-def format_xmat(xmat):
-    """ Format the xmat anharm section
-    """
-
-    xmat = numpy.array(xmat)
-    # Loop over the rows of the anharm numpy array
-    anharm_string = ''
-    for i in range(xmat.shape[0]):
-        anharm_string += ' '.join(
-            ['{0:>12.5f}'.format(val) for val in list(xmat[i, :i+1])
-             if val != 0.0]
-        )
-        if (i+1) != xmat.shape[0]:
-            anharm_string += '\n'
-
-    # Indent the lines
-    anharm_string = indent(anharm_string, 2)
-
-    return anharm_string
-
-
-def molec_spec_format(geom):
-    """ Helps format the molecular section from the geometry
-    """
-
-    # Build geom string; converting the coordinates to angstrom
-    atom_list_string = ''
-    for (asymb, _) in geom:
-        atom_list_string += '{:s} '.format(asymb)
-
-    # Remove final newline character
-    atom_list_string = atom_list_string.rstrip()
-
-    # Indent the lines
-    atom_list_string = indent(atom_list_string, 6)
-
-    return atom_list_string
-
-
-def format_flux_mode_indices(atom_indices):
-    """ formats the atom indices for flux modes
-    """
-
-    # Build string containing the values of each keyword
-    flux_mode_idx_string = ''
-    for vals in atom_indices:
-        flux_mode_idx_string += '{0:<4d}'.format(vals)
-
-    return flux_mode_idx_string
-
-
-# Helpful checker to set MESS string writing
-def is_atom_in_str(species_data_str):
-    """ searches for an atom in the str
-    """
-    return bool('Atom' in species_data_str)
+    return remove_trail_whitespace(hess_str)

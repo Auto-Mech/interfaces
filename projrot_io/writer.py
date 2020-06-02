@@ -1,12 +1,11 @@
 """
-Functions to write the ProjRot input file
+  Functions to write ProjRot input files
 """
 
 import os
-import numpy as np
-from mako.template import Template
 from qcelemental import constants as qcc
-from qcelemental import periodictable as ptab
+from ioformat import build_mako_str
+from ioformat import remove_trail_whitespace
 from projrot_io import util
 
 
@@ -23,19 +22,29 @@ def rpht_input(geoms, grads, hessians,
                rotors_str='',
                coord_proj='cartesian',
                proj_rxn_coord=False):
-    """ Write the ProjRot input file
+    """ Writes a string for the input file for ProjRot.
+
+        :param geoms: geometry for single species or along a reaction path
+        :type geoms: list(list(float))
+        :param grads: gradient for single species or along a reaction path
+        :type grads: list(list(float))
+        :param hessians: Hessian for single species or along a reaction path
+        :type hessians: list(list(float))
+        :param saddle_idx: idx denoting the saddle point along a reaction path
+        :type saddle_idx: int
+        :param rotors_str: ProjRot-format string with all the rotor definitions
+        :type rotors_str: str
+        :param coord_proj: choice of coordinate system to perform projections
+        :type coord_proj: str
+        :param proj_rxn_coord: whether to project out reaction coordinate
+        :type proj_rxn_coord: bool
+        :rtype: str
     """
 
     # Format the molecule info
-    if not isinstance(geoms, list):
-        geoms = [geoms]
-    if not isinstance(grads, list):
-        grads = [grads]
-    if not isinstance(hessians, list):
-        hessians = [hessians]
-    nsteps = len(geoms)
+    data_str = util.write_data_str(geoms, grads, hessians)
     natoms = len(geoms[0])
-    data_str = _write_data_str(geoms, grads, hessians)
+    nsteps = len(geoms)
     nrotors = rotors_str.count('pivotA')
 
     # Check input into the function
@@ -54,19 +63,28 @@ def rpht_input(geoms, grads, hessians,
         'data_str': data_str
     }
 
-    # Set template name and path for an atom
-    template_file_name = 'rpht_input.mako'
-    template_file_path = os.path.join(TEMPLATE_PATH, template_file_name)
-
-    # Build a ProjRot input string
-    rpht_string = Template(filename=template_file_path).render(**rpht_keys)
-
-    return util.remove_trail_whitespace(rpht_string)
+    return build_mako_str(
+        template_file_name='rpht_input.mako',
+        template_src_path=TEMPLATE_PATH,
+        template_keys=rpht_keys)
 
 
-def rpht_path_coord_en(coords, energy, bnd1=(), bnd2=()):
-    """ Write the ProjRot file containing path data
+def rpht_path_coord_en(coords, energies, bnd1=(), bnd2=()):
+    """ Writes a string for the auxiliary input file used for
+        ProjRot SCT calculations, which contains information
+        along the reaction path.
+
+        :params coords: Values of reaction coordinate along reaction path
+        :type coords: list(float)
+        :params energies: Energies along reaction path
+        :type energies: list(float)
+        :params bnd1: values of bond in reactant side
+        :type bnd1: list(float)
+        :params bnd2: values of bond in product side
+        :type bnd2: list(float)
+        :rtype: str
     """
+
     nsteps = len(coords)
 
     # Check bnd1 and bnd2 lists and build the corresponding string lists
@@ -80,27 +98,34 @@ def rpht_path_coord_en(coords, energy, bnd1=(), bnd2=()):
         bnd_strs = ['' for i in range(len(coords))]
 
     # Check that all the lists are not empty and have the same length
-    assert all(lst for lst in (coords, energy, bnd_strs))
-    assert all(len(lst) == nsteps for lst in (coords, energy, bnd_strs))
+    assert all(lst for lst in (coords, energies, bnd_strs))
+    assert all(len(lst) == nsteps for lst in (coords, energies, bnd_strs))
 
     path_str = '{0:<7s}{1:<12s}{2:<10s}{3:<10s}{4:<10s}\n'.format(
         'Point', 'Coordinate', 'Energy', 'Bond1', 'Bond2')
-    for i, (crd, ene, bnd_str) in enumerate(zip(coords, energy, bnd_strs)):
+    for i, (crd, ene, bnd_str) in enumerate(zip(coords, energies, bnd_strs)):
         path_str += '{0:<7d}{1:<12.5f}{2:<10.5f}{3:<20s}'.format(
             i+1, crd, ene, bnd_str)
         if i+1 != nsteps:
             path_str += '\n'
 
-    return util.remove_trail_whitespace(path_str)
+    return remove_trail_whitespace(path_str)
 
 
 def rotors(axis, group, remdummy=None):
     """ Write the sections that defines the rotors section
+
+        :param group: idxs for the atoms of one of the rotational groups
+        :type group: list(int)
+        :param axis: idxs for the atoms that make up the rotational axis
+        :type axis: list(int)
+        :param remdummy: list of idxs of dummy atoms for shifting values
+        :type remdummy: list(int)
+        :rtype str
     """
 
     # Set up the keywords
-    pivota = axis[0]
-    pivotb = axis[1]
+    [pivota, pivotb] = axis
     atomsintopa = len(group)
     if remdummy is not None:
         pivota = int(pivota - remdummy[pivota-1])
@@ -116,110 +141,3 @@ def rotors(axis, group, remdummy=None):
     rotors_str += '{0:<32s}{1}'.format('topAatoms', topaatoms)
 
     return util.remove_trail_whitespace(rotors_str)
-
-
-def _write_data_str(geoms, grads, hessians):
-    """ Combine all of the data information into a string
-    """
-    nsteps = len(geoms) - 1
-    data_str = ''
-    for i, (geo, grad, hess) in enumerate(zip(geoms, grads, hessians)):
-        data_str += 'Step    {0}\n'.format(str(i+1))
-        data_str += 'geometry\n'
-        data_str += _format_geom_str(geo)
-        data_str += 'gradient\n'
-        data_str += _format_grad_str(geo, grad)
-        data_str += 'Hessian\n'
-        data_str += _format_hessian_str(hess)
-        if i != nsteps:
-            data_str += '\n'
-
-    return util.remove_trail_whitespace(data_str)
-
-
-def _format_geom_str(geo):
-    """ Write the geometry section of the input file
-        geometry in Angstroms
-    """
-
-    # Format the strings for the xyz coordinates
-    geom_str = ''
-    for i, (sym, coords) in enumerate(geo):
-        anum = int(ptab.to_Z(sym))
-        coords = [coord * BOHR2ANG for coord in coords]
-        coords_str = '{0:>14.8f}{1:>14.8f}{2:>14.8f}'.format(
-            coords[0], coords[1], coords[2])
-        geom_str += '{0:2d}{1:4d}{2:4d}{3}\n'.format(
-            i+1, anum, 0, coords_str)
-
-    return util.remove_trail_whitespace(geom_str)
-
-
-def _format_grad_str(geom, grad):
-    """ Write the gradient section of the input file
-        grads in Hartrees/Bohr
-    """
-
-    atom_list = []
-    for i, (sym, _) in enumerate(geom):
-        atom_list.append(int(ptab.to_Z(sym)))
-
-    # Format the strings for the xyz gradients
-    full_grads_str = ''
-    for i, grads in enumerate(grad):
-        grads_str = '{0:>14.8f}{1:>14.8f}{2:>14.8f}'.format(
-            grads[0], grads[1], grads[2])
-        full_grads_str += '{0:2d}{1:4d}{2}\n'.format(
-            i+1, atom_list[i], grads_str)
-
-    return util.remove_trail_whitespace(full_grads_str)
-
-
-def _format_hessian_str(hess):
-    """ Write the Hessian section of the input file
-    """
-
-    # Format the Hessian
-    hess = np.array(hess)
-    nrows = np.shape(hess)[0]
-    ncols = np.shape(hess)[1]
-
-    if nrows % 5 == 0:
-        nchunks = nrows // 5
-    else:
-        nchunks = (nrows // 5) + 1
-
-    hess_str = '   ' + '    '.join([str(val) for val in range(1, 6)]) + '\n'
-    cnt = 0
-    while cnt+1 <= nchunks:
-        for i in range(nrows):
-            col_tracker = 1
-            if i >= 5*cnt:
-                hess_str += '{0}'.format(str(i+1))
-                for j in range(5*cnt, ncols):
-                    if i >= j:
-                        if col_tracker <= 5:
-                            hess_str += '  {0:5.8f}'.format(hess[i][j])
-                            col_tracker += 1
-                            if col_tracker == 6:
-                                hess_str += '\n'
-                        else:
-                            continue
-                    elif i < j and col_tracker != 6:
-                        hess_str += '\n'
-                        break
-                    else:
-                        break
-            if i+1 == nrows and cnt+1 < nchunks-1:
-                val_str = '     '.join(
-                    [str(val)
-                     for val in range(5*(cnt+1) + 1, 5*(cnt+1) + 6)])
-                hess_str += '    ' + val_str + '\n'
-            if i+1 == nrows and cnt+1 == nchunks-1:
-                val_str = '     '.join(
-                    [str(val)
-                     for val in range(5*(cnt+1) + 1, nrows+1)])
-                hess_str += '    ' + val_str + '\n'
-        cnt += 1
-
-    return util.remove_trail_whitespace(hess_str)

@@ -1,20 +1,26 @@
 """
-Take data dictionaries from mechanisms and combine them under a common index
+  Take data dictionaries from mechanisms and combine them under a common index
 """
 
 import itertools
 import numpy as np
-import chemkin_io.parser
+from ioformat import remove_whitespace
+from ioformat import phycon
+from chemkin_io.parser import mechanism as mech_parser
 from chemkin_io.calculator import thermo
 from chemkin_io.calculator import rates
 from chemkin_io.parser.mechanism import reaction_units
 
 
-RC = 1.98720425864083e-3  # in kcal/mol.K
-
-
 def mechanism_thermo(mech1_thermo_dct, mech2_thermo_dct):
-    """ Loop over the the Mech1 thermo entries
+    """ Combine together the thermo dictionaries for two mechanisms.
+
+        :param mech1_thermo_dct: thermo dct for mechanism 1
+        :type mech1_thermo_dct: dict[spc: [[H(t)], [Cp(T)], [S(T)], [G(T)]]
+        :param mech2_thermo_dct: thermo dct for mechanism 2
+        :type mech2_thermo_dct: dict[spc: [[H(t)], [Cp(T)], [S(T)], [G(T)]]
+        :return total_thermo_dct: dict with thermo from both mechanisms
+        :rtype: dict[mech: mech_thermo_dct]
     """
 
     total_thermo_dct = {}
@@ -43,8 +49,22 @@ def mechanism_thermo(mech1_thermo_dct, mech2_thermo_dct):
 
 
 def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
-                    mech2_thermo_dct=None):
-    """ calculate the reactions rates for two mech files
+                    mech2_thermo_dct=None, ignore_reverse=False):
+    """ Combine together the rate dictionaries for two mechanisms.
+        Currently, there are two assumptions to combining the dicts.
+          (1) k(T,P) values for both mechanisms have same temperature range.
+          (2) Reaction directions in combined dict match those from Mech1.
+
+        :param mech1_ktp_dct: rate constant dict for mechanism 1
+        :type mech1_ktp_dct: dict[reaction: dict[pressure: k(T,P)s]]
+        :param mech2_ktp_dct: rate constant dict for mechanism 2
+        :type mech2_ktp_dct: dict[reaction: dict[pressure: k(T,P)s]]
+        :param mech2_thermo_dct: thermo dict for mechanism 2; to reverse rxns
+        :type mech2_thermo_dct: dict[spc: [[H(t)], [Cp(T)], [S(T)], [G(T)]]
+        :param temps: Temperatures the k(T,P) values were calculated for (K)
+        :type temps: list(float)
+        :return total_ktp_dct: dict with thermo from both mechanisms
+        :rtype: dict[mech: mech_ktp_dct]
     """
 
     total_ktp_dct = {}
@@ -62,9 +82,13 @@ def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
             if not reverse_rates:
                 mech2_ktp = mech2_ktp_dct[mech1_name]
             else:
-                assert mech2_thermo_dct is not None
-                mech2_ktp = _reverse_reaction_rates(
-                    mech2_ktp_dct, mech2_thermo_dct, mech2_name_match, temps)
+                if not ignore_reverse:
+                    assert mech2_thermo_dct is not None
+                    mech2_ktp = _reverse_reaction_rates(
+                        mech2_ktp_dct, mech2_thermo_dct,
+                        mech2_name_match, temps)
+                else:
+                    continue
         else:
             mech2_ktp = {}
 
@@ -82,21 +106,32 @@ def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
 
 # Thermo functions
 def build_thermo_name_dcts(mech1_str, mech2_str, temps):
-    """ builds the thermo dictionaries indexed by names
+    """ Builds the thermo dictionaries indexed by names.
+
+        :param mech1_str: string of mechanism 1 input file
+        :type mech1_str: str
+        :param mech2_str: string of mechanism 2 input file
+        :type mech2_str: str
+        :param temps: Temperatures to calculate thermochemistry (K)
+        :type temps: list(float)
+        :return: mech1_thermo_dct
+        :rtype: dict[name: [thermo]]
+        :return: mech2_thermo_dct
+        :rtype: dict[name: [thermo]]
     """
 
-    mech1_thermo_block = chemkin_io.parser.mechanism.thermo_block(mech1_str)
+    mech1_thermo_block = mech_parser.thermo_block(mech1_str)
     if mech1_thermo_block is not None:
-        mech1_thermo_block = chemkin_io.parser.util.clean_up_whitespace(
+        mech1_thermo_block = remove_whitespace(
             mech1_thermo_block)
         mech1_thermo_dct = thermo.mechanism(
             mech1_thermo_block, temps)
     else:
         mech1_thermo_dct = None
 
-    mech2_thermo_block = chemkin_io.parser.mechanism.thermo_block(mech2_str)
+    mech2_thermo_block = mech_parser.thermo_block(mech2_str)
     if mech2_thermo_block is not None:
-        mech2_thermo_block = chemkin_io.parser.util.clean_up_whitespace(
+        mech2_thermo_block = remove_whitespace(
             mech2_thermo_block)
         mech2_thermo_dct = thermo.mechanism(
             mech2_thermo_block, temps)
@@ -109,8 +144,24 @@ def build_thermo_name_dcts(mech1_str, mech2_str, temps):
 def build_thermo_inchi_dcts(mech1_str, mech2_str,
                             mech1_csv_str, mech2_csv_str,
                             temps):
-    """ builds new thermo dictionaries indexed by inchis
+    """ Builds the thermo dictionaries indexed by InChI strings.
+
+        :param mech1_str: string of mechanism 1 input file
+        :type mech1_str: str
+        :param mech2_str: string of mechanism 2 input file
+        :type mech2_str: str
+        :param mech1_csv_str: species.csv file string for mechanism 1
+        :type mech1_csv_str: str
+        :param mech2_csv_str: species.csv file string for mechanism 2
+        :type mech2_csv_str: str
+        :param temps: Temperatures to calculate thermochemistry (K)
+        :type temps: list(float)
+        :return: mech1_thermo_dct
+        :rtype: dict[name: [thermo]]
+        :return: mech2_thermo_dct
+        :rtype: dict[name: [thermo]]
     """
+
     # Get dicts: dict[name] = thm_dstr
     mech1_thermo_dct, mech2_thermo_dct = build_thermo_name_dcts(
         mech1_str, mech2_str, temps)
@@ -119,7 +170,7 @@ def build_thermo_inchi_dcts(mech1_str, mech2_str,
     # Get dicts: dict[name] = inchi
     # Convert name dict to get: dict[inchi] = name
     if mech1_thermo_dct is not None:
-        mech1_name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
+        mech1_name_inchi_dct = mech_parser.spc_name_dct(
             mech1_csv_str, 'inchi')
         mech1_thermo_ich_dct = {}
         for name, data in mech1_thermo_dct.items():
@@ -129,7 +180,7 @@ def build_thermo_inchi_dcts(mech1_str, mech2_str,
         mech1_thermo_ich_dct = None
 
     if mech2_thermo_dct is not None:
-        mech2_name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
+        mech2_name_inchi_dct = mech_parser.spc_name_dct(
             mech2_csv_str, 'inchi')
         mech2_thermo_ich_dct = {}
         for name, data in mech2_thermo_dct.items():
@@ -146,8 +197,8 @@ def spc_name_from_inchi(mech1_csv_str, mech2_csv_str, ich):
         the mechanism name for a given InChI string
     """
 
-    mech1_inchi_dct = chemkin_io.parser.mechanism.spc_inchi_dct(mech1_csv_str)
-    mech2_inchi_dct = chemkin_io.parser.mechanism.spc_inchi_dct(mech2_csv_str)
+    mech1_inchi_dct = mech_parser.spc_inchi_dct(mech1_csv_str)
+    mech2_inchi_dct = mech_parser.spc_inchi_dct(mech2_csv_str)
 
     mech_name = mech1_inchi_dct.get(ich)
     if mech_name is not None:
@@ -184,7 +235,18 @@ def _assess_reaction_match(mech1_names, mech2_dct):
 
 
 def _reverse_reaction_rates(mech_dct, thermo_dct, rxn, temps):
-    """ use the equilibrium constant to reverse the reaction rates
+    """ For a given reaction, use the thermochemistry values of its
+        constituent species to calculate the equilibrium constant
+        and reverse the rate constants.
+
+        :param mech_dct:
+        :type mech_dct: dict[pressure: rates]
+        :param thermo_dct: thermochemical values of all species in mechanism
+        :type thermo_dct: dict[spc name: [thermo vals]]
+        :param rxn: reactant-product pair for the reaction
+        :type rxn: tuple(tuple(str), tuple(str))
+        :return: rev_ktp_dct: reversed rates of the reaction
+        :rtype: dict[pressure: reversed rates]
     """
 
     [rct_idxs, prd_idxs] = rxn
@@ -203,8 +265,19 @@ def _reverse_reaction_rates(mech_dct, thermo_dct, rxn, temps):
 
 
 def _calculate_equilibrium_constant(thermo_dct, rct_idxs, prd_idxs, temps):
-    """ use the thermo parameters to obtain the equilibrium
-        constant
+    """ Calculate the equilibrium constant for a given reaction at
+        a set of temperatures using constiutent species' thermochemistry.
+
+        :param thermo_dct: thermochemical values of all species in mechanism
+        :type thermo_dct: dict[spc name: [thermo vals]]
+        :param rct_idxs: name(s) of the reactants
+        :type rct_idxs: tuple(str)
+        :param prd_idxs: name(s) of the products
+        :type prd_idxs: tuple(str)
+        :param temps: Temperatures to calculate thermochemistry (K)
+        :type temps: list(float)
+        :return: equilibrium constants
+        :rtype: numpy.ndarray
     """
 
     k_equils = []
@@ -219,7 +292,7 @@ def _calculate_equilibrium_constant(thermo_dct, rct_idxs, prd_idxs, temps):
         rxn_gibbs = prd_gibbs - rct_gibbs
 
         k_equils.append(
-            np.exp(-rxn_gibbs / (RC * temp)))
+            np.exp(-rxn_gibbs / (phycon.RC * temp)))
 
     return k_equils
 
@@ -232,38 +305,60 @@ def _grab_gibbs(thermo_vals, temp_idx):
 
 
 # Functions to build dictionaries
-def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures):
-    """ builds the reaction dictionaries indexed by names
+def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures,
+                             ignore_reverse=True, remove_bad_fits=False):
+    """ Parses the strings of two mechanism files and calculates
+        rate constants [k(T,P)]s at an input set of temperatures and pressures.
+
+        :param mech1_str: string of mechanism 1 input file
+        :type mech1_str: str
+        :param mech2_str: string of mechanism 2 input file
+        :type mech2_str: str
+        :param t_ref: Reference temperature (K)
+        :type t_ref: float
+        :param temps: List of Temperatures (K)
+        :type temps: numpy.ndarray
+        :return mech1_ktp_dct: rate constants for mechanism 1
+        :rtype: dict[pressure: rates]
+        :return mech2_ktp_dct: rate constants for mechanism 2
+        :rtype: dict[pressure: rates]
     """
 
-    mech1_reaction_block = chemkin_io.parser.util.clean_up_whitespace(
-        chemkin_io.parser.mechanism.reaction_block(mech1_str))
+    mech1_reaction_block = remove_whitespace(
+        mech_parser.reaction_block(mech1_str))
     mech1_units = reaction_units(mech1_str)
     mech1_ktp_dct = rates.mechanism(
-        mech1_reaction_block, mech1_units, t_ref, temps, pressures)
+        mech1_reaction_block, mech1_units, t_ref, temps, pressures,
+        ignore_reverse=ignore_reverse, remove_bad_fits=remove_bad_fits)
 
-    mech2_reaction_block = chemkin_io.parser.util.clean_up_whitespace(
-        chemkin_io.parser.mechanism.reaction_block(mech2_str))
-    mech2_units = reaction_units(mech2_str)
-    mech2_ktp_dct = rates.mechanism(
-        mech2_reaction_block, mech2_units, t_ref, temps, pressures)
+    if mech2_str:
+        mech2_reaction_block = remove_whitespace(
+            mech_parser.reaction_block(mech2_str))
+        mech2_units = reaction_units(mech2_str)
+        mech2_ktp_dct = rates.mechanism(
+            mech2_reaction_block, mech2_units, t_ref, temps, pressures,
+            ignore_reverse=ignore_reverse, remove_bad_fits=remove_bad_fits)
+    else:
+        mech2_ktp_dct = {}
 
     return mech1_ktp_dct, mech2_ktp_dct
 
 
 def build_reaction_inchi_dcts(mech1_str, mech2_str,
                               mech1_csv_str, mech2_csv_str,
-                              t_ref, temps, pressures):
+                              t_ref, temps, pressures,
+                              ignore_reverse=True):
     """ builds new reaction dictionaries indexed by inchis
     """
     # Get dicts: dict[name] = rxn_dstr
     mech1_reaction_dct, mech2_reaction_dct = build_reaction_name_dcts(
-        mech1_str, mech2_str, t_ref, temps, pressures)
+        mech1_str, mech2_str, t_ref, temps, pressures,
+        ignore_reverse=ignore_reverse)
 
     # Get dicts: dict[name] = inchi
-    mech1_name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
+    mech1_name_inchi_dct = mech_parser.spc_name_dct(
         mech1_csv_str, 'inchi')
-    mech2_name_inchi_dct = chemkin_io.parser.mechanism.spc_name_dct(
+    mech2_name_inchi_dct = mech_parser.spc_name_dct(
         mech2_csv_str, 'inchi')
 
     # Convert name dict to get: dict[inchi] = rxn_data
@@ -294,8 +389,7 @@ def conv_ich_to_name_ktp_dct(ktp_ich_dct, csv_str):
     """ convert ktp dct from using ichs to using names
     """
     # Get dicts: dict[name] = inchi
-    mech1_inchi_name_dct = chemkin_io.parser.mechanism.spc_inchi_dct(
-        csv_str)
+    mech1_inchi_name_dct = mech_parser.spc_inchi_dct(csv_str)
 
     # Convert name dict to get: dict[inchi] = rxn_data
     ktp_name_dct = {}

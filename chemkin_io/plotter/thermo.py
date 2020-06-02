@@ -62,8 +62,16 @@ def build(thermo_dct, temps, dir_prefix='.', names=None):
 
 
 def _build_figure(species):
-    """ Initialize figure object
+    """ Initialize the size and format of the plot figure.
+
+        :param nreactions: number of reactions on single page of figure
+        :type nreactions: int
+        :return: figure object for single page of plots
+        :rtype: matplotlib.pyplot object
+        :return: axes object for single page of plots
+        :rtype: matplotlib.pyplot object
     """
+
     # Initialize plot objects
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 8))
 

@@ -21,7 +21,6 @@ dependencies:
     - future
     - flake8
     - pylint
-    - conda-forge::qcelemental
     - kevinmooreiii::automol
     - kevinmooreiii::autoparse
     - kevinmooreiii::ratefit

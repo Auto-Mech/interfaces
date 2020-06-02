@@ -6,5 +6,5 @@ ${geom1}
 ${geom2}
     SymmetryFactor                ${sym_factor}   
     PotentialPrefactor[au] 	      ${pot_prefactor}
-    PotentialPowerExponent 	      ${pot_power_exp}
+    PotentialPowerExponent 	      ${pot_exp}
   End

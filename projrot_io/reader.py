@@ -3,13 +3,21 @@
 """
 
 
-def rpht_output(output_string):
-    """ Read the projected frequencies
+def rpht_output(output_str):
+    """ Parses the ProjRot frequency output file strings for
+        the projected frequencies.
+
+        :param output_str: string of lines of MESS output file
+        :type output_str: str
+        :return real_freqs: real vibrational frequencies
+        :rtype: list(float)
+        :return imag_freqs: imaginary vibrational frequencies
+        :rtype: list(float)
     """
 
     # Read the file and read in the non-zero frequencies
     freqs = []
-    for line in output_string.splitlines():
+    for line in output_str.splitlines():
         line = line.strip()
         if line != '':
             freqs.append(float(line))
