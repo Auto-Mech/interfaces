@@ -107,7 +107,7 @@ def build(ktp_dct, temps, dir_prefix='.', names=None, mech_labels=None):
             isbimol = _is_bimolecular(reaction)
             # Build the axes objects containing the plotted rate constants
             axes_col = axes[:, j] if nreactions == 2 else axes
-            print('reaction', reaction)
+            # print('reaction', reaction)
             _build_axes(axes_col, reaction_mech_ktp_dcts, isbimol,
                         temps, mech_labels)
 
@@ -206,9 +206,9 @@ def _full_plot(ax_obj, mech_ktp_dcts, mech_pressures, temps, mech_labels):
     for i, ktp_dct in enumerate(mech_ktp_dcts):
         for j, pressure in enumerate(mech_pressures[i]):
             plab = pressure if pressure != 'high' else 'PIndep'
-            print(ktp_dct[pressure])
-            print(np.log10(ktp_dct[pressure]))
-            print(temps)
+            # print(ktp_dct[pressure])
+            # print(np.log10(ktp_dct[pressure]))
+            # print(temps)
             if pressure in ktp_dct:
                 ax_obj.plot((1000.0/temps), np.log10(ktp_dct[pressure]),
                             color=COLORS[j], linestyle=LINESTYLES[i],

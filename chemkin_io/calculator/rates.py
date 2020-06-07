@@ -10,7 +10,7 @@ from ioformat import phycon
 from chemkin_io.parser import reaction as rxn_parser
 
 
-def mechanism(rxn_block, rxn_units, t_ref, temps, pressures,
+def mechanism(rxn_block, rxn_units, t_ref, temps, pressures, collider=None,
               ignore_reverse=True, remove_bad_fits=False):
     """ Parses the all the reactions data string in the reaction block
         in a mechanism file for their fitting parameters and
@@ -26,6 +26,8 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures,
         :type temps: numpy.ndarray
         :param pressures: Pressures used to calculate k(T,P)s
         :type pressures: list(float)
+        :param collider: bath gas molecule collider
+        :type collider: str
         :param ignore_reverse: don't include any reverse reactions
         :type ignore_reverse: bool
         :return: branch_dct: branching fractions for all reactions in mechanism
@@ -40,20 +42,25 @@ def mechanism(rxn_block, rxn_units, t_ref, temps, pressures,
     # for rxn in reaction_data_dct:
     #    print('ckin calc rate', rxn)
     mech_dct = {}
-    for dstr in reaction_data_dct.values():
-        rct_names = rxn_parser.reactant_names(dstr)
-        prd_names = rxn_parser.product_names(dstr)
-        rxn = (rct_names, prd_names)
-        rxn_rev = (prd_names, rct_names)
-        if rxn not in mech_dct and rxn_rev not in mech_dct:
-            mech_dct[rxn] = reaction(dstr, rxn_units,
-                                     t_ref, temps, pressures=pressures)
-        elif rxn not in mech_dct and rxn_rev in mech_dct:
-            if not ignore_reverse:
-                # have to flip
-                new_ktp_dct = reaction(dstr, rxn_units,
-                                       t_ref, temps, pressures=pressures)
-                mech_dct[rxn] = _add_rates(mech_dct[rxn], new_ktp_dct)
+    # for rxn, dstrs in reaction_data_dct.items():
+    for rxn, dstr in reaction_data_dct.items():
+        ktp_dct = reaction(dstr, rxn_units,
+                           t_ref, temps, pressures=pressures)
+        if rxn not in mech_dct:
+            mech_dct[rxn] = ktp_dct
+        else:
+            mech_dct[rxn] = _add_rates(mech_dct[rxn], ktp_dct)
+        # if rxn not in mech_dct and rxn_rev not in mech_dct:
+        # rct_names = rxn_parser.reactant_names(dstr)
+        # prd_names = rxn_parser.product_names(dstr)
+        # rxn = (rct_names, prd_names)
+        # rxn_rev = (prd_names, rct_names)
+        # elif rxn not in mech_dct and rxn_rev in mech_dct:
+        #     if not ignore_reverse:
+        #         # have to flip
+        #         new_ktp_dct = reaction(dstr, rxn_units,
+        #                                t_ref, temps, pressures=pressures)
+        #         mech_dct[rxn] = _add_rates(mech_dct[rxn], new_ktp_dct)
         # elif rxn in mech_dct:
         #     new_ktp_dct = reaction(dstr, rxn_units,
         #                            t_ref, temps, pressures=pressures)
@@ -134,7 +141,7 @@ def branching_fractions(mech_dct, pressures):
     return branch_dct, total_rate_dct
 
 
-def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
+def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None, collider=None):
     """ Parses the data string for a reaction for fitting parameters and
         uses those parameters to calculate rate constants at input temps
         and pressures [k(T,P)]s.
@@ -149,30 +156,41 @@ def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
         :type temps: numpy.ndarray
         :param pressures: Pressures used to calculate k(T,P)s
         :type pressures: list(float)
+        :param collider: bath gas molecule collider
+        :type collider: str
         :return ktp_dct: k(T,P)s at all temps and pressures
         :rtype: dict[pressure: temps]
     """
 
     # Accepts a params dictionary
     # Read the parameters from the reactions string
+    print('dstr\n', rxn_dstr)
     highp_params = rxn_parser.high_p_parameters(rxn_dstr)
     lowp_params = rxn_parser.low_p_parameters(rxn_dstr)
     troe_params = rxn_parser.troe_parameters(rxn_dstr)
     chebyshev_params = rxn_parser.chebyshev_parameters(rxn_dstr)
     plog_params = rxn_parser.plog_parameters(rxn_dstr)
+    collid_dct = rxn_parser.collider_enhance_factors(rxn_dstr)
 
     # Determine if any pdep params at all are found
     any_pdep = any(params is not None
                    for params in (lowp_params, troe_params,
                                   chebyshev_params, plog_params))
 
-    # Calculate high_pressure rates
-    print('dstr\n', rxn_dstr)
+    # First check the pressure region that is being specified
+    pressure_region = rxn_parser.pressure_region_specification(rxn_dstr)
+
+    # Set the collider efficiency
+    collid_factor = collid_dct.get(collider, 1.0)
+
     print('any_pdep', any_pdep)
+    print('p region', pressure_region)
+
+    # Calculate high_pressure rates
     highp_ks = _arrhenius(highp_params, temps, t_ref, rxn_units)
     ktp_dct = {}
     if 'high' in pressures:
-        if not any_pdep:
+        if not any_pdep and pressure_region == 'indep':
             if not rxn_parser.are_highp_fake(highp_params):
                 ktp_dct['high'] = highp_ks
 
@@ -181,27 +199,32 @@ def reaction(rxn_dstr, rxn_units, t_ref, temps, pressures=None):
                       if pressure != 'high']
 
     # Calculate pressure-dependent rate constants based on discovered params
+    # Either linear Pressure dependence, if specified or using
     # Either (1) Plog, (2) Chebyshev, (3) Lindemann, or (4) Troe
     # Update units if necessary
-    # if any_pdep:
-    #    assert pressures is not None
 
     pdep_dct = {}
-    if plog_params is not None:
-        # print('plog params', plog_params)
-        pdep_dct = _plog(plog_params, temps, pdep_pressures, t_ref, rxn_units)
+    if pressure_region == 'lowp':
+        pdep_dct = ratefit.calc.lowp_limit(
+            highp_ks, temps, pdep_pressures, collid_factor=collid_factor)
+    else:
+        if plog_params is not None:
+            pdep_dct = _plog(plog_params, temps, pdep_pressures,
+                             t_ref, rxn_units)
 
-    elif chebyshev_params is not None:
-        pdep_dct = _chebyshev(chebyshev_params, temps, pdep_pressures)
+        elif chebyshev_params is not None:
+            pdep_dct = _chebyshev(chebyshev_params, temps, pdep_pressures)
 
-    elif lowp_params is not None:
-        lowp_ks = _arrhenius(lowp_params, temps, t_ref, rxn_units)
-        if troe_params is not None:
-            pdep_dct = _troe(troe_params, highp_ks, lowp_ks,
-                             temps, pdep_pressures)
-        else:
-            pdep_dct = ratefit.calc.lindemann(
-                highp_ks, lowp_ks, temps, pdep_pressures)
+        elif lowp_params is not None:
+            lowp_ks = _arrhenius(lowp_params, temps, t_ref, rxn_units)
+            if troe_params is not None:
+                pdep_dct = _troe(troe_params, highp_ks, lowp_ks,
+                                 temps, pdep_pressures,
+                                 collid_factor=collid_factor)
+            else:
+                pdep_dct = ratefit.calc.lindemann(
+                    highp_ks, lowp_ks, temps, pdep_pressures,
+                    collid_factor=collid_factor)
 
     # Build the rate constants dictionary with the pdep dict
     if pdep_dct:
@@ -300,7 +323,7 @@ def _chebyshev(chebyshev_params, temps, pressures):
     return ktp_dct
 
 
-def _troe(troe_params, highp_ks, lowp_ks, temps, pressures):
+def _troe(troe_params, highp_ks, lowp_ks, temps, pressures, collid_factor=1.0):
     """ Calculates rate constants [k(T,P)]s with the Troe expression
         using the parameters parsed from the reaction string.
 
@@ -324,7 +347,8 @@ def _troe(troe_params, highp_ks, lowp_ks, temps, pressures):
         ts2 = troe_params[3]
     ktp_dct = ratefit.calc.troe(
         highp_ks, lowp_ks, temps, pressures,
-        troe_params[0], troe_params[1], troe_params[2], ts2=ts2)
+        troe_params[0], troe_params[1], troe_params[2], ts2=ts2,
+        collid_factor=collid_factor)
 
     return ktp_dct
 

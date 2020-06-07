@@ -4,6 +4,7 @@
 
 import itertools
 import numpy as np
+import ratefit
 from ioformat import remove_whitespace
 from ioformat import phycon
 from chemkin_io.parser import mechanism as mech_parser
@@ -69,10 +70,14 @@ def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
 
     total_ktp_dct = {}
 
+    print('\nFinding Reaction Matches to Combine Dictionaries')
     # Build full rates dictionary with common index
     # First loop through mech1: add common and mech1-unique species
     for mech1_name, mech1_ktp in mech1_ktp_dct.items():
 
+        print('---------')
+        print('- M1 RCTS', '+'.join(mech1_name[0]))
+        print('- M1 PRDS', '+'.join(mech1_name[1]))
         # Check what (if/any) combination of mech2 matches with mech1
         mech2_name_match, reverse_rates = _assess_reaction_match(
             mech1_name, mech2_ktp_dct)
@@ -80,9 +85,12 @@ def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
         # Calculate reaction rates, reverse if needed
         if mech2_name_match:
             if not reverse_rates:
-                mech2_ktp = mech2_ktp_dct[mech1_name]
+                print('\n - Match in forward direction')
+                mech2_ktp = mech2_ktp_dct[mech2_name_match]
+                # mech2_ktp = mech2_ktp_dct[mech1_name]
             else:
                 if not ignore_reverse:
+                    print('\n - Match in reverse direction, rev k(T) w/ therm')
                     assert mech2_thermo_dct is not None
                     mech2_ktp = _reverse_reaction_rates(
                         mech2_ktp_dct, mech2_thermo_dct,
@@ -91,6 +99,9 @@ def mechanism_rates(mech1_ktp_dct, mech2_ktp_dct, temps,
                     continue
         else:
             mech2_ktp = {}
+
+        # print('\npost flip mech2 ktp')
+        # print(mech2_ktp)
 
         # Add data_entry to overal thermo dictionary
         total_ktp_dct[mech1_name] = {
@@ -212,26 +223,35 @@ def _assess_reaction_match(mech1_names, mech2_dct):
     """ assess whether the reaction should be flipped
     """
 
+    # Get all possible orderings of the reactants and products for mech1
     [mech1_rcts, mech1_prds] = mech1_names
-    mech1_rct_comb = list(itertools.combinations(mech1_rcts, len(mech1_rcts)))
-    mech1_prd_comb = list(itertools.combinations(mech1_prds, len(mech1_prds)))
+    mech1_rct_perm = list(itertools.permutations(mech1_rcts, len(mech1_rcts)))
+    mech1_prd_perm = list(itertools.permutations(mech1_prds, len(mech1_prds)))
+    # print('\n\nTEST')
+    # print('m1_rct_perm', mech1_rct_perm)
+    # print('m1_prd_perm', mech1_prd_perm)
 
     mech2_key = ()
     flip_rxn = None
     for rxn in mech2_dct:
         [mech2_rcts, mech2_prds] = rxn
-        if mech2_rcts in mech1_rct_comb and mech2_prds in mech1_prd_comb:
+        # print('m2', mech2_rcts, mech2_prds)
+        if mech2_rcts in mech1_rct_perm and mech2_prds in mech1_prd_perm:
             flip_rxn = False
             mech2_key = rxn
             break
-        if mech2_rcts in mech1_prd_comb and mech2_prds in mech1_rct_comb:
+        if mech2_rcts in mech1_prd_perm and mech2_prds in mech1_rct_perm:
             mech2_key = rxn
             flip_rxn = True
             break
 
-    ret = mech2_key, flip_rxn
+    if mech2_key:
+        print('\n- M2 RCTS', '+'.join(mech2_key[0]))
+        print('- M2 PRDS', '+'.join(mech2_key[1]))
+    else:
+        print('\n- NO M2 MATCH')
 
-    return ret
+    return mech2_key, flip_rxn
 
 
 def _reverse_reaction_rates(mech_dct, thermo_dct, rxn, temps):
@@ -256,9 +276,23 @@ def _reverse_reaction_rates(mech_dct, thermo_dct, rxn, temps):
     ktp_dct = mech_dct[rxn]
     rev_ktp_dct = {}
     for pressure, rate_ks in ktp_dct.items():
+
+        # Calculate density to handle units, if needed
+        if len(rct_idxs) > 1 and len(prd_idxs) == 1:
+            densities = ratefit.calc.p_to_m(1.0, temps)
+            rate_ks *= densities
+            # print('flip1')
+        elif len(rct_idxs) == 1 and len(prd_idxs) > 1:
+            densities = ratefit.calc.p_to_m(1.0, temps)
+            rate_ks /= densities
+            # print('flip2')
+
+        # Calculate the reverse rates with K_equil
         rev_rates = []
-        for rate_k, k_equil in zip(rate_ks, k_equils):
-            rev_rates.append(rate_k / k_equil)
+        for forw_k, k_equil in zip(rate_ks, k_equils):
+            rev_rates.append(forw_k / k_equil)
+
+        # Add reversed rates to dict
         rev_ktp_dct[pressure] = rev_rates
 
     return rev_ktp_dct
@@ -285,14 +319,22 @@ def _calculate_equilibrium_constant(thermo_dct, rct_idxs, prd_idxs, temps):
         rct_gibbs = 0.0
         for rct in rct_idxs:
             rct_gibbs += _grab_gibbs(thermo_dct[rct], temp_idx)
+            # print('idv rct g', _grab_gibbs(thermo_dct[rct], temp_idx))
         prd_gibbs = 0.0
         for prd in prd_idxs:
             prd_gibbs += _grab_gibbs(thermo_dct[prd], temp_idx)
+            # print('idv prd g', _grab_gibbs(thermo_dct[prd], temp_idx))
 
         rxn_gibbs = prd_gibbs - rct_gibbs
 
         k_equils.append(
             np.exp(-rxn_gibbs / (phycon.RC * temp)))
+        ktest = np.exp(-rxn_gibbs / (phycon.RC * temp))
+
+        print('rct gibbs', rct_gibbs)
+        print('prd gibbs', prd_gibbs)
+        print('rxn gibbs', rxn_gibbs)
+        print('kequil', ktest)
 
     return k_equils
 
@@ -347,7 +389,8 @@ def build_reaction_name_dcts(mech1_str, mech2_str, t_ref, temps, pressures,
 def build_reaction_inchi_dcts(mech1_str, mech2_str,
                               mech1_csv_str, mech2_csv_str,
                               t_ref, temps, pressures,
-                              ignore_reverse=True):
+                              ignore_reverse=True,
+                              remove_bad_fits=False):
     """ builds new reaction dictionaries indexed by inchis
     """
     # Get dicts: dict[name] = rxn_dstr

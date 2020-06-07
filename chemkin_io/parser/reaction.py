@@ -56,7 +56,7 @@ def data_block(block_str):
         map(troe_parameters, rxn_dstr_lst),
         map(chebyshev_parameters, rxn_dstr_lst),
         map(plog_parameters, rxn_dstr_lst),
-        map(buffer_enhance_factors, rxn_dstr_lst)))
+        map(collision_enhance_factors, rxn_dstr_lst)))
 
     return rxn_dat_lst
 
@@ -80,6 +80,10 @@ def data_dct(block_str, data_entry='strings', remove_bad_fits=False):
             rct_names = reactant_names(string)
             prd_names = product_names(string)
             key = (rct_names, prd_names)
+            # if key not in rxn_dct:
+            #     rxn_dct[key] = [string]
+            # else:
+            #     rxn_dct[key].append(string)
             if key not in rxn_dct:
                 rxn_dct[key] = string
             else:
@@ -168,6 +172,46 @@ def product_names(rxn_dstr):
     return names
 
 
+def pressure_region_specification(rxn_dstr):
+    """ Parses the data string for a reaction in the reactions block
+        for the line containing the chemical equation in order to
+        check if a body M is given, indicating pressure dependence.
+
+        :param rxn_dstr: data string for species in reaction block
+        :type rxn_dstr: str
+        :return pressure_region: type of pressure indicated
+        :rtype: str
+    """
+
+    pattern = app.capturing(
+        _first_line_pattern(
+            rct_ptt=SPECIES_NAMES_PATTERN,
+            prd_ptt=SPECIES_NAMES_PATTERN,
+            param_ptt=COEFF_PATTERN
+        )
+    )
+    string = apf.first_capture(pattern, rxn_dstr)
+
+    if string is not None:
+        string = string.strip()
+        if 'M' in string:
+            # Presence of M denotes specific region assumptions
+            if '(+M)' in string:
+                pressure_region = 'falloff'
+            else:
+                pressure_region = 'lowp'
+        else:
+            # No M can be independent or not, depending on subsequent info
+            if 'PLOG' in rxn_dstr or 'CHEB' in rxn_dstr:
+                pressure_region = 'all'
+            else:
+                pressure_region = 'indep'
+    else:
+        pressure_region = None
+
+    return pressure_region
+
+
 def high_p_parameters(rxn_dstr):
     """ Parses the data string for a reaction in the reactions block
         for the line containing the chemical equation in order to
@@ -247,34 +291,43 @@ def troe_parameters(rxn_dstr):
         :return params: Troe fitting parameters
         :rtype: list(float)
     """
-
     pattern1 = (
         'TROE' +
         app.zero_or_more(app.SPACE) + app.escape('/') +
         app.SPACES + app.capturing(app.NUMBER) +
         app.SPACES + app.capturing(app.NUMBER) +
         app.SPACES + app.capturing(app.NUMBER) +
-        app.SPACES + app.maybe(app.capturing(app.NUMBER)) +
+        app.maybe(app.SPACES + app.capturing(app.NUMBER)) +
         app.zero_or_more(app.SPACE) + app.escape('/')
     )
-    pattern2 = (
-        'TROE' +
-        app.zero_or_more(app.SPACE) + app.escape('/') +
-        app.SPACES + app.capturing(app.NUMBER) +
-        app.SPACES + app.capturing(app.NUMBER) +
-        app.SPACES + app.capturing(app.NUMBER) +
-        app.zero_or_more(app.SPACE) + app.escape('/')
-    )
+    # pattern2 = (
+    #     'TROE' +
+    #     app.zero_or_more(app.SPACE) + app.escape('/') +
+    #     app.SPACES + app.capturing(app.NUMBER) +
+    #     app.SPACES + app.capturing(app.NUMBER) +
+    #     app.SPACES + app.capturing(app.NUMBER) +
+    #     app.zero_or_more(app.SPACE) + app.escape('/')
+    # )
     cap1 = apf.first_capture(pattern1, rxn_dstr)
-    cap2 = apf.first_capture(pattern2, rxn_dstr)
+    # cap2 = apf.first_capture(pattern2, rxn_dstr)
+    # print('cap1', cap1)
+    # print('cap2', cap1)
+    # cap2 = apf.first_capture(pattern2, rxn_dstr)
     if cap1 is not None:
-        params = [float(val) for val in cap1]
+        params = []
+        for val in cap1:
+            if val is not None:
+                params.append(float(val))
+            else:
+                params.append(None)
     else:
-        if cap2 is not None:
-            params = [float(val) for val in cap2]
-            params.append(None)
-        else:
-            params = None
+        params = None
+    # else:
+    #     if cap2 is not None:
+    #         params = [float(val) for val in cap2]
+    #         params.append(None)
+    #     else:
+    #         params = None
 
     return params
 
@@ -375,7 +428,7 @@ def plog_parameters(rxn_dstr):
     return params_dct
 
 
-def buffer_enhance_factors(rxn_dstr):
+def collider_enhance_factors(rxn_dstr):
     """ Parses the data string for a reaction in the reactions block
         for the line containing the names of several bath gases and
         their corresponding collision enhancement factors.
@@ -399,7 +452,7 @@ def buffer_enhance_factors(rxn_dstr):
     species_name = app.one_or_more(species_char)
 
     # Loop over the lines and search for string with collider facts
-    factors = None
+    factors = {}
     if apf.has_match('LOW', rxn_dstr) or apf.has_match('TROE', rxn_dstr):
         for line in rxn_dstr.splitlines():
             if not any(apf.has_match(string, line) for string in bad_strings):
@@ -468,9 +521,7 @@ def ratek_fit_info(rxn_dstr):
 
     # Build the inf_dct
     inf_dct = {}
-    print(rxn_dstr)
     for idx, pressure in enumerate(pressures):
-        print(pressure)
         inf_dct[pressure] = {'temps': trange_vals[idx]}
         if mean_vals:
             inf_dct[pressure].update({'mean_err': mean_vals[idx]})

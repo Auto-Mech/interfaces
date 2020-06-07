@@ -52,18 +52,22 @@ def build(ktp_dct, temps, dir_prefix='.'):
 
     # Plot the rate constants for each reaction
     reactions = list(ktp_dct.keys())
+    nreactions = len(reactions)
+    print('numreactions', len(reactions))
     for i in range(0, len(reactions), 4):
+        print('idx', i)
 
-        # Determine if plot will have two reactions in it, or one reaction
-        if i+1 <= len(reactions)-1:
-            nreactions = 4
+        # Determine if plot will have four reactions in it, or fewer
+        if i+4 <= nreactions:
+            n_plot_reactions = 4
         else:
-            continue
+            n_plot_reactions = nreactions - i
+        print('nplots', n_plot_reactions)
 
         # Create the figure object
-        fig, axes = _build_figure(nreactions)
+        fig, axes = _build_figure(n_plot_reactions)
 
-        for j in range(nreactions):
+        for j in range(n_plot_reactions):
             # Set the axes object containing the plotted data for each reaction
             reaction_names = []
             # Determine the reaction dictionaries
@@ -108,13 +112,12 @@ def _build_figure(nreactions):
     """
 
     # Initialize plot objects
-    if nreactions == 4:
-        fig, axes = plt.subplots(
-            nrows=2, ncols=2, figsize=(12, 8))
-    else:
-        grid = {'width_ratios': [0.5]}
-        fig, axes = plt.subplots(
-            nrows=2, ncols=1, figsize=(12, 8), gridspec_kw=grid)
+    # if nreactions == 4:
+    fig, axes = plt.subplots(
+        nrows=2, ncols=2, figsize=(12, 8))
+    #     grid = {'width_ratios': [0.5]}
+    #     fig, axes = plt.subplots(
+    #         nrows=2, ncols=1, figsize=(12, 8), gridspec_kw=grid)
 
     # Set various plot options
     fig.tight_layout()
@@ -217,7 +220,6 @@ def _set_block_title(reaction):
     """
     side_lst = []
     for side in reaction:
-        print('side', side)
         side_lst.append('+'.join(side))
 
     title = '{0:^60s}'.format(
