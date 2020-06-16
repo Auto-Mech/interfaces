@@ -25,6 +25,7 @@ def mechanism(block_str, temps, rval=phycon.RC):
 
     mech_thermo_dct = {}
     for name, thermo_dstr in nasa_dct.items():
+        # print('dstr\n', thermo_dstr)
         h_t, cp_t, s_t, g_t, = [], [], [], []
         for temp in temps:
             h_t.append(enthalpy(thermo_dstr, temp, rval=rval))
@@ -137,7 +138,7 @@ def gibbs(thm_dstr, temp, rval=phycon.RC):
 
     h_t = enthalpy(thm_dstr, temp, rval=rval)
     s_t = entropy(thm_dstr, temp, rval=rval)
-    if enthalpy is not None and entropy is not None:
+    if h_t is not None and s_t is not None:
         g_t = h_t - (s_t * temp)
     else:
         g_t = None
@@ -160,7 +161,7 @@ def _coefficients_for_specific_temperature(thm_dstr, temp):
     """
 
     temps = thm_parser.temperatures(thm_dstr)
-    if temps[0] < temp < temps[1]:
+    if temps[0] <= temp <= temps[1]:
         cfts = thm_parser.low_coefficients(thm_dstr)
     elif temps[1] < temp < temps[2]:
         cfts = thm_parser.high_coefficients(thm_dstr)

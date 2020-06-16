@@ -1,3 +1,6 @@
+%if rotor_id != '':
+# ${rotor_id}
+%endif
 Rotor  Hindered
 % if geom:
   Geometry[angstrom]   ${natom}

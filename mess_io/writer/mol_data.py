@@ -168,7 +168,8 @@ def core_rotd(sym_factor, flux_file_name, stoich):
 
 
 def rotor_hindered(group, axis, symmetry, potential,
-                   remdummy=None, geom=None, use_quantum_weight=False):
+                   remdummy=None, geom=None, use_quantum_weight=False,
+                   rotor_id=''):
     """ Writes the string that defines the `Rotor` section for a
         single hindered rotor of a species for a MESS input file by
         formatting input information into strings a filling Mako template.
@@ -183,8 +184,12 @@ def rotor_hindered(group, axis, symmetry, potential,
         :type potential: list(float)
         :param remdummy: list of idxs of dummy atoms for shifting values
         :type remdummy: list(int)
-        :param stoich: combined stoichiometry of dissociation species 1 and 2
-        :type stoich: str
+        :param geom: geometry of the species the rotor exists for
+        :type geom: list
+        :param use_quantum_weight: toggle weigthing of quantum effects
+        :type use_quantum_weight: bool
+        :param rotor_id: name associated with the rotor
+        :type rotor_id: str
         :rtype: str
     """
 
@@ -208,7 +213,8 @@ def rotor_hindered(group, axis, symmetry, potential,
         'potential': rotor_potential,
         'natom': natom,
         'geom': geom,
-        'use_quantum_weight': use_quantum_weight
+        'use_quantum_weight': use_quantum_weight,
+        'rotor_id': rotor_id
     }
 
     return build_mako_str(
@@ -219,7 +225,7 @@ def rotor_hindered(group, axis, symmetry, potential,
 
 def rotor_internal(group, axis, symmetry, grid_size, mass_exp_size,
                    pot_exp_size=5, hmin=13, hmax=101,
-                   rotor_id='', remdummy=None, geom=None):
+                   remdummy=None, geom=None, rotor_id=''):
     """ Writes the string that defines the `Rotor` section for a
         single internal rotor of a species for a MESS input file by
         formatting input information into strings a filling Mako template.
@@ -244,6 +250,8 @@ def rotor_internal(group, axis, symmetry, grid_size, mass_exp_size,
         :type remdummy: list(int)
         :param geom: geometry of the species the rotor exists for
         :type geom: list
+        :param rotor_id: name associated with the rotor
+        :type rotor_id: str
         :rtype: str
     """
 
@@ -265,7 +273,6 @@ def rotor_internal(group, axis, symmetry, grid_size, mass_exp_size,
     rotor_keys = {
         'group': rotor_group,
         'axis': rotor_axis,
-        'rotor_id': rotor_id,
         'symmetry': symmetry,
         'mass_exp_size': mass_exp_size,
         'pot_exp_size': pot_exp_size,
@@ -273,7 +280,8 @@ def rotor_internal(group, axis, symmetry, grid_size, mass_exp_size,
         'hmax': hmax,
         'grid_size': grid_size,
         'natom': natom,
-        'geom': geom
+        'geom': geom,
+        'rotor_id': rotor_id
     }
 
     return build_mako_str(

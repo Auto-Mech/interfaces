@@ -44,11 +44,21 @@ def rpht_input(geoms, grads, hessians,
     # Format the molecule info
     data_str = util.write_data_str(geoms, grads, hessians)
     natoms = len(geoms[0])
-    nsteps = len(geoms)
+    # nsteps = len(geoms)
     nrotors = rotors_str.count('pivotA')
 
-    # Check input into the function
-    assert all(len(lst) == nsteps for lst in (geoms, grads, hessians))
+    # Check input into the function (really fix calls to not have this)
+    if not isinstance(geoms, list):
+        geoms = [geoms]
+    if not isinstance(grads, list):
+        grads = [grads]
+    if not isinstance(hessians, list):
+        hessians = [hessians]
+
+    nsteps = len(geoms)
+    assert nsteps == len(hessians)
+    if len(grads) != 0:
+        assert len(grads) == nsteps
     assert coord_proj in ('cartesian', 'internal')
 
     # Create a fill value dictionary
