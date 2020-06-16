@@ -14,14 +14,15 @@ from mess_io.writer.rxnchan import ts_sadpt
 from mess_io.writer.rxnchan import ts_variational
 from mess_io.writer.rxnchan import configs_union
 from mess_io.writer.rxnchan import dummy
-from mess_io.writer.species import atom
-from mess_io.writer.species import molecule
+from mess_io.writer.spc import atom
+from mess_io.writer.spc import molecule
 from mess_io.writer.mol_data import core_rigidrotor
 from mess_io.writer.mol_data import core_multirotor
 from mess_io.writer.mol_data import core_phasespace
 from mess_io.writer.mol_data import core_rotd
 from mess_io.writer.mol_data import rotor_hindered
 from mess_io.writer.mol_data import rotor_internal
+from mess_io.writer.mol_data import mdhr_data
 from mess_io.writer.mol_data import umbrella_mode
 from mess_io.writer.mol_data import tunnel_eckart
 from mess_io.writer.mol_data import tunnel_sct
@@ -51,6 +52,7 @@ __all__ = [
     'core_rotd',
     'rotor_hindered',
     'rotor_internal',
+    'mdhr_data',
     'umbrella_mode',
     'tunnel_eckart',
     'tunnel_sct',

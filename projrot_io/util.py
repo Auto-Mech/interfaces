@@ -25,12 +25,12 @@ def write_data_str(geoms, grads, hessians):
         :rtype: str
     """
 
-    if not isinstance(geoms, list):
-        geoms = [geoms]
-    if not isinstance(grads, list):
-        grads = [grads]
-    if not isinstance(hessians, list):
-        hessians = [hessians]
+    # if not isinstance(geoms, list):
+    #     geoms = [geoms]
+    # if not isinstance(grads, list):
+    #     grads = [grads]
+    # if not isinstance(hessians, list):
+    #     hessians = [hessians]
     nsteps = len(geoms)
 
     data_str = ''
